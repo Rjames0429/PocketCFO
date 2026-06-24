@@ -422,7 +422,17 @@ function dismissDemo(){
 async function fetchData(){
   D={};
   const{data:cats}=await sb.from('budget_categories').select('*').eq('user_id',CU.id).eq('is_active',true).order('sort_order');
-  if(!cats||!cats.length)return;
+  if(!cats||!cats.length){
+    // No data found - load demo data automatically
+    console.log('No data found, loading demo data...');
+    await loadDemoData(CU.id);
+    // Show demo banner
+    document.getElementById('demo-banner').style.display='flex';
+    // Re-fetch after loading
+    const{data:cats2}=await sb.from('budget_categories').select('*').eq('user_id',CU.id).eq('is_active',true).order('sort_order');
+    if(!cats2||!cats2.length)return;
+    return fetchData();
+  }
   const{data:items}=await sb.from('budget_line_items').select('*').eq('user_id',CU.id).eq('is_active',true).order('sort_order');
   const{data:budgets}=await sb.from('monthly_budgets').select('*').eq('user_id',CU.id).eq('year',YEAR);
   const{data:txns}=await sb.from('transactions').select('*').eq('user_id',CU.id).eq('is_excluded',false).gte('date',`${YEAR}-01-01`).lte('date',`${YEAR}-12-31`);
