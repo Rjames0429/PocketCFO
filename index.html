@@ -432,7 +432,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- Update Actuals Modal -->
 <div class="ov" id="modal-actuals">
   <div class="modal">
-    <h3>📥 Update actuals</h3>
+    <h3>📥 Update Actuals</h3>
     <p class="msub">Enter what you actually spent. Budget shown for reference.</p>
     <div class="mth" id="act-tabs"></div>
     <div id="act-fields"></div>
@@ -551,6 +551,7 @@ async function doSignOut(){
 // ── DEMO DATA LOADER ──────────────────────────────────────
 async function loadDemoData(userId){
   try{
+    const signupMonth=new Date().getMonth(); // e.g. 5 for June
     let so=1;
     for(const[catName,catData]of Object.entries(DEMO)){
       const{data:cat}=await sb.from('budget_categories').insert({user_id:userId,name:catName,sort_order:so++}).select().single();
@@ -561,7 +562,20 @@ async function loadDemoData(userId){
         if(!li)continue;
         const buds=Array.from({length:12},(_,m)=>({user_id:userId,line_item_id:li.id,year:YEAR,month:m+1,budget_amount:item.b}));
         await sb.from('monthly_budgets').insert(buds);
-        const txns=item.a.map((amt,m)=>amt>0?{user_id:userId,line_item_id:li.id,category_id:cat.id,amount:amt,date:`${YEAR}-${String(m+1).padStart(2,'0')}-15`,merchant_name:item.n,match_source:'demo',is_reviewed:true}:null).filter(Boolean);
+        // For months before signup month with no actuals — seed with budget amount
+        // so YTD and Full Year tabs make sense from day one
+        const txns=[];
+        for(let m=0;m<12;m++){
+          const existingActual=item.a[m];
+          if(existingActual>0){
+            // Real demo actual exists — use it
+            txns.push({user_id:userId,line_item_id:li.id,category_id:cat.id,amount:existingActual,date:`${YEAR}-${String(m+1).padStart(2,'0')}-15`,merchant_name:item.n,match_source:'demo',is_reviewed:true});
+          } else if(m<signupMonth && existingActual===0){
+            // Prior month with no actual — pre-seed at budget so YTD is meaningful
+            txns.push({user_id:userId,line_item_id:li.id,category_id:cat.id,amount:item.b,date:`${YEAR}-${String(m+1).padStart(2,'0')}-15`,merchant_name:item.n,match_source:'seeded',is_reviewed:true});
+          }
+          // Future months — no actuals, leave empty
+        }
         if(txns.length)await sb.from('transactions').insert(txns);
       }
     }
@@ -621,8 +635,24 @@ const getYB=item=>{let s=0;for(let m=0;m<=CM;m++)s+=getB(item,m);return s;};
 const getYA=item=>{let s=0;for(let m=0;m<=CM;m++)s+=getA(item,m);return s;};
 const getAnnB=item=>{let s=0;for(let m=0;m<12;m++)s+=getB(item,m);return s;};
 const getAnnA=item=>{let s=0;for(let m=0;m<12;m++)s+=getA(item,m);return s;};
-function getBV(item){if(VIEW==='mtd')return getB(item,CM);if(VIEW==='ytd')return getYB(item);return getAnnB(item);}
-function getAV(item){if(VIEW==='mtd')return getA(item,CM);if(VIEW==='ytd')return getYA(item);return getAnnA(item);}
+function getBV(item){
+  if(VIEW==='mtd') return getB(item,CM);
+  if(VIEW==='ytd') return getYB(item);
+  return getAnnB(item); // full year = sum all 12 monthly budgets
+}
+function getAV(item){
+  if(VIEW==='mtd') return getA(item,CM);
+  if(VIEW==='ytd') return getYA(item);
+  // Full year = actuals to date + (avg monthly actual × remaining months)
+  // This is the run rate / FYE projection
+  const actualToDate=getAnnA(item);
+  const monthsWithData=Array.from({length:12},(_,m)=>getA(item,m)).filter(a=>a>0).length;
+  if(monthsWithData===0) return getAnnB(item); // no actuals yet — use budget as projection
+  const avgMonthly=actualToDate/monthsWithData;
+  const remainingMonths=12-CM-1;
+  // Actuals to date + projected remaining at run rate
+  return getYA(item)+(avgMonthly*remainingMonths);
+}
 
 // Forecast with carry-forward logic
 function getForecastForMonth(catName,itemName,month){
@@ -745,7 +775,12 @@ function render(){
     <div class="m-sc kp"><div class="m-sc-lbl">Forecast</div><div class="m-sc-val">${$f(tF)}</div><div class="m-sc-sub">Carries forward</div></div>
   </div>`:'';
   const mn=MNS[CM],me=ME();
-  const vl={mtd:`${mn} — spend tracker`,ytd:`Year to date — ${me} month${me>1?'s':''} in`,annual:'Full year — projected view',bvf:'Budget vs. Forecast'};
+  const vl={
+    mtd:`${mn} — spend tracker`,
+    ytd:`Year to date — ${me} month${me>1?'s':''} in`,
+    annual:`Full year estimate — actuals + run rate`,
+    bvf:'Budget vs. Forecast'
+  };
 
   let tB=0,tA=0,tF=0,rows='';
   const cks=Object.keys(D);
@@ -786,14 +821,13 @@ function render(){
 
   // KPI colors
   const vB=tB-tA,vF=tF-tA;
-  const pctUsed=tB>0?Math.min(Math.abs(tA/tB*100),100).toFixed(1):0;
-  const pctOver=tB>0?(tA/tB*100).toFixed(1):0;
-  const pctProg=tB>0?Math.min(Math.abs(tA/tB*100),100):0;
+  const pctUsed=tB>0?Math.min((tA/tB*100),999).toFixed(1):0;
+  const pctProg=tB>0?Math.min((tA/tB*100),100):0;
   const pctB=tB>0?Math.abs(vB/tB*100).toFixed(1):0;
   const isOver=tA>tB;
 
   const progHTML=isOver
-    ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${pctOver}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(vB))} over budget</span></div>`
+    ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(vB))} over budget</span></div>`
     :`<div class="prog-track"><div class="prog-fill-good" style="width:${pctProg}%"></div></div><div class="prog-right"><span class="prog-pct-good">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(vB)}</strong> remaining</span></div>`;
 
   const kpiVarCls=vB>=0?'kgd':'kbd';
@@ -806,7 +840,7 @@ function render(){
     `<div class="tabs-toolbar"><div class="tabs-v">`+
     ['mtd','ytd','annual','bvf'].map((v,i)=>`<button class="tab-v${VIEW===v?' active':''}" onclick="setV('${v}')">${['Month to date','Year to date','Full year','Budget vs. Forecast'][i]}</button>`).join('')+
     `</div></div>`+
-    `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update actuals</button></div>`+
+    `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update Actuals</button></div>`+
     `<div class="kpis"><div class="kpi kb"><div class="kl">Budget</div><div class="kv">${$f(tB)}</div><div class="ks">${mn} ${YEAR}</div></div><div class="kpi kg"><div class="kl">Actual</div><div class="kv">${$f(tA)}</div><div class="ks">Spent so far</div></div><div class="kpi ${kpiVarCls}"><div class="kl">Variance</div><div class="kv">${vs(vB)}</div><div class="ks">${pctB}% ${vB>=0?'favorable':'over budget'}</div></div><div class="kpi kp"><div class="kl">Forecast</div><div class="kv">${$f(tF)}</div><div class="ks">Carries forward</div></div></div>`+
     summaryCards+
     `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup><thead><tr><th style="text-align:left;${mobile?'padding-left:8px':'padding-left:16px'}">Category</th><th>Budget</th><th>Actual</th><th>Variance</th><th class="cdiv">Forecast</th></tr></thead><tbody>${rows}${addR}${totR}</tbody></table></div>`+
