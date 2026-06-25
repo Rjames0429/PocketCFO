@@ -324,6 +324,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .app-header-row1{display:none}
 .bottom-nav{display:none}
 .m-header-row{display:none}
+#hdr-logo-desk{display:flex} /* visible on desktop */
+
+@media(max-width:768px){
+  #hdr-logo-desk{display:none!important} /* hidden on mobile — logo shown in mobile row instead */
+}
 </style>
 </head>
 <body>
