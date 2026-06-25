@@ -711,7 +711,7 @@ function svCat(id){
 
 function fcCell(cat,iname,val,nextMo){
   const fkey=`fc_${cat}_${iname||'total'}`;
-  return`<div><input class="fci" data-cat="${cat}" data-item="${iname||''}" value="${$iv(val)}" onchange="onFC(this)" onfocus="this.select()" id="${fkey}"/>${!isMobile()?`<div class="fc-carry">→ carries to ${MNS[CM+1]||'next year'}</div>`:''}</div>`;
+  return`<div><input class="fci" data-cat="${cat}" data-item="${iname||''}" value="$${$iv(val)}" onchange="onFC(this)" onfocus="this.select()" id="${fkey}"/>${!isMobile()?`<div class="fc-carry">→ carries to ${MNS[CM+1]||'next year'}</div>`:''}</div>`;
 }
 function onFC(el){
   const cat=el.dataset.cat,item=el.dataset.item,raw=pn(el.value);
@@ -766,13 +766,15 @@ function render(){
 
   // KPI colors
   const vB=tB-tA,vF=tF-tA;
-  const pctB=tB>0?Math.abs(vB/tB*100).toFixed(1):0;
+  const pctUsed=tB>0?Math.min(Math.abs(tA/tB*100),100).toFixed(1):0;
+  const pctOver=tB>0?(tA/tB*100).toFixed(1):0;
   const pctProg=tB>0?Math.min(Math.abs(tA/tB*100),100):0;
+  const pctB=tB>0?Math.abs(vB/tB*100).toFixed(1):0;
   const isOver=tA>tB;
 
   const progHTML=isOver
-    ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">112%</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(vB))} over budget</span></div>`
-    :`<div class="prog-track"><div class="prog-fill-good" style="width:${pctProg}%"></div></div><div class="prog-right"><span class="prog-pct-good">${pctB}%</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(vB)}</strong> remaining</span></div>`;
+    ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${pctOver}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(vB))} over budget</span></div>`
+    :`<div class="prog-track"><div class="prog-fill-good" style="width:${pctProg}%"></div></div><div class="prog-right"><span class="prog-pct-good">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(vB)}</strong> remaining</span></div>`;
 
   const kpiVarCls=vB>=0?'kgd':'kbd';
   const vs=n=>n>=0?`+${$f(n)}`:`-${$f(Math.abs(n))}`;
