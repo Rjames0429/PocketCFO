@@ -206,6 +206,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ls{display:flex;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:12px;color:var(--text3);font-size:14px}
 .ld{width:10px;height:10px;border-radius:50%;background:var(--brand);animation:pu 1s ease infinite}
 @keyframes pu{0%,100%{opacity:.3}50%{opacity:1}}
+/* Mobile summary card colors */
+.m-sc.kb{background:linear-gradient(135deg,#185FA5,#0C447C)}
+.m-sc.kg{background:linear-gradient(135deg,#2E7D32,#1B5E20)}
+.m-sc.kgd{background:linear-gradient(135deg,#1D9E75,#0F6E56)}
+.m-sc.kbd{background:linear-gradient(135deg,#C62828,#7B1111)}
+.m-sc.kp{background:linear-gradient(135deg,#3C3489,#26215C)}
 
 /* ══════════════════════════════════════
    MOBILE STYLES — max-width 768px
@@ -213,78 +219,82 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @media(max-width:768px){
   body{background:#fff}
 
-  /* Header stacks on mobile */
-  .app-header{height:auto;padding:8px 16px;flex-direction:column;align-items:stretch;gap:0;position:sticky;top:0;z-index:50}
-  .app-header-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
-  .hlogo .name{font-size:15px}
-  .hcenter{background:#f9f8ff;border-radius:8px;overflow:hidden;border:0.5px solid var(--border2);flex-direction:row;gap:0;width:100%}
-  .hstat{flex:1;padding:6px 10px;align-items:flex-start}
-  .hstat+.hstat{border-left:0.5px solid var(--border2)}
-  .hstat-val{font-size:13px}
-  .hstat-lbl{font-size:8px}
+  /* ── HEADER — simple logo + badge only ── */
+  .app-header{height:auto;padding:10px 16px;flex-direction:row;align-items:center;position:sticky;top:0;z-index:50;border-bottom:0.5px solid #eee}
+  .app-header-row1{display:none}
+  .hlogo .name{font-size:16px}
+  .hcenter{display:none} /* stats hidden on mobile */
   .hsep{display:none}
-  .hright{display:none} /* hide account badge on mobile — shown in header row1 */
+  .hright{display:flex;align-items:center;gap:8px}
+  .hright .saved-ind,.hright .btn-so{display:none}
 
-  .app-main{padding:10px 14px 80px}
-
-  .page-label{font-size:9px;letter-spacing:1px;margin-bottom:2px}
-  .month-h{font-size:20px;margin-bottom:7px}
-  .month-h .yr{font-size:12px}
+  /* ── STICKY SECTION — budget overview + tabs + controls ── */
+  .app-main{padding:0;background:#fff}
+  .page-label{font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;padding:36px 16px 0} /* 36px top = breathing room */
+  .month-h{font-size:26px;font-weight:700;margin-bottom:12px;padding:0 16px}
+  .month-h .yr{font-size:15px}
 
   /* Progress */
-  .prog-wrap{margin-bottom:10px}
+  .prog-wrap{margin-bottom:14px;padding:0 16px}
   .prog-track{width:auto;flex:1}
-  .prog-pct-good,.prog-pct-over{font-size:10px}
-  .prog-rem-good,.prog-rem-over{font-size:9px}
+  .prog-pct-good,.prog-pct-over{font-size:12px}
+  .prog-rem-good,.prog-rem-over{font-size:11px}
 
   /* Tabs — 2x2 grid */
-  .tabs-toolbar{flex-direction:column;align-items:stretch;margin-bottom:8px;gap:8px}
-  .tabs-v{display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:7px}
-  .tab-v{padding:5px 3px;font-size:9.5px;border-radius:5px;text-align:center}
+  .tabs-toolbar{flex-direction:column;align-items:stretch;margin-bottom:10px;gap:0;padding:0 16px;border-bottom:1px solid #eee;padding-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  .tabs-v{display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:8px;margin-bottom:10px}
+  .tab-v{padding:6px 3px;font-size:9.5px;border-radius:6px;text-align:center}
 
   /* Sub toolbar */
-  .sub-toolbar{margin-bottom:8px}
-  .mlbl{font-size:10px}
-  .mpick-btn{height:26px;font-size:10px;min-width:110px}
-  .btn-act{height:26px;font-size:9.5px;padding:0 8px}
+  .sub-toolbar{margin-bottom:0;padding:0 16px 14px}
+  .mlbl{font-size:11px}
+  .mpick-btn{height:28px;font-size:11px;min-width:120px}
+  .btn-act{height:28px;font-size:10px;padding:0 10px}
 
-  /* KPIs — 2x2 */
-  .kpis{grid-template-columns:1fr 1fr;margin-bottom:8px;border-radius:8px}
-  .kpi{padding:8px 9px}
-  .kl{font-size:7px;margin-bottom:1px}
-  .kv{font-size:14px}
-  .ks{font-size:7px;margin-top:1px}
+  /* ── SCROLLABLE CONTENT ── */
+  .kpis{display:none} /* hide old KPI strip — replaced by summary cards below */
 
-  /* TABLE — mobile compact */
+  /* Summary cards injected via JS */
+  .m-summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:12px 16px;padding:0}
+  .m-sc{border-radius:8px;padding:6px 10px}
+  .m-sc-lbl{font-size:7.5px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:2px}
+  .m-sc-val{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.3px}
+  .m-sc-sub{font-size:7.5px;color:rgba(255,255,255,.6);margin-top:1px}
+
+  /* TABLE — wider category, frozen header via JS */
+  .tw{margin:0 16px 12px;border-radius:10px}
   .tw table{font-size:9px}
-  .tw col.d-cat{width:24%}
+  .tw col.d-cat{width:34%} /* wider — no cutoff */
   .tw col.d-bud{width:16%}
   .tw col.d-act{width:16%}
-  .tw col.d-var{width:22%}
-  .tw col.d-fc{width:22%}
+  .tw col.d-var{width:17%}
+  .tw col.d-fc{width:17%}
   .tw th{
-    padding:7px 3px;
+    padding:8px 3px;
     font-size:7px;
-    text-align:center;
+    text-align:center!important;
     letter-spacing:.2px;
     vertical-align:bottom;
     line-height:1.3;
     white-space:normal;
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:#f0eefa; /* keep purple on freeze */
   }
-  .tw th:first-child{text-align:left;padding-left:6px}
+  .tw th:first-child{text-align:left!important;padding-left:8px}
   .tw td{
-    padding:5px 3px;
-    font-size:9px;
+    padding:7px 3px;
+    font-size:9.5px;
     text-align:center;
     white-space:nowrap;
     overflow:hidden;
   }
-  .tw td:first-child{text-align:left;padding-left:6px;font-size:9px}
-  .tw .tr td{font-size:9px}
-  .sl{padding-left:6px;font-size:8.5px}
-  .nw{gap:4px}
-  .tog{width:14px;height:14px;font-size:7px}
-  .pill{font-size:8px;padding:1px 4px}
+  .tw td:first-child{text-align:left;padding-left:8px;font-size:9.5px;overflow:hidden;text-overflow:ellipsis}
+  .tw .tr td{font-size:9.5px}
+  .nw{gap:5px}
+  .tog{width:16px;height:16px;font-size:7px}
+  .pill{font-size:8.5px;padding:2px 5px}
   /* Forecast bubble on mobile */
   .fci{
     width:92%!important;
@@ -292,7 +302,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     float:none;
     display:block;
     margin:0 auto;
-    font-size:9px!important;
+    font-size:9.5px!important;
     font-family:inherit!important;
     font-weight:500!important;
     text-align:center;
@@ -301,11 +311,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     appearance:none;
     line-height:1.3;
   }
-  .fc-carry{display:none} /* hide carry hint on mobile */
-  .ecn,.ein{font-size:9px}
-  .addb{font-size:10px;padding:7px}
+  .fc-carry{display:none}
+  .ecn,.ein{font-size:9.5px}
+  .addb{font-size:10px;padding:7px;margin:0 16px 8px;width:calc(100% - 32px)}
   .addr td{padding:6px}
-  /* hint bar hidden on mobile */
   .hint-wrap{display:none}
 
   /* Bottom nav */
@@ -316,7 +325,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .nav-lbl{font-size:9px;color:#bbb;font-weight:500}
   .nav-lbl.active{color:var(--brand);font-weight:600}
 
-  /* Mobile header row */
   .m-header-row{display:flex!important;align-items:center;justify-content:space-between;margin-bottom:7px}
 }
 
@@ -730,6 +738,12 @@ function render(){
   if(!Object.keys(D).length){document.getElementById('app-main').innerHTML='<div class="ls"><div class="ld"></div>Loading your data…</div>';return;}
 
   const mobile=isMobile();
+  const summaryCards=mobile?`<div class="m-summary-cards">
+    <div class="m-sc kb"><div class="m-sc-lbl">Budget</div><div class="m-sc-val">${$f(tB)}</div><div class="m-sc-sub">${mn} ${YEAR}</div></div>
+    <div class="m-sc kg"><div class="m-sc-lbl">Actual</div><div class="m-sc-val">${$f(tA)}</div><div class="m-sc-sub">Spent so far</div></div>
+    <div class="m-sc ${isOver?'kbd':'kgd'}"><div class="m-sc-lbl">Variance</div><div class="m-sc-val">${vs(vB)}</div><div class="m-sc-sub">${pctB}% ${vB>=0?'favorable':'over'}</div></div>
+    <div class="m-sc kp"><div class="m-sc-lbl">Forecast</div><div class="m-sc-val">${$f(tF)}</div><div class="m-sc-sub">Carries forward</div></div>
+  </div>`:'';
   const mn=MNS[CM],me=ME();
   const vl={mtd:`${mn} — spend tracker`,ytd:`Year to date — ${me} month${me>1?'s':''} in`,annual:'Full year — projected view',bvf:'Budget vs. Forecast'};
 
@@ -794,7 +808,8 @@ function render(){
     `</div></div>`+
     `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update actuals</button></div>`+
     `<div class="kpis"><div class="kpi kb"><div class="kl">Budget</div><div class="kv">${$f(tB)}</div><div class="ks">${mn} ${YEAR}</div></div><div class="kpi kg"><div class="kl">Actual</div><div class="kv">${$f(tA)}</div><div class="ks">Spent so far</div></div><div class="kpi ${kpiVarCls}"><div class="kl">Variance</div><div class="kv">${vs(vB)}</div><div class="ks">${pctB}% ${vB>=0?'favorable':'over budget'}</div></div><div class="kpi kp"><div class="kl">Forecast</div><div class="kv">${$f(tF)}</div><div class="ks">Carries forward</div></div></div>`+
-    `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup><thead><tr><th style="text-align:left;${mobile?'padding-left:6px':'padding-left:16px'}">Category</th><th>Budget</th><th>Actual</th><th>Variance</th><th class="cdiv">Forecast</th></tr></thead><tbody>${rows}${addR}${totR}</tbody></table></div>`+
+    summaryCards+
+    `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup><thead><tr><th style="text-align:left;${mobile?'padding-left:8px':'padding-left:16px'}">Category</th><th>Budget</th><th>Actual</th><th>Variance</th><th class="cdiv">Forecast</th></tr></thead><tbody>${rows}${addR}${totR}</tbody></table></div>`+
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
 }
 
