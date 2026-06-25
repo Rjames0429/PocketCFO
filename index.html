@@ -77,7 +77,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-so:hover{color:var(--red)}
 
 /* ── MAIN CONTENT ── */
-.app-main{padding:24px 20px 20px;max-width:1100px;margin:0 auto;background:#fff}
+.app-main{padding:24px 20px 100px;max-width:1100px;margin:0 auto;background:#fff;min-height:100vh}
 .page-label{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
 .month-h{font-size:28px;font-weight:600;color:var(--text);letter-spacing:-.6px;display:flex;align-items:baseline;gap:8px;margin-bottom:14px}
 .month-h .yr{font-size:16px;font-weight:400;color:#bbb}
@@ -222,14 +222,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   /* ── HEADER — simple logo + badge only ── */
   .app-header{height:auto;padding:10px 16px;flex-direction:row;align-items:center;position:sticky;top:0;z-index:50;border-bottom:0.5px solid #eee}
   .app-header-row1{display:none}
+  #hdr-logo-desk{display:flex!important} /* always show logo */
   .hlogo .name{font-size:16px}
   .hcenter{display:none} /* stats hidden on mobile */
   .hsep{display:none}
   .hright{display:flex;align-items:center;gap:8px}
-  .hright .saved-ind,.hright .btn-so{display:none}
+  .hright .saved-ind,.hright .btn-so{display:none} /* hide save/signout on mobile */
 
   /* ── STICKY SECTION — budget overview + tabs + controls ── */
-  .app-main{padding:0;background:#fff}
+  .app-main{padding:0;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .page-label{font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;padding:36px 16px 0} /* 36px top = breathing room */
   .month-h{font-size:26px;font-weight:700;margin-bottom:12px;padding:0 16px}
   .month-h .yr{font-size:15px}
@@ -316,6 +317,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .addb{font-size:10px;padding:7px;margin:0 16px 8px;width:calc(100% - 32px)}
   .addr td{padding:6px}
   .hint-wrap{display:none}
+  /* Extra bottom padding so Total row clears the fixed bottom nav */
+  .tw{margin:0 16px 100px;border-radius:10px}
 
   /* Bottom nav */
   .bottom-nav{display:flex!important;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:0.5px solid var(--border2);padding:6px 0 16px;z-index:50;align-items:center;justify-content:space-around}
@@ -395,20 +398,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="demo-dismiss" onclick="dismissDemo()">Got it ✕</button>
   </div>
   <div class="app-header">
-    <!-- Mobile row 1 -->
-    <div class="app-header-row1 m-header-row">
-      <div class="hlogo"><div class="dot"></div><div class="name">PocketCFO</div></div>
-      <span class="abadge" id="hdr-acct-m">PCF-0000-0000</span>
-    </div>
-    <!-- Desktop logo (hidden on mobile via CSS) -->
+    <!-- Single logo — shown on both desktop and mobile -->
     <div class="hlogo" id="hdr-logo-desk"><div class="dot"></div><div class="name">PocketCFO</div></div>
-    <!-- Stats -->
+    <!-- Stats (hidden on mobile via CSS) -->
     <div class="hcenter" id="hdr-stats">
       <div class="hstat"><div class="hstat-val" id="hdr-left" style="color:#2E7D32">$0 left</div><div class="hstat-lbl" id="hdr-month-lbl">June 2026 budget</div></div>
       <div class="hsep"></div>
       <div class="hstat"><div class="hstat-val" id="hdr-spent" style="color:#185FA5">$0</div><div class="hstat-lbl">Spent so far</div></div>
     </div>
-    <!-- Desktop right -->
+    <!-- Single account badge + sign out -->
     <div class="hright">
       <span class="abadge" id="hdr-acct">PCF-0000-0000</span>
       <span class="saved-ind" id="sav-ind">✓ Saved</span>
@@ -592,7 +590,7 @@ async function loadApp(){
   if(u){
     const acct=u.account_number||'PCF-0000-0000';
     document.getElementById('hdr-acct').textContent=acct;
-    document.getElementById('hdr-acct-m').textContent=acct;
+    
     if(u.display_name==='demo'&&!sessionStorage.getItem('demo-dismissed')){
       document.getElementById('demo-banner').style.display='flex';
     }
