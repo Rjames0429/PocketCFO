@@ -768,12 +768,6 @@ function render(){
   if(!Object.keys(D).length){document.getElementById('app-main').innerHTML='<div class="ls"><div class="ld"></div>Loading your data…</div>';return;}
 
   const mobile=isMobile();
-  const summaryCards=mobile?`<div class="m-summary-cards">
-    <div class="m-sc kb"><div class="m-sc-lbl">Budget</div><div class="m-sc-val">${$f(tB)}</div><div class="m-sc-sub">${mn} ${YEAR}</div></div>
-    <div class="m-sc kg"><div class="m-sc-lbl">Actual</div><div class="m-sc-val">${$f(tA)}</div><div class="m-sc-sub">Spent so far</div></div>
-    <div class="m-sc ${isOver?'kbd':'kgd'}"><div class="m-sc-lbl">Variance</div><div class="m-sc-val">${vs(vB)}</div><div class="m-sc-sub">${pctB}% ${vB>=0?'favorable':'over'}</div></div>
-    <div class="m-sc kp"><div class="m-sc-lbl">Forecast</div><div class="m-sc-val">${$f(tF)}</div><div class="m-sc-sub">Carries forward</div></div>
-  </div>`:'';
   const mn=MNS[CM],me=ME();
   const vl={
     mtd:`${mn} — spend tracker`,
@@ -832,6 +826,14 @@ function render(){
 
   const kpiVarCls=vB>=0?'kgd':'kbd';
   const vs=n=>n>=0?`+${$f(n)}`:`-${$f(Math.abs(n))}`;
+
+  // Summary cards for mobile — defined here after all vars are ready
+  const summaryCards=mobile?`<div class="m-summary-cards">
+    <div class="m-sc kb"><div class="m-sc-lbl">Budget</div><div class="m-sc-val">${$f(tB)}</div><div class="m-sc-sub">${mn} ${YEAR}</div></div>
+    <div class="m-sc kg"><div class="m-sc-lbl">Actual</div><div class="m-sc-val">${$f(tA)}</div><div class="m-sc-sub">Spent so far</div></div>
+    <div class="m-sc ${isOver?'kbd':'kgd'}"><div class="m-sc-lbl">Variance</div><div class="m-sc-val">${vs(vB)}</div><div class="m-sc-sub">${pctB}% ${vB>=0?'favorable':'over'}</div></div>
+    <div class="m-sc kp"><div class="m-sc-lbl">Forecast</div><div class="m-sc-val">${$f(tF)}</div><div class="m-sc-sub">Carries forward</div></div>
+  </div>`:'';
 
   document.getElementById('app-main').innerHTML=
     `<div class="page-label">Budget Overview</div>`+
