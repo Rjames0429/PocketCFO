@@ -109,6 +109,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mpick-wrap{position:relative;display:inline-block}
 .mdd{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;min-width:140px;overflow:hidden}
 .mdd.open{display:block}
+.mdd-desk{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;min-width:140px;overflow:hidden}
+.mdd-desk.open{display:block}
 .mopt{padding:8px 14px;font-size:12px;font-family:inherit;color:var(--text);cursor:pointer}
 .mopt:hover{background:var(--brand-pale);color:var(--brand)}
 .mopt.sel{background:var(--brand);color:#fff}
@@ -649,7 +651,11 @@ function getBV(item){
 function getAV(item){
   if(VIEW==='mtd') return getA(item,CM);
   if(VIEW==='ytd') return getYA(item);
-  if(VIEW==='bvf') return getFV(item.name?item.name:null,null); // forecast for comparison
+  if(VIEW==='bvf'){
+    // Budget vs Forecast: show annual forecast for each item
+    const catName=Object.keys(D).find(cat=>D[cat].items.some(i=>i===item))||'';
+    return mFI(catName,item.name)*12;
+  }
   // Full year = actuals to date + run rate for remaining months
   const actualToDate=getAnnA(item);
   const monthsWithData=Array.from({length:12},(_,m)=>getA(item,m)).filter(a=>a>0).length;
@@ -820,14 +826,19 @@ function render(){
 
   // KPI colors
   const vB=tB-tA,vF=tF-tA;
-  const pctUsed=tB>0?Math.min((tA/tB*100),999).toFixed(1):0;
-  const pctProg=tB>0?Math.min((tA/tB*100),100):0;
+  // Progress bar always uses CURRENT MONTH actuals vs budget — never changes per tab
+  let tB_mtd=0,tA_mtd=0;
+  Object.keys(D).forEach(cat=>{D[cat].items.forEach(it=>{tB_mtd+=getB(it,CM);tA_mtd+=getA(it,CM);});});
+  const pctUsed=tB_mtd>0?Math.min((tA_mtd/tB_mtd*100),999).toFixed(1):0;
+  const pctProg=tB_mtd>0?Math.min((tA_mtd/tB_mtd*100),100):0;
   const pctB=tB>0?Math.abs(vB/tB*100).toFixed(1):0;
   const isOver=tA>tB;
+  const isOverMtd=tA_mtd>tB_mtd;
+  const vB_mtd=tB_mtd-tA_mtd;
 
-  const progHTML=isOver
-    ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(vB))} over budget</span></div>`
-    :`<div class="prog-track"><div class="prog-fill-good" style="width:${pctProg}%"></div></div><div class="prog-right"><span class="prog-pct-good">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(vB)}</strong> remaining</span></div>`;
+  const progHTML=isOverMtd
+    ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(vB_mtd))} over budget</span></div>`
+    :`<div class="prog-track"><div class="prog-fill-good" style="width:${pctProg}%"></div></div><div class="prog-right"><span class="prog-pct-good">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(vB_mtd)}</strong> remaining</span></div>`;
 
   const kpiVarCls=vB>=0?'kgd':'kbd';
   const vs=n=>n>=0?`+${$f(n)}`:`-${$f(Math.abs(n))}`;
@@ -867,7 +878,7 @@ function render(){
     `<div class="page-label">${tabSub[VIEW]||'Budget Overview'}</div>`+
     `<div class="month-h">${pageH} <span class="yr">${pageYr}</span></div>`+
     `<div class="prog-wrap">${progHTML}</div>`+
-    `<div class="tabs-toolbar">`+
+    `<div class="tabs-toolbar" style="position:relative">`+
     (mobile
       ? `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
         `<div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:18px;top:calc(100% + 4px);background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200;min-width:190px;overflow:hidden">`+
@@ -880,7 +891,7 @@ function render(){
     )+
     `</div>`+
     (!mobile
-      ? `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update Actuals</button></div>`
+      ? `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMPDesk(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update Actuals</button></div>`
       : '')+
     `<div class="kpis"><div class="kpi kb"><div class="kl">Budget</div><div class="kv">${$f(tB)}</div><div class="ks">${VIEW==='mtd'?mn+' '+YEAR:VIEW==='ytd'?'Jan–'+mn:YEAR}</div></div>`+
     `<div class="kpi kg"><div class="kl">${VIEW==='bvf'?'Forecast':'Actual'}</div><div class="kv">${$f(tA)}</div><div class="ks">${VIEW==='annual'?'Run rate est.':VIEW==='bvf'?'vs. budget':'Spent so far'}</div></div>`+
@@ -898,18 +909,39 @@ function render(){
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
 }
 
-function togViewDD(e){e.stopPropagation();const d=document.getElementById('m-view-dd');if(d)d.style.display=d.style.display==='none'?'block':'none';}
-function closeMViewDD(){const d=document.getElementById('m-view-dd');if(d)d.style.display='none';}
-function tc(i){const k=Object.keys(D)[i];EXP[k]=!EXP[k];render();}
-function setV(v){VIEW=v;closeMViewDD();render();}
-function togMP(e){e.stopPropagation();document.getElementById('mdd').classList.toggle('open');}
+function togViewDD(e){
+  e.stopPropagation();
+  const d=document.getElementById('m-view-dd');
+  if(d){d.style.display=d.style.display==='none'?'block':'none';}
+}
+function closeMViewDD(){
+  const d=document.getElementById('m-view-dd');
+  if(d)d.style.display='none';
+}
+function togMP(e){
+  // Mobile month dropdown
+  e.stopPropagation();
+  const d=document.getElementById('mdd');
+  if(d)d.classList.toggle('open');
+}
+function togMPDesk(e){
+  // Desktop month dropdown
+  e.stopPropagation();
+  const d=document.getElementById('mdd-desk');
+  if(d)d.classList.toggle('open');
+}
 function pickM(i){
   CM=i;
-  document.querySelectorAll('.mopt').forEach((o,j)=>o.classList.toggle('sel',j===i));
-  document.getElementById('mdd').classList.remove('open');
+  // Close all dropdowns
+  ['mdd','mdd-desk'].forEach(id=>{const d=document.getElementById(id);if(d)d.classList.remove('open');});
   render();
 }
-document.addEventListener('click',()=>{const d=document.getElementById('mdd');if(d)d.classList.remove('open');closeMViewDD();});
+function tc(i){const k=Object.keys(D)[i];EXP[k]=!EXP[k];render();}
+function setV(v){VIEW=v;closeMViewDD();render();}
+document.addEventListener('click',()=>{
+  ['mdd','mdd-desk'].forEach(id=>{const d=document.getElementById(id);if(d)d.classList.remove('open');});
+  closeMViewDD();
+});
 
 function openOv(id){
   document.getElementById(id).classList.add('open');
