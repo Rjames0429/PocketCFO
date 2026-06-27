@@ -831,12 +831,12 @@ function render(){
   // Progress bar always uses CURRENT MONTH actuals vs budget — never changes per tab
   let tB_mtd=0,tA_mtd=0;
   Object.keys(D).forEach(cat=>{D[cat].items.forEach(it=>{tB_mtd+=getB(it,CM);tA_mtd+=getA(it,CM);});});
+  const vB_mtd=tB_mtd-tA_mtd;
+  const isOverMtd=tA_mtd>tB_mtd;
   const pctUsed=tB_mtd>0?Math.min((tA_mtd/tB_mtd*100),999).toFixed(1):0;
   const pctProg=tB_mtd>0?Math.min((tA_mtd/tB_mtd*100),100):0;
   const pctB=tB_mtd>0?Math.abs(vB_mtd/tB_mtd*100).toFixed(1):0;
   const isOver=tA>tB;
-  const isOverMtd=tA_mtd>tB_mtd;
-  const vB_mtd=tB_mtd-tA_mtd;
 
   const progHTML=isOverMtd
     ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(vB_mtd))} over budget</span></div>`
