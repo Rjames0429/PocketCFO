@@ -219,138 +219,134 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @media(max-width:768px){
   body{background:#fff}
 
-  /* ── HEADER — simple logo + badge only ── */
-  .app-header{height:auto;padding:10px 16px;flex-direction:row;align-items:center;position:sticky;top:0;z-index:50;border-bottom:0.5px solid #eee}
+  /* HEADER — logo + single badge */
+  .app-header{height:auto;padding:10px 18px;flex-direction:row;align-items:center;position:sticky;top:0;z-index:50;background:#fff;border-bottom:0.5px solid #f0f0f0}
   .app-header-row1{display:none}
-  #hdr-logo-desk{display:flex!important} /* always show logo */
-  .hlogo .name{font-size:16px}
-  .hcenter{display:none} /* stats hidden on mobile */
+  #hdr-logo-desk{display:flex!important}
+  .hlogo .name{font-size:16px;font-weight:700}
+  .hcenter{display:none}
   .hsep{display:none}
   .hright{display:flex;align-items:center;gap:8px}
-  .hright .saved-ind,.hright .btn-so{display:none} /* hide save/signout on mobile */
+  .hright .saved-ind,.hright .btn-so{display:none}
 
-  /* ── SCROLLABLE CONTENT — app-main is the scroll parent ── */
+  /* APP MAIN — scroll container, explicit height so sticky th works */
   .app-main{
-    padding:0;
-    background:#fff;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-    /* Must have explicit height for position:sticky on th to work */
-    height:calc(100vh - 56px - 68px); /* viewport minus header minus bottom nav */
+    padding:0;background:#fff;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    height:calc(100vh - 48px - 68px);
   }
-  .page-label{font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;padding:36px 16px 0} /* 36px top = breathing room */
-  .month-h{font-size:26px;font-weight:700;margin-bottom:12px;padding:0 16px}
-  .month-h .yr{font-size:15px}
 
-  /* Progress */
-  .prog-wrap{margin-bottom:14px;padding:0 16px}
-  .prog-track{width:auto;flex:1}
-  .prog-pct-good,.prog-pct-over{font-size:12px}
-  .prog-rem-good,.prog-rem-over{font-size:11px}
+  /* BUDGET OVERVIEW */
+  .page-label{font-size:10px;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;padding:22px 18px 0;display:block}
+  .month-h{font-size:28px;font-weight:700;letter-spacing:-.6px;margin-bottom:12px;padding:0 18px}
+  .month-h .yr{font-size:15px;font-weight:400;color:#ccc}
 
-  /* Tabs — 2x2 grid */
-  .tabs-toolbar{flex-direction:column;align-items:stretch;margin-bottom:10px;gap:0;padding:0 16px;border-bottom:1px solid #eee;padding-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-  .tabs-v{display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:8px;margin-bottom:10px}
-  .tab-v{padding:6px 3px;font-size:9.5px;border-radius:6px;text-align:center}
+  /* PROGRESS */
+  .prog-wrap{margin-bottom:14px;padding:0 18px;display:flex;align-items:center;gap:10px}
+  .prog-track{width:auto;flex:1;height:5px}
+  .prog-pct-good{font-size:12px;font-weight:700;color:#7B4A0A}
+  .prog-pct-over{font-size:12px;font-weight:700}
+  .prog-rem-good{font-size:11px}
+  .prog-rem-over{font-size:11px}
 
-  /* Sub toolbar */
-  .sub-toolbar{margin-bottom:0;padding:0 16px 14px}
-  .mlbl{font-size:11px}
-  .mpick-btn{height:28px;font-size:11px;min-width:120px}
-  .btn-act{height:28px;font-size:10px;padding:0 10px}
+  /* CONTROLS — view pill + month + update on one line */
+  .tabs-toolbar{
+    display:flex;flex-direction:row;align-items:center;
+    gap:6px;padding:0 18px 14px;
+    border-bottom:0.5px solid #f0f0f0;margin-bottom:0;
+  }
+  .tabs-v{display:none}
+  /* View pill — injected via JS render */
+  .m-view-pill{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:6px;padding:0 12px;height:32px;
+    font-size:11px;font-weight:600;color:#4B3FA0;
+    background:#f0eefa;border:1.5px solid #ddd8f5;border-radius:99px;
+    flex:1;cursor:pointer;
+  }
+  .m-view-pill .arr{font-size:9px;color:#9B93D0}
+  .m-month-pill{
+    display:flex;align-items:center;gap:5px;padding:0 11px;height:32px;
+    font-size:11px;font-weight:500;color:#555;
+    background:#fff;border:0.5px solid #e5e5e5;border-radius:99px;
+    cursor:pointer;flex-shrink:0;
+  }
+  .m-month-pill .arr{font-size:9px;color:#ccc}
+  .m-act-btn{
+    display:flex;align-items:center;gap:4px;padding:0 11px;height:32px;
+    font-size:10px;font-weight:600;color:#4B3FA0;
+    background:#fff;border:1.5px solid #ddd8f5;border-radius:99px;
+    cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;
+  }
 
-  /* ── SCROLLABLE CONTENT ── */
-  .kpis{display:none} /* hide old KPI strip — replaced by summary cards below */
+  .sub-toolbar{display:none}
+  .kpis{display:none}
 
-  /* Summary cards injected via JS */
-  .m-summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:12px 16px;padding:0}
-  .m-sc{border-radius:8px;padding:6px 10px}
-  .m-sc-lbl{font-size:7.5px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:2px}
-  .m-sc-val{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.3px}
-  .m-sc-sub{font-size:7.5px;color:rgba(255,255,255,.6);margin-top:1px}
+  /* SUMMARY CARDS */
+  .m-summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 18px 10px}
+  .m-sc{border-radius:10px;padding:10px 13px}
+  .m-sc-lbl{font-size:8px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:3px}
+  .m-sc-val{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.3px}
+  .m-sc-sub{font-size:8px;color:rgba(255,255,255,.5);margin-top:2px}
 
-  /* TABLE — wider category, frozen header */
-  .tw{margin:0 16px 12px;border-radius:10px;overflow:hidden}
+  /* TABLE — overflow:visible is CRITICAL for position:sticky to work */
+  .tw{
+    margin:0 18px 100px;border-radius:12px;
+    border:1px solid #efefef;background:#fff;
+    overflow:visible;
+    box-shadow:0 1px 6px rgba(0,0,0,.05);
+  }
   .tw table{font-size:9px}
-  .tw col.d-cat{width:34%}
+  .tw col.d-cat{width:32%}
   .tw col.d-bud{width:16%}
-  .tw col.d-act{width:16%}
-  .tw col.d-var{width:17%}
+  .tw col.d-act{width:17%}
+  .tw col.d-var{width:18%}
   .tw col.d-fc{width:17%}
-  /* Sticky th — works because .app-main is the scroll parent
-     and we remove overflow:hidden from .tw so sticky isn't clipped */
-  .tw{overflow:visible;border-radius:10px;border:1px solid #e0e0e0;background:#fff}
-  .tw table{border-collapse:collapse;border-radius:10px;overflow:hidden}
   .tw th{
-    padding:8px 3px;
-    font-size:7px;
+    padding:9px 4px;font-size:7px;
     text-align:center!important;
-    letter-spacing:.2px;
-    vertical-align:bottom;
-    line-height:1.3;
-    white-space:normal;
-    position:sticky;
-    top:0;
-    z-index:10;
-    background:#f0eefa;
-    box-shadow:0 1px 0 #ddd8f5;
+    letter-spacing:.2px;vertical-align:bottom;line-height:1.3;white-space:normal;
+    position:sticky;top:0;z-index:10;
+    background:#f5f4ff;
+    box-shadow:0 1px 0 #e8e5fb;
   }
-  .tw th:first-child{text-align:left!important;padding-left:8px}
-  .tw td{
-    padding:7px 3px;
-    font-size:9.5px;
-    text-align:center;
-    white-space:nowrap;
-    overflow:hidden;
-  }
-  .tw td:first-child{text-align:left;padding-left:8px;font-size:9.5px;overflow:hidden;text-overflow:ellipsis}
-  .tw .tr td{font-size:9.5px}
-  .nw{gap:5px}
-  .tog{width:16px;height:16px;font-size:7px}
-  .pill{font-size:8.5px;padding:2px 5px}
-  /* Forecast bubble on mobile */
+  .tw th:first-child{text-align:left!important;padding-left:12px}
+  .tw th+th{border-left:0.5px solid #e8e5fb}
+  .tw td{padding:9px 4px;font-size:10.5px;text-align:center;white-space:nowrap;overflow:hidden}
+  .tw td:first-child{text-align:left;font-weight:600;padding-left:12px;overflow:hidden;text-overflow:ellipsis}
+  .tw .tr td{font-size:10.5px;font-weight:700}
+  .nw{gap:7px}
+  .tog{width:18px;height:18px;font-size:8px}
+  .pill{font-size:8.5px;padding:2px 6px}
   .fci{
-    width:92%!important;
-    max-width:none;
-    float:none;
-    display:block;
-    margin:0 auto;
-    font-size:9.5px!important;
-    font-family:inherit!important;
-    font-weight:500!important;
-    text-align:center;
-    padding:2px 0;
-    -webkit-appearance:none;
-    appearance:none;
-    line-height:1.3;
+    width:90%!important;float:none;display:block;margin:0 auto;
+    font-size:10.5px!important;font-family:inherit!important;font-weight:500!important;
+    text-align:center;padding:2px 0;-webkit-appearance:none;appearance:none;line-height:1.3;
   }
   .fc-carry{display:none}
-  .ecn,.ein{font-size:9.5px}
-  .addb{font-size:10px;padding:7px;margin:0 16px 8px;width:calc(100% - 32px)}
-  .addr td{padding:6px}
+  .ecn,.ein{font-size:10.5px}
+  .addb{font-size:10px;padding:8px;margin:0;width:100%}
+  .addr td{padding:7px 12px}
   .hint-wrap{display:none}
-  /* Extra bottom padding so Total row clears the fixed bottom nav */
-  .tw{margin:0 16px 100px;border-radius:10px}
 
-  /* Bottom nav */
-  .bottom-nav{display:flex!important;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:0.5px solid var(--border2);padding:6px 0 16px;z-index:50;align-items:center;justify-content:space-around}
-  .nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:55px;cursor:pointer}
-  .nav-icon{font-size:20px;color:#bbb}
+  /* BOTTOM NAV */
+  .bottom-nav{display:flex!important;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:0.5px solid var(--border2);padding:8px 0 20px;z-index:50;align-items:center;justify-content:space-around}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:55px;cursor:pointer}
+  .nav-icon{font-size:22px;color:#ccc}
   .nav-icon.active{color:var(--brand)}
-  .nav-lbl{font-size:9px;color:#bbb;font-weight:500}
+  .nav-lbl{font-size:9px;color:#ccc;font-weight:500}
   .nav-lbl.active{color:var(--brand);font-weight:600}
-
-  .m-header-row{display:flex!important;align-items:center;justify-content:space-between;margin-bottom:7px}
+  .m-header-row{display:flex!important;align-items:center;justify-content:space-between}
 }
 
 /* Desktop — hide mobile-only elements */
 .app-header-row1{display:none}
 .bottom-nav{display:none}
 .m-header-row{display:none}
-#hdr-logo-desk{display:flex} /* visible on desktop */
+#hdr-logo-desk{display:flex}
 
 @media(max-width:768px){
-  #hdr-logo-desk{display:none!important} /* hidden on mobile — logo shown in mobile row instead */
+  #hdr-logo-desk{display:flex!important}
 }
 </style>
 </head>
@@ -849,21 +845,26 @@ function render(){
     `<div class="page-label">Budget Overview</div>`+
     `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
     `<div class="prog-wrap">${progHTML}</div>`+
-    `<div class="tabs-toolbar"><div class="tabs-v">`+
-    ['mtd','ytd','annual','bvf'].map((v,i)=>`<button class="tab-v${VIEW===v?' active':''}" onclick="setV('${v}')">${['Month to date','Year to date','Full year','Budget vs. Forecast'][i]}</button>`).join('')+
-    `</div></div>`+
-    `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update Actuals</button></div>`+
+    `<div class="tabs-toolbar">`+
+    (mobile
+      ? `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">Month to date</span><span class="arr">▾</span></div><div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:18px;top:100%;background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;min-width:180px;overflow:hidden">${['mtd','ytd','annual','bvf'].map((v,i)=>`<div class="mopt${VIEW===v?' sel':''}" onclick="setV('${v}');closeMViewDD()" style="padding:10px 14px;font-size:13px;cursor:pointer">${['Month to date','Year to date','Full year','Budget vs. Forecast'][i]}</div>`).join('')}</div><div class="m-month-pill" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div><button class="m-act-btn" onclick="openOv('modal-actuals')">📥 Update</button>`
+      : `<div class="tabs-v">${['mtd','ytd','annual','bvf'].map((v,i)=>`<button class="tab-v${VIEW===v?' active':''}" onclick="setV('${v}')">${['Month to date','Year to date','Full year','Budget vs. Forecast'][i]}</button>`).join('')}</div>`
+    )+
+    `</div>`+
+    (!mobile ? `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update Actuals</button></div>` : '')+
     `<div class="kpis"><div class="kpi kb"><div class="kl">Budget</div><div class="kv">${$f(tB)}</div><div class="ks">${mn} ${YEAR}</div></div><div class="kpi kg"><div class="kl">Actual</div><div class="kv">${$f(tA)}</div><div class="ks">Spent so far</div></div><div class="kpi ${kpiVarCls}"><div class="kl">Variance</div><div class="kv">${vs(vB)}</div><div class="ks">${pctB}% ${vB>=0?'favorable':'over budget'}</div></div><div class="kpi kp"><div class="kl">Forecast</div><div class="kv">${$f(tF)}</div><div class="ks">Carries forward</div></div></div>`+
     summaryCards+
     `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup><thead><tr><th style="text-align:left;${mobile?'padding-left:8px':'padding-left:16px'}">Category</th><th>Budget</th><th>Actual</th><th>Variance</th><th class="cdiv">Forecast</th></tr></thead><tbody>${rows}${addR}${totR}</tbody></table></div>`+
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
 }
 
+function togViewDD(e){e.stopPropagation();const d=document.getElementById('m-view-dd');if(d)d.style.display=d.style.display==='none'?'block':'none';}
+function closeMViewDD(){const d=document.getElementById('m-view-dd');if(d)d.style.display='none';}
 function tc(i){const k=Object.keys(D)[i];EXP[k]=!EXP[k];render();}
-function setV(v){VIEW=v;render();}
+function setV(v){VIEW=v;closeMViewDD();render();}
 function togMP(e){e.stopPropagation();document.getElementById('mdd').classList.toggle('open');}
 function pickM(i){CM=i;document.querySelectorAll('.mopt').forEach((o,j)=>o.classList.toggle('sel',j===i));document.getElementById('mdd').classList.remove('open');render();}
-document.addEventListener('click',()=>{const d=document.getElementById('mdd');if(d)d.classList.remove('open');});
+document.addEventListener('click',()=>{const d=document.getElementById('mdd');if(d)d.classList.remove('open');closeMViewDD();});
 
 function openOv(id){
   document.getElementById(id).classList.add('open');
