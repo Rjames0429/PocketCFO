@@ -649,14 +649,13 @@ function getBV(item){
 function getAV(item){
   if(VIEW==='mtd') return getA(item,CM);
   if(VIEW==='ytd') return getYA(item);
-  // Full year = actuals to date + (avg monthly actual × remaining months)
-  // This is the run rate / FYE projection
+  if(VIEW==='bvf') return getFV(item.name?item.name:null,null); // forecast for comparison
+  // Full year = actuals to date + run rate for remaining months
   const actualToDate=getAnnA(item);
   const monthsWithData=Array.from({length:12},(_,m)=>getA(item,m)).filter(a=>a>0).length;
-  if(monthsWithData===0) return getAnnB(item); // no actuals yet — use budget as projection
+  if(monthsWithData===0) return getAnnB(item);
   const avgMonthly=actualToDate/monthsWithData;
   const remainingMonths=12-CM-1;
-  // Actuals to date + projected remaining at run rate
   return getYA(item)+(avgMonthly*remainingMonths);
 }
 
@@ -841,20 +840,61 @@ function render(){
     <div class="m-sc kp"><div class="m-sc-lbl">Forecast</div><div class="m-sc-val">${$f(tF)}</div><div class="m-sc-sub">Carries forward</div></div>
   </div>`:'';
 
+  // View labels for all tabs
+  const viewKeys=['mtd','ytd','annual','bvf'];
+  const viewLabels=['Month to date','Year to date','Full year','Budget vs. Forecast'];
+  const viewLabel=viewLabels[viewKeys.indexOf(VIEW)]||'Month to date';
+  const tabSub={mtd:`${mn} ${YEAR}`,ytd:`Jan – ${mn} ${YEAR}`,annual:`Full year estimate — ${YEAR}`,bvf:`Budget vs. Forecast — ${YEAR}`};
+  const pageH=VIEW==='annual'||VIEW==='bvf'?String(YEAR):mn;
+  const pageYr=VIEW==='annual'||VIEW==='bvf'?'':String(YEAR);
+
+  // Update mobile summary cards to reflect current view
+  const mCardSub={
+    mtd:{b:mn+' '+YEAR,a:'Spent so far',v:pctB+'% '+(vB>=0?'favorable':'over'),f:'Carries forward'},
+    ytd:{b:'Jan–'+mn,a:'YTD actual',v:pctB+'% '+(vB>=0?'favorable':'over'),f:'YTD forecast'},
+    annual:{b:'Full year',a:'Run rate est.',v:'vs. budget',f:'Full year fcst'},
+    bvf:{b:'Annual budget',a:'Forecast total',v:'vs. forecast',f:'Forecast'}
+  }[VIEW]||{b:mn,a:'Spent',v:'Var',f:'Forecast'};
+
+  const summaryCardsUpdated=mobile?`<div class="m-summary-cards">
+    <div class="m-sc kb"><div class="m-sc-lbl">Budget</div><div class="m-sc-val">${$f(tB)}</div><div class="m-sc-sub">${mCardSub.b}</div></div>
+    <div class="m-sc kg"><div class="m-sc-lbl">${VIEW==='bvf'?'Forecast':'Actual'}</div><div class="m-sc-val">${$f(tA)}</div><div class="m-sc-sub">${mCardSub.a}</div></div>
+    <div class="m-sc ${isOver?'kbd':'kgd'}"><div class="m-sc-lbl">Variance</div><div class="m-sc-val">${vs(vB)}</div><div class="m-sc-sub">${mCardSub.v}</div></div>
+    <div class="m-sc kp"><div class="m-sc-lbl">Forecast</div><div class="m-sc-val">${$f(tF)}</div><div class="m-sc-sub">${mCardSub.f}</div></div>
+  </div>`:'';
+
   document.getElementById('app-main').innerHTML=
-    `<div class="page-label">Budget Overview</div>`+
-    `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
+    `<div class="page-label">${tabSub[VIEW]||'Budget Overview'}</div>`+
+    `<div class="month-h">${pageH} <span class="yr">${pageYr}</span></div>`+
     `<div class="prog-wrap">${progHTML}</div>`+
     `<div class="tabs-toolbar">`+
     (mobile
-      ? `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">Month to date</span><span class="arr">▾</span></div><div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:18px;top:100%;background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;min-width:180px;overflow:hidden">${['mtd','ytd','annual','bvf'].map((v,i)=>`<div class="mopt${VIEW===v?' sel':''}" onclick="setV('${v}');closeMViewDD()" style="padding:10px 14px;font-size:13px;cursor:pointer">${['Month to date','Year to date','Full year','Budget vs. Forecast'][i]}</div>`).join('')}</div><div class="m-month-pill" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div><button class="m-act-btn" onclick="openOv('modal-actuals')">📥 Update</button>`
-      : `<div class="tabs-v">${['mtd','ytd','annual','bvf'].map((v,i)=>`<button class="tab-v${VIEW===v?' active':''}" onclick="setV('${v}')">${['Month to date','Year to date','Full year','Budget vs. Forecast'][i]}</button>`).join('')}</div>`
+      ? `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
+        `<div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:18px;top:calc(100% + 4px);background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200;min-width:190px;overflow:hidden">`+
+        viewKeys.map((v,i)=>`<div class="mopt${VIEW===v?' sel':''}" onclick="setV('${v}');closeMViewDD()" style="padding:11px 16px;font-size:13px;cursor:pointer;border-bottom:0.5px solid #f5f5f5">${viewLabels[i]}</div>`).join('')+
+        `</div>`+
+        `<div class="m-month-pill" onclick="togMP(event)"><span id="m-mpl">${MNS[CM].slice(0,3)} ${YEAR}</span><span class="arr">▾</span></div>`+
+        `<div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div>`+
+        `<button class="m-act-btn" onclick="openOv('modal-actuals')">📥 Update</button>`
+      : `<div class="tabs-v">${viewKeys.map((v,i)=>`<button class="tab-v${VIEW===v?' active':''}" onclick="setV('${v}')">${viewLabels[i]}</button>`).join('')}</div>`
     )+
     `</div>`+
-    (!mobile ? `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update Actuals</button></div>` : '')+
-    `<div class="kpis"><div class="kpi kb"><div class="kl">Budget</div><div class="kv">${$f(tB)}</div><div class="ks">${mn} ${YEAR}</div></div><div class="kpi kg"><div class="kl">Actual</div><div class="kv">${$f(tA)}</div><div class="ks">Spent so far</div></div><div class="kpi ${kpiVarCls}"><div class="kl">Variance</div><div class="kv">${vs(vB)}</div><div class="ks">${pctB}% ${vB>=0?'favorable':'over budget'}</div></div><div class="kpi kp"><div class="kl">Forecast</div><div class="kv">${$f(tF)}</div><div class="ks">Carries forward</div></div></div>`+
-    summaryCards+
-    `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup><thead><tr><th style="text-align:left;${mobile?'padding-left:8px':'padding-left:16px'}">Category</th><th>Budget</th><th>Actual</th><th>Variance</th><th class="cdiv">Forecast</th></tr></thead><tbody>${rows}${addR}${totR}</tbody></table></div>`+
+    (!mobile
+      ? `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMP(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update Actuals</button></div>`
+      : '')+
+    `<div class="kpis"><div class="kpi kb"><div class="kl">Budget</div><div class="kv">${$f(tB)}</div><div class="ks">${VIEW==='mtd'?mn+' '+YEAR:VIEW==='ytd'?'Jan–'+mn:YEAR}</div></div>`+
+    `<div class="kpi kg"><div class="kl">${VIEW==='bvf'?'Forecast':'Actual'}</div><div class="kv">${$f(tA)}</div><div class="ks">${VIEW==='annual'?'Run rate est.':VIEW==='bvf'?'vs. budget':'Spent so far'}</div></div>`+
+    `<div class="kpi ${kpiVarCls}"><div class="kl">Variance</div><div class="kv">${vs(vB)}</div><div class="ks">${pctB}% ${vB>=0?'favorable':'over'}</div></div>`+
+    `<div class="kpi kp"><div class="kl">Forecast</div><div class="kv">${$f(tF)}</div><div class="ks">${VIEW==='bvf'?'Annual forecast':'Carries forward'}</div></div></div>`+
+    summaryCardsUpdated+
+    `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup>`+
+    `<thead><tr>`+
+    `<th style="text-align:center!important">Category</th>`+
+    `<th>Budget</th>`+
+    `<th>${VIEW==='annual'?'Run rate':VIEW==='bvf'?'Forecast':'Actual'}</th>`+
+    `<th>Variance</th><th class="cdiv">Forecast</th>`+
+    `</tr></thead><tbody>${rows}${addR}${totR}</tbody></table></div>`+
+    (VIEW==='annual'?`<div style="font-size:11px;color:#aaa;text-align:center;padding:6px 20px 0">Actuals to date + average monthly spend × remaining months</div>`:'')+
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
 }
 
@@ -863,7 +903,12 @@ function closeMViewDD(){const d=document.getElementById('m-view-dd');if(d)d.styl
 function tc(i){const k=Object.keys(D)[i];EXP[k]=!EXP[k];render();}
 function setV(v){VIEW=v;closeMViewDD();render();}
 function togMP(e){e.stopPropagation();document.getElementById('mdd').classList.toggle('open');}
-function pickM(i){CM=i;document.querySelectorAll('.mopt').forEach((o,j)=>o.classList.toggle('sel',j===i));document.getElementById('mdd').classList.remove('open');render();}
+function pickM(i){
+  CM=i;
+  document.querySelectorAll('.mopt').forEach((o,j)=>o.classList.toggle('sel',j===i));
+  document.getElementById('mdd').classList.remove('open');
+  render();
+}
 document.addEventListener('click',()=>{const d=document.getElementById('mdd');if(d)d.classList.remove('open');closeMViewDD();});
 
 function openOv(id){
