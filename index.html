@@ -239,13 +239,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     border-bottom:1px solid #f0f0f0;
     box-shadow:0 2px 8px rgba(0,0,0,.04);
   }
-  /* APP MAIN — scroll container */
+  /* APP MAIN — height set dynamically by JS after frozen div renders */
   .app-main{
     padding:0;background:#f9f9f9;
     overflow-y:scroll;
     -webkit-overflow-scrolling:auto;
-    height:calc(100vh - 48px - 68px);
     overscroll-behavior:none;
+    /* fallback height — JS will override */
+    height:calc(100vh - 48px - 200px);
   }
 
   /* BUDGET OVERVIEW */
@@ -994,6 +995,14 @@ function render(){
     let fo=document.getElementById('m-frozen-overview');
     if(!fo){fo=document.createElement('div');fo.id='m-frozen-overview';document.getElementById('app-main').before(fo);}
     fo.innerHTML=frozenHTML;
+    // Dynamically set app-main height to fill remaining space
+    requestAnimationFrame(()=>{
+      const headerH=document.querySelector('.app-header')?.offsetHeight||48;
+      const frozenH=fo.offsetHeight||0;
+      const navH=68;
+      const remaining=window.innerHeight-headerH-frozenH-navH;
+      document.getElementById('app-main').style.height=Math.max(remaining,200)+'px';
+    });
   }
 
   document.getElementById('app-main').innerHTML=
