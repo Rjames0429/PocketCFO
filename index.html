@@ -229,8 +229,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .hright{display:flex;align-items:center;gap:8px}
   .hright .saved-ind,.hright .btn-so{display:none} /* hide save/signout on mobile */
 
-  /* ── STICKY SECTION — budget overview + tabs + controls ── */
-  .app-main{padding:0;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  /* ── SCROLLABLE CONTENT — app-main is the scroll parent ── */
+  .app-main{
+    padding:0;
+    background:#fff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    /* Must have explicit height for position:sticky on th to work */
+    height:calc(100vh - 56px - 68px); /* viewport minus header minus bottom nav */
+  }
   .page-label{font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;padding:36px 16px 0} /* 36px top = breathing room */
   .month-h{font-size:26px;font-weight:700;margin-bottom:12px;padding:0 16px}
   .month-h .yr{font-size:15px}
@@ -262,14 +269,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .m-sc-val{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.3px}
   .m-sc-sub{font-size:7.5px;color:rgba(255,255,255,.6);margin-top:1px}
 
-  /* TABLE — wider category, frozen header via JS */
-  .tw{margin:0 16px 12px;border-radius:10px}
+  /* TABLE — wider category, frozen header */
+  .tw{margin:0 16px 12px;border-radius:10px;overflow:hidden}
   .tw table{font-size:9px}
-  .tw col.d-cat{width:34%} /* wider — no cutoff */
+  .tw col.d-cat{width:34%}
   .tw col.d-bud{width:16%}
   .tw col.d-act{width:16%}
   .tw col.d-var{width:17%}
   .tw col.d-fc{width:17%}
+  /* Sticky th — works because .app-main is the scroll parent
+     and we remove overflow:hidden from .tw so sticky isn't clipped */
+  .tw{overflow:visible;border-radius:10px;border:1px solid #e0e0e0;background:#fff}
+  .tw table{border-collapse:collapse;border-radius:10px;overflow:hidden}
   .tw th{
     padding:8px 3px;
     font-size:7px;
@@ -281,7 +292,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     position:sticky;
     top:0;
     z-index:10;
-    background:#f0eefa; /* keep purple on freeze */
+    background:#f0eefa;
+    box-shadow:0 1px 0 #ddd8f5;
   }
   .tw th:first-child{text-align:left!important;padding-left:8px}
   .tw td{
