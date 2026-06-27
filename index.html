@@ -236,11 +236,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     padding:0;background:#fff;
     overflow-y:auto;-webkit-overflow-scrolling:touch;
     height:calc(100vh - 48px - 68px);
+    scroll-behavior:smooth;
+    scroll-padding-top:0;
   }
 
   /* BUDGET OVERVIEW */
-  .page-label{font-size:10px;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;padding:22px 18px 0;display:block}
-  .month-h{font-size:28px;font-weight:700;letter-spacing:-.6px;margin-bottom:12px;padding:0 18px}
+  .page-label{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px;padding:24px 18px 0;display:block}
+  .month-h{font-size:30px;font-weight:700;letter-spacing:-.7px;margin-bottom:14px;padding:0 18px}
   .month-h .yr{font-size:15px;font-weight:400;color:#ccc}
 
   /* PROGRESS */
@@ -286,10 +288,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   /* SUMMARY CARDS */
   .m-summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 18px 10px}
-  .m-sc{border-radius:10px;padding:7px 13px}
-  .m-sc-lbl{font-size:8px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:3px}
-  .m-sc-val{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.3px}
-  .m-sc-sub{font-size:8px;color:rgba(255,255,255,.5);margin-top:2px}
+  .m-sc{border-radius:10px;padding:6px 12px}
+  .m-sc-lbl{font-size:8px;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:2px}
+  .m-sc-val{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;text-shadow:0 1px 2px rgba(0,0,0,.15)}
+  .m-sc-sub{font-size:7.5px;color:rgba(255,255,255,.65);margin-top:1px;font-weight:500}
 
   /* TABLE — overflow:visible is CRITICAL for position:sticky to work */
   .tw{
@@ -831,7 +833,7 @@ function render(){
   Object.keys(D).forEach(cat=>{D[cat].items.forEach(it=>{tB_mtd+=getB(it,CM);tA_mtd+=getA(it,CM);});});
   const pctUsed=tB_mtd>0?Math.min((tA_mtd/tB_mtd*100),999).toFixed(1):0;
   const pctProg=tB_mtd>0?Math.min((tA_mtd/tB_mtd*100),100):0;
-  const pctB=tB>0?Math.abs(vB/tB*100).toFixed(1):0;
+  const pctB=tB_mtd>0?Math.abs(vB_mtd/tB_mtd*100).toFixed(1):0;
   const isOver=tA>tB;
   const isOverMtd=tA_mtd>tB_mtd;
   const vB_mtd=tB_mtd-tA_mtd;
@@ -875,17 +877,21 @@ function render(){
   </div>`:'';
 
   document.getElementById('app-main').innerHTML=
-    `<div class="page-label">${tabSub[VIEW]||'Budget Overview'}</div>`+
-    `<div class="month-h">${pageH} <span class="yr">${pageYr}</span></div>`+
+    `<div class="page-label">Budget Overview</div>`+
+    `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
     `<div class="prog-wrap">${progHTML}</div>`+
     `<div class="tabs-toolbar" style="position:relative">`+
     (mobile
-      ? `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
-        `<div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:18px;top:calc(100% + 4px);background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200;min-width:190px;overflow:hidden">`+
-        viewKeys.map((v,i)=>`<div class="mopt${VIEW===v?' sel':''}" onclick="setV('${v}');closeMViewDD()" style="padding:11px 16px;font-size:13px;cursor:pointer;border-bottom:0.5px solid #f5f5f5">${viewLabels[i]}</div>`).join('')+
+      ? `<div class="m-view-wrap" style="position:relative;flex:1">`+
+          `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
+          `<div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:200;min-width:100%;overflow:hidden">`+
+          viewKeys.map((v,i)=>`<div class="mopt${VIEW===v?' sel':''}" onclick="setV('${v}');closeMViewDD()" style="padding:12px 16px;font-size:13px;font-weight:${VIEW===v?'600':'400'};cursor:pointer;color:${VIEW===v?'#4B3FA0':'#222'};border-bottom:0.5px solid #f5f5f5">${viewLabels[i]}</div>`).join('')+
+          `</div>`+
         `</div>`+
-        `<div class="m-month-pill" onclick="togMP(event)"><span id="m-mpl">${MNS[CM].slice(0,3)} ${YEAR}</span><span class="arr">▾</span></div>`+
-        `<div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div>`+
+        `<div class="m-month-wrap" style="position:relative;flex-shrink:0">`+
+          `<div class="m-month-pill" onclick="togMP(event)"><span id="m-mpl">${MNS[CM].slice(0,3)} ${YEAR}</span><span class="arr">▾</span></div>`+
+          `<div class="mdd" id="mdd" style="left:0;right:auto;min-width:160px">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div>`+
+        `</div>`+
         `<button class="m-act-btn" onclick="openOv('modal-actuals')">📥 Update</button>`
       : `<div class="tabs-v">${viewKeys.map((v,i)=>`<button class="tab-v${VIEW===v?' active':''}" onclick="setV('${v}')">${viewLabels[i]}</button>`).join('')}</div>`
     )+
