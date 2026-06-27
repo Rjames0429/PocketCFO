@@ -231,24 +231,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .hright{display:flex;align-items:center;gap:8px}
   .hright .saved-ind,.hright .btn-so{display:none}
 
+  /* STICKY OVERVIEW — frozen below app header */
+  .m-sticky-overview{
+    background:#fff;
+    padding:20px 18px 0;
+    flex-shrink:0;
+    border-bottom:1px solid #f0f0f0;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+  }
   /* APP MAIN — scroll container */
   .app-main{
-    padding:0;background:#fff;
+    padding:0;background:#f9f9f9;
     overflow-y:scroll;
     -webkit-overflow-scrolling:auto;
     height:calc(100vh - 48px - 68px);
     overscroll-behavior:none;
   }
-  /* Top spacer inside scroll so top whitespace matches bottom 220px */
-  .app-main > *:first-child{scroll-margin-top:0}
 
   /* BUDGET OVERVIEW */
-  .page-label{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px;padding:18px 18px 0;display:block}
-  .month-h{font-size:30px;font-weight:700;letter-spacing:-.7px;margin-bottom:14px;padding:0 18px}
+  .page-label{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:5px;display:block}
+  .month-h{font-size:30px;font-weight:700;letter-spacing:-.7px;margin-bottom:12px}
   .month-h .yr{font-size:15px;font-weight:400;color:#ccc}
 
   /* PROGRESS */
-  .prog-wrap{margin-bottom:14px;padding:0 18px;display:flex;align-items:center;gap:10px}
+  .prog-wrap{margin-bottom:12px;display:flex;align-items:center;gap:10px}
   .prog-track{width:auto;flex:1;height:5px}
   .prog-pct-good{font-size:12px;font-weight:700;color:#7B4A0A}
   .prog-pct-over{font-size:12px;font-weight:700}
@@ -258,7 +264,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   /* CONTROLS — view pill + month + update on one line */
   .tabs-toolbar{
     display:flex;flex-direction:row;align-items:center;
-    gap:6px;padding:0 18px 14px;
+    gap:6px;padding-bottom:14px;
     border-bottom:0.5px solid #f0f0f0;margin-bottom:0;
   }
   .tabs-v{display:none}
@@ -957,38 +963,60 @@ function render(){
     <div class="m-sc kp"><div class="m-sc-lbl">Forecast</div><div class="m-sc-val">${$f(tF)}</div><div class="m-sc-sub">${mCardSub.f}</div></div>
   </div>`:'';
 
+  // On mobile: frozen overview sits above app-main scroll
+  // On desktop: everything inside app-main as before
+  const frozenHTML=mobile
+    ?`<div class="m-sticky-overview">`+
+       `<div class="page-label">Budget Overview</div>`+
+       `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
+       `<div class="prog-wrap">${progHTML}</div>`+
+       `<div class="tabs-toolbar" style="position:relative">`+
+       (mobile
+         ? `<div class="m-view-wrap" style="position:relative;flex:1">`+
+             `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
+             `<div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:200;min-width:220px;overflow:hidden">`+
+             viewKeys.map((v,i)=>`<div class="mopt${VIEW===v?' sel':''}" onclick="setV('${v}');closeMViewDD()" style="padding:12px 16px;font-size:13px;cursor:pointer;border-bottom:0.5px solid #f5f5f5">${viewLabels[i]}</div>`).join('')+
+             `</div>`+
+           `</div>`+
+           `<div class="m-month-wrap" style="position:relative;flex-shrink:0">`+
+             `<div class="m-month-pill" onclick="togMP(event)"><span id="m-mpl">${MNS[CM].slice(0,3)} ${YEAR}</span><span class="arr">▾</span></div>`+
+             `<div class="mdd" id="mdd" style="left:0;right:auto;min-width:160px">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div>`+
+           `</div>`+
+           `<button class="m-act-btn" onclick="openOv('modal-actuals')">📥 Update</button>`
+         : ''
+       )+
+       `</div>`+
+     `</div>`
+    :'';
+
+  // Inject frozen section on mobile into a dedicated div above app-main
+  if(mobile){
+    let fo=document.getElementById('m-frozen-overview');
+    if(!fo){fo=document.createElement('div');fo.id='m-frozen-overview';document.getElementById('app-main').before(fo);}
+    fo.innerHTML=frozenHTML;
+  }
+
   document.getElementById('app-main').innerHTML=
-    `<div class="page-label">Budget Overview</div>`+
-    `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
-    `<div class="prog-wrap">${progHTML}</div>`+
-    `<div class="tabs-toolbar" style="position:relative">`+
-    (mobile
-      ? `<div class="m-view-wrap" style="position:relative;flex:1">`+
-          `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
-          `<div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:200;min-width:220px;overflow:hidden">`+
-          viewKeys.map((v,i)=>`<div class="mopt${VIEW===v?' sel':''}" onclick="setV('${v}');closeMViewDD()" style="padding:12px 16px;font-size:13px;cursor:pointer;border-bottom:0.5px solid #f5f5f5">${viewLabels[i]}</div>`).join('')+
-          `</div>`+
-        `</div>`+
-        `<div class="m-month-wrap" style="position:relative;flex-shrink:0">`+
-          `<div class="m-month-pill" onclick="togMP(event)"><span id="m-mpl">${MNS[CM].slice(0,3)} ${YEAR}</span><span class="arr">▾</span></div>`+
-          `<div class="mdd" id="mdd" style="left:0;right:auto;min-width:160px">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div>`+
-        `</div>`+
-        `<button class="m-act-btn" onclick="openOv('modal-actuals')">📥 Update</button>`
-      : `<div class="tabs-v">${viewKeys.map((v,i)=>`<button class="tab-v${VIEW===v?' active':''}" onclick="setV('${v}')">${viewLabels[i]}</button>`).join('')}</div>`
-    )+
-    `</div>`+
-    (!mobile
-      ? `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMPDesk(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update Actuals</button></div>`
-      : '')+
+    // Desktop only: page header + tabs + sub toolbar shown inside app-main
+    (!mobile?
+      `<div class="page-label">Budget Overview</div>`+
+      `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
+      `<div class="prog-wrap">${progHTML}</div>`+
+      `<div class="tabs-toolbar"><div class="tabs-v">${viewKeys.map((v,i)=>`<button class="tab-v${VIEW===v?' active':''}" onclick="setV('${v}')">${viewLabels[i]}</button>`).join('')}</div></div>`+
+      `<div class="sub-toolbar"><div style="display:flex;align-items:center;gap:6px"><span class="mlbl">Change month:</span><div class="mpick-wrap"><div class="mpick-btn" onclick="togMPDesk(event)"><span id="mpl">${mn} ${YEAR}</span><span class="arr">▾</span></div><div class="mdd-desk" id="mdd-desk">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div></div></div><button class="btn-act" onclick="openOv('modal-actuals')">📥 Update Actuals</button></div>`
+    :'')+
+    // Both: KPI cards (hidden on mobile by CSS, replaced by summaryCardsUpdated)
     `<div class="kpis"><div class="kpi kb"><div class="kl">Budget</div><div class="kv">${$f(tB)}</div><div class="ks">${VIEW==='mtd'?mn+' '+YEAR:VIEW==='ytd'?'Jan–'+mn:YEAR}</div></div>`+
     `<div class="kpi kg"><div class="kl">${VIEW==='bvf'?'Forecast':'Actual'}</div><div class="kv">${$f(tA)}</div><div class="ks">${VIEW==='annual'?'Run rate est.':VIEW==='bvf'?'vs. budget':'Spent so far'}</div></div>`+
     `<div class="kpi ${kpiVarCls}"><div class="kl">Variance</div><div class="kv">${vs(vB)}</div><div class="ks">${pctB}% ${vB>=0?'favorable':'over'}</div></div>`+
     `<div class="kpi kp"><div class="kl">Forecast</div><div class="kv">${$f(tF)}</div><div class="ks">${VIEW==='bvf'?'Annual forecast':'Carries forward'}</div></div></div>`+
+    // Mobile summary cards
     summaryCardsUpdated+
+    // Table — both
     `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup>`+
     `<thead><tr>`+
     `<th style="text-align:center!important">Category</th>`+
-    `<th>Budget</th>`+
+    `<th>${VIEW==='annual'?'Run rate':VIEW==='bvf'?'Forecast':'Actual' === 'Actual'?'Budget':'Budget'}</th>`+
     `<th>${VIEW==='annual'?'Run rate':VIEW==='bvf'?'Forecast':'Actual'}</th>`+
     `<th>Variance</th><th class="cdiv">Forecast</th>`+
     `</tr></thead><tbody>${rows}${addR}${totR}</tbody></table></div>`+
