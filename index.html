@@ -323,7 +323,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   /* TABLE — overflow:visible is CRITICAL for position:sticky to work */
   .tw{
-    margin:0 18px 120px;border-radius:12px;
+    margin:0 18px 60px;border-radius:12px;
     border:1px solid #efefef;background:#fff;
     overflow:visible;
     box-shadow:0 1px 6px rgba(0,0,0,.05);
@@ -1154,11 +1154,11 @@ function navTo(page){
     if(icon)icon.classList.toggle('active',p===page);
     if(lbl)lbl.classList.toggle('active',p===page);
   });
-  // Show selected page
+  // Show selected page, explicitly hide the other when switching away
   if(page==='budget'){
-    // Restore proper display mode (flex on mobile, block on desktop)
     document.getElementById('app-screen').style.display=isMobile()?'flex':'block';
   } else {
+    document.getElementById('app-screen').style.display='none'; // fully hide budget page + its Add Category button
     const el=document.getElementById('page-'+page);
     if(el){el.style.display='block';renderPage(page);}
   }
