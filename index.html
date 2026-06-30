@@ -235,7 +235,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   #app-screen{
     display:flex!important;
     flex-direction:column;
-    height:calc(100vh - 68px); /* leave room for external fixed bottom nav */
+    height:calc(100vh - 52px); /* leave room for shorter external fixed bottom nav */
     min-height:0!important; /* override base min-height:100vh which was forcing full height */
     overflow:hidden;
     position:relative;
@@ -364,9 +364,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .hint-wrap{display:none}
 
   /* BOTTOM NAV */
-  .bottom-nav{flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:8px 0 20px;align-items:center;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;z-index:60}
+  .bottom-nav{flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:6px 0 12px;align-items:center;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;z-index:60}
   .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:55px;cursor:pointer}
-  .nav-icon{font-size:22px;color:#ccc}
+  .nav-icon{font-size:20px;color:#ccc}
   .nav-icon.active{color:var(--brand)}
   .nav-lbl{font-size:9px;color:#ccc;font-weight:500}
   .nav-lbl.active{color:var(--brand);font-weight:600}
@@ -382,12 +382,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   #hdr-logo-desk{display:flex!important}
   .chat-btn{
     position:fixed;
-    bottom:90px;right:18px;z-index:55;
+    bottom:70px;right:18px;z-index:55;
     width:48px;height:48px;border-radius:50%;
-    background:#4B3FA0;border:none;cursor:pointer;
+    background:#4B3FA0;border:none;cursor:grab;
     font-size:20px;align-items:center;justify-content:center;
     box-shadow:0 4px 16px rgba(75,63,160,.35);
+    touch-action:none;
+    user-select:none;
+    transition:box-shadow .15s;
   }
+  .chat-btn.dragging{cursor:grabbing;box-shadow:0 8px 24px rgba(75,63,160,.5);transition:none}
   .chat-msg-bot{display:flex;justify-content:flex-start}
   .chat-msg-user{display:flex;justify-content:flex-end}
   .chat-bubble-bot{background:#fff;border:1px solid #ebebeb;border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:13px;color:#222;max-width:85%;line-height:1.5;box-shadow:0 1px 3px rgba(0,0,0,.06)}
@@ -496,7 +500,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <!-- Chat button — persistent, only shown on Budget tab via JS -->
-<button class="chat-btn" id="chat-btn" onclick="openChat()" style="display:none">💬</button>
+<button class="chat-btn" id="chat-btn" style="display:none">💬</button>
 
 <!-- Chat modal -->
   <div class="ov" id="modal-chat">
@@ -714,7 +718,7 @@ async function loadApp(){
   const bn=document.getElementById('bottom-nav');
   if(bn)bn.style.display=isMobile()?'flex':'none';
   const cb=document.getElementById('chat-btn');
-  if(cb)cb.style.display=isMobile()?'flex':'none';
+  if(cb){cb.style.display=isMobile()?'flex':'none';if(window._initChatDrag)window._initChatDrag();}
   if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{doSignOut();return;}}
   const{data:u}=await sb.from('users').select('account_number,display_name').eq('id',CU.id).single();
   if(u){
@@ -1156,7 +1160,7 @@ function navTo(page){
   }
   // Chat button only shows on Budget tab
   const cb=document.getElementById('chat-btn');
-  if(cb)cb.style.display=(page==='budget'&&isMobile())?'flex':'none';
+  if(cb){cb.style.display=(page==='budget'&&isMobile())?'flex':'none';if(window._initChatDrag)window._initChatDrag();}
   // Bottom nav always visible on mobile regardless of page
   const bn=document.getElementById('bottom-nav');
   if(bn)bn.style.display=isMobile()?'flex':'none';
@@ -1416,6 +1420,49 @@ function settingsRow(icon,title,sub,type){
 }
 
 // ── CHAT ────────────────────────────────────────────────────
+// ── DRAGGABLE CHAT BUTTON ──────────────────────────────────
+(function(){
+  let dragging=false,moved=false,startX=0,startY=0,btnStartX=0,btnStartY=0;
+  function initDrag(){
+    const btn=document.getElementById('chat-btn');
+    if(!btn||btn._dragInit)return;
+    btn._dragInit=true;
+    btn.addEventListener('pointerdown',e=>{
+      dragging=true;moved=false;
+      const rect=btn.getBoundingClientRect();
+      startX=e.clientX;startY=e.clientY;
+      btnStartX=rect.left;btnStartY=rect.top;
+      btn.classList.add('dragging');
+      btn.setPointerCapture(e.pointerId);
+    });
+    btn.addEventListener('pointermove',e=>{
+      if(!dragging)return;
+      const dx=e.clientX-startX,dy=e.clientY-startY;
+      if(Math.abs(dx)>4||Math.abs(dy)>4)moved=true;
+      if(moved){
+        let newX=btnStartX+dx,newY=btnStartY+dy;
+        // Keep within viewport bounds
+        newX=Math.max(4,Math.min(window.innerWidth-52,newX));
+        newY=Math.max(60,Math.min(window.innerHeight-120,newY));
+        btn.style.left=newX+'px';
+        btn.style.top=newY+'px';
+        btn.style.right='auto';
+        btn.style.bottom='auto';
+      }
+    });
+    btn.addEventListener('pointerup',e=>{
+      dragging=false;
+      btn.classList.remove('dragging');
+      // If it wasn't dragged (just a tap), open chat
+      if(!moved)openChat();
+    });
+  }
+  if(document.readyState==='complete')initDrag();
+  else window.addEventListener('load',initDrag);
+  // Re-init in case button is recreated (it's not, but safe to call repeatedly)
+  window._initChatDrag=initDrag;
+})();
+
 function openChat(){openOv('modal-chat');}
 async function sendChat(){
   const inp=document.getElementById('chat-input');
