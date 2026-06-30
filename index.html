@@ -231,8 +231,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @media(max-width:768px){
   body{background:#fff}
 
-  /* HEADER — logo + single badge */
-  .app-header{height:auto;padding:10px 18px;flex-direction:row;align-items:center;position:sticky;top:0;z-index:50;background:#fff;border-bottom:0.5px solid #f0f0f0}
+  /* APP SCREEN — flex column, fills viewport exactly. No calc() guessing. */
+  #app-screen{
+    display:flex!important;
+    flex-direction:column;
+    height:100vh;
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* HEADER — logo + single badge — fixed size flex item */
+  .app-header{height:auto;padding:10px 18px;flex-direction:row;align-items:center;background:#fff;border-bottom:0.5px solid #f0f0f0;flex-shrink:0;position:static}
   .app-header-row1{display:none}
   #hdr-logo-desk{display:flex!important}
   .hlogo .name{font-size:16px;font-weight:700}
@@ -249,13 +258,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     border-bottom:1px solid #f0f0f0;
     box-shadow:0 2px 4px rgba(0,0,0,.03);
   }
-  /* APP MAIN — simple scroll container, full height minus header+nav */
+  /* APP MAIN — flex:1 fills remaining space automatically, no calc() needed */
   .app-main{
     padding:0;background:#f9f9f9;
-    overflow-y:scroll;
-    -webkit-overflow-scrolling:auto;
-    overscroll-behavior:none;
-    height:calc(100vh - 48px - 68px);
+    flex:1 1 auto;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    min-height:0; /* required for flex children to scroll properly */
   }
 
   /* BUDGET OVERVIEW */
@@ -353,7 +363,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .hint-wrap{display:none}
 
   /* BOTTOM NAV */
-  .bottom-nav{display:flex!important;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:0.5px solid var(--border2);padding:8px 0 20px;z-index:50;align-items:center;justify-content:space-around}
+  .bottom-nav{display:flex!important;flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:8px 0 20px;align-items:center;justify-content:space-around}
   .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:55px;cursor:pointer}
   .nav-icon{font-size:22px;color:#ccc}
   .nav-icon.active{color:var(--brand)}
@@ -372,8 +382,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @media(max-width:768px){
   #hdr-logo-desk{display:flex!important}
   .chat-btn{
-    display:flex!important;position:fixed;
-    bottom:82px;right:18px;z-index:45;
+    display:flex!important;position:absolute;
+    bottom:90px;right:18px;z-index:45;
     width:48px;height:48px;border-radius:50%;
     background:#4B3FA0;border:none;cursor:pointer;
     font-size:20px;align-items:center;justify-content:center;
