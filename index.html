@@ -363,7 +363,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .hint-wrap{display:none}
 
   /* BOTTOM NAV */
-  .bottom-nav{display:flex!important;flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:8px 0 20px;align-items:center;justify-content:space-around}
+  .bottom-nav{flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:8px 0 20px;align-items:center;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;z-index:60}
   .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:55px;cursor:pointer}
   .nav-icon{font-size:22px;color:#ccc}
   .nav-icon.active{color:var(--brand)}
@@ -372,18 +372,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .m-header-row{display:flex!important;align-items:center;justify-content:space-between}
 }
 
-/* Desktop — hide mobile-only elements */
+/* Desktop — hide mobile-only elements (JS now controls display via inline style) */
 .app-header-row1{display:none}
-.bottom-nav{display:none}
 .m-header-row{display:none}
 #hdr-logo-desk{display:flex}
-.chat-btn{display:none}
 
 @media(max-width:768px){
   #hdr-logo-desk{display:flex!important}
   .chat-btn{
-    display:flex!important;position:absolute;
-    bottom:90px;right:18px;z-index:45;
+    position:fixed;
+    bottom:90px;right:18px;z-index:55;
     width:48px;height:48px;border-radius:50%;
     background:#4B3FA0;border:none;cursor:pointer;
     font-size:20px;align-items:center;justify-content:center;
@@ -472,31 +470,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="app-main" id="app-main">
     <div class="ls"><div class="ld"></div>Loading your dashboard…</div>
   </div>
+</div>
+<!-- ↑ /app-screen closes here. Bottom nav + chat button live OUTSIDE app-screen
+     so they're never hidden when switching pages. ↓ -->
 
-  <!-- Bottom nav (mobile only) -->
-  <div class="bottom-nav" id="bottom-nav">
-    <div class="nav-item active" onclick="navTo('budget')">
-      <div class="nav-icon active" id="ni-budget">📊</div>
-      <div class="nav-lbl active" id="nl-budget">Budget</div>
-    </div>
-    <div class="nav-item" onclick="navTo('transactions')">
-      <div class="nav-icon" id="ni-transactions">💳</div>
-      <div class="nav-lbl" id="nl-transactions">Transactions</div>
-    </div>
-    <div class="nav-item" onclick="navTo('charts')">
-      <div class="nav-icon" id="ni-charts">📈</div>
-      <div class="nav-lbl" id="nl-charts">Charts</div>
-    </div>
-    <div class="nav-item" onclick="navTo('settings')">
-      <div class="nav-icon" id="ni-settings">⚙️</div>
-      <div class="nav-lbl" id="nl-settings">Settings</div>
-    </div>
+<!-- Bottom nav — persistent, always visible regardless of active page -->
+<div class="bottom-nav" id="bottom-nav" style="display:none">
+  <div class="nav-item active" onclick="navTo('budget')">
+    <div class="nav-icon active" id="ni-budget">📊</div>
+    <div class="nav-lbl active" id="nl-budget">Budget</div>
   </div>
+  <div class="nav-item" onclick="navTo('transactions')">
+    <div class="nav-icon" id="ni-transactions">💳</div>
+    <div class="nav-lbl" id="nl-transactions">Transactions</div>
+  </div>
+  <div class="nav-item" onclick="navTo('charts')">
+    <div class="nav-icon" id="ni-charts">📈</div>
+    <div class="nav-lbl" id="nl-charts">Charts</div>
+  </div>
+  <div class="nav-item" onclick="navTo('settings')">
+    <div class="nav-icon" id="ni-settings">⚙️</div>
+    <div class="nav-lbl" id="nl-settings">Settings</div>
+  </div>
+</div>
 
-  <!-- Chat button (mobile only) -->
-  <button class="chat-btn" id="chat-btn" onclick="openChat()">💬</button>
+<!-- Chat button — persistent, only shown on Budget tab via JS -->
+<button class="chat-btn" id="chat-btn" onclick="openChat()" style="display:none">💬</button>
 
-  <!-- Chat modal -->
+<!-- Chat modal -->
   <div class="ov" id="modal-chat">
     <div class="modal" style="width:100%;max-width:420px;height:70vh;display:flex;flex-direction:column;padding:0;border-radius:16px;overflow:hidden">
       <div style="background:#4B3FA0;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
@@ -526,12 +527,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div style="font-size:17px;font-weight:600;color:#111">Transactions</div>
     </div>
     <div id="txn-content" style="padding:0 0 20px"></div>
-    <div class="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;z-index:46">
-      <div class="nav-item" onclick="navTo('budget')"><div class="nav-icon">📊</div><div class="nav-lbl">Budget</div></div>
-      <div class="nav-item" onclick="navTo('transactions')"><div class="nav-icon active">💳</div><div class="nav-lbl active">Transactions</div></div>
-      <div class="nav-item" onclick="navTo('charts')"><div class="nav-icon">📈</div><div class="nav-lbl">Charts</div></div>
-      <div class="nav-item" onclick="navTo('settings')"><div class="nav-icon">⚙️</div><div class="nav-lbl">Settings</div></div>
-    </div>
+
   </div>
 
   <!-- Charts page -->
@@ -541,12 +537,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div style="font-size:17px;font-weight:600;color:#111">Charts</div>
     </div>
     <div id="charts-content" style="padding:20px 18px"></div>
-    <div class="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;z-index:46">
-      <div class="nav-item" onclick="navTo('budget')"><div class="nav-icon">📊</div><div class="nav-lbl">Budget</div></div>
-      <div class="nav-item" onclick="navTo('transactions')"><div class="nav-icon">💳</div><div class="nav-lbl">Transactions</div></div>
-      <div class="nav-item" onclick="navTo('charts')"><div class="nav-icon active">📈</div><div class="nav-lbl active">Charts</div></div>
-      <div class="nav-item" onclick="navTo('settings')"><div class="nav-icon">⚙️</div><div class="nav-lbl">Settings</div></div>
-    </div>
+
   </div>
 
   <!-- Settings page -->
@@ -556,12 +547,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div style="font-size:17px;font-weight:600;color:#111">Settings</div>
     </div>
     <div id="settings-content" style="padding:20px 18px"></div>
-    <div class="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;z-index:46">
-      <div class="nav-item" onclick="navTo('budget')"><div class="nav-icon">📊</div><div class="nav-lbl">Budget</div></div>
-      <div class="nav-item" onclick="navTo('transactions')"><div class="nav-icon">💳</div><div class="nav-lbl">Transactions</div></div>
-      <div class="nav-item" onclick="navTo('charts')"><div class="nav-icon">📈</div><div class="nav-lbl">Charts</div></div>
-      <div class="nav-item" onclick="navTo('settings')"><div class="nav-icon active">⚙️</div><div class="nav-lbl active">Settings</div></div>
-    </div>
+
   </div>
 </div>
 
@@ -722,7 +708,12 @@ async function loadDemoData(userId){
 // ── APP ───────────────────────────────────────────────────
 async function loadApp(){
   document.getElementById('auth-screen').style.display='none';
-  document.getElementById('app-screen').style.display='block';
+  document.getElementById('app-screen').style.display=isMobile()?'flex':'block';
+  // Initialize persistent nav + chat button visibility
+  const bn=document.getElementById('bottom-nav');
+  if(bn)bn.style.display=isMobile()?'flex':'none';
+  const cb=document.getElementById('chat-btn');
+  if(cb)cb.style.display=isMobile()?'flex':'none';
   if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{doSignOut();return;}}
   const{data:u}=await sb.from('users').select('account_number,display_name').eq('id',CU.id).single();
   if(u){
@@ -1158,13 +1149,16 @@ function navTo(page){
   if(page==='budget'){
     document.getElementById('app-screen').style.display=isMobile()?'flex':'block';
   } else {
-    document.getElementById('app-screen').style.display='none'; // fully hide budget page + its Add Category button
+    document.getElementById('app-screen').style.display='none';
     const el=document.getElementById('page-'+page);
     if(el){el.style.display='block';renderPage(page);}
   }
-  // Hide/show chat button
+  // Chat button only shows on Budget tab
   const cb=document.getElementById('chat-btn');
-  if(cb)cb.style.display=page==='budget'?'':'none';
+  if(cb)cb.style.display=(page==='budget'&&isMobile())?'flex':'none';
+  // Bottom nav always visible on mobile regardless of page
+  const bn=document.getElementById('bottom-nav');
+  if(bn)bn.style.display=isMobile()?'flex':'none';
 }
 
 function renderPage(page){
