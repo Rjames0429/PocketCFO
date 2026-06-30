@@ -236,14 +236,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   #app-screen{
     display:flex!important;
     flex-direction:column;
-    height:calc(100vh - var(--nav-h) - env(safe-area-inset-top)); /* account for iPhone notch/Dynamic Island */
+    height:calc(100vh - var(--nav-h)); /* leave room for bottom nav — single source of truth */
     min-height:0!important; /* override base min-height:100vh which was forcing full height */
     overflow:hidden;
     position:relative;
   }
 
   /* HEADER — logo + single badge — fixed size flex item */
-  .app-header{height:auto;padding:10px 18px;padding-top:max(10px, env(safe-area-inset-top));flex-direction:row;align-items:center;background:#fff;border-bottom:0.5px solid #f0f0f0;flex-shrink:0;position:static}
+  .app-header{height:auto;padding:10px 18px;flex-direction:row;align-items:center;background:#fff;border-bottom:0.5px solid #f0f0f0;flex-shrink:0;position:static}
   .app-header-row1{display:none}
   #hdr-logo-desk{display:flex!important}
   .hlogo .name{font-size:16px;font-weight:700}
@@ -265,8 +265,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     padding:0;background:#f9f9f9;
     flex:1 1 auto;
     overflow-y:auto;
-    -webkit-overflow-scrolling:auto;
-    overscroll-behavior:none;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
     min-height:0; /* required for flex children to scroll properly */
   }
 
@@ -731,8 +731,7 @@ async function loadApp(){
   if(bn)bn.style.display=isMobile()?'flex':'none';
   const cb=document.getElementById('chat-btn');
   if(cb){cb.style.display=isMobile()?'flex':'none';if(window._initChatDrag)window._initChatDrag();}
-  // syncNavHeight after a frame so nav is fully painted and offsetHeight is accurate
-  requestAnimationFrame(syncNavHeight);
+  syncNavHeight(); // measure real nav bar height, sync CSS var — prevents future desync bugs
   if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{doSignOut();return;}}
   const{data:u}=await sb.from('users').select('account_number,display_name').eq('id',CU.id).single();
   if(u){
