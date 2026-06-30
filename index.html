@@ -236,6 +236,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     display:flex!important;
     flex-direction:column;
     height:calc(100vh - 68px); /* leave room for external fixed bottom nav */
+    min-height:0!important; /* override base min-height:100vh which was forcing full height */
     overflow:hidden;
     position:relative;
   }
