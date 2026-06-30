@@ -332,7 +332,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .tw th:first-child{text-align:center!important;padding-left:4px}
   .tw th+th{border-left:0.5px solid #e8e5fb}
   .tw td{padding:9px 4px;font-size:12px;text-align:center;white-space:nowrap;overflow:hidden}
-  .tw td:first-child{text-align:left;font-weight:600;padding-left:12px;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+  .tw td:first-child{text-align:left;font-weight:600;padding-left:8px;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+  .tw .sub-row td:first-child{font-weight:400;padding-left:0}
   .tw .tr td{font-size:12px;font-weight:700}
   .nw{gap:7px}
   .tog{width:20px;height:20px;font-size:9px}
@@ -902,9 +903,9 @@ function render(){
     if(exp){cd.items.forEach(item=>{
       const ib=getBV(item),ia=getAV(item),iF=getFV(cat,item.name);
       const ivar=mobile?pillMob(ib,ia):pill(ib,ia);
-      rows+=`<tr class="sub-row"><td><div class="nw" style="padding-left:${mobile?'20px':'32px'}">`+
-        `<span style="color:#bbb;font-size:10px;margin-right:2px">└</span>`+
-        `<span class="sub-item-name">${item.name}</span>`+
+      rows+=`<tr class="sub-row"><td><div class="nw" style="padding-left:${mobile?'14px':'30px'};overflow:visible">`+
+        `<span style="color:#ccc;font-size:9px;flex-shrink:0">└</span>`+
+        `<span class="sub-item-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.name}</span>`+
       `</div></td>`;
       rows+=`<td>${eCell(ib,v=>saveBudget(cat,item.name,v))}</td>`;
       rows+=`<td>${eCell(ia,v=>saveActualDB(cat,item.name,v))}</td>`;
