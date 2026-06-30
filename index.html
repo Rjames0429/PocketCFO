@@ -122,7 +122,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .kpi{padding:16px 14px}.kpi+.kpi{border-left:1px solid rgba(255,255,255,.15)}
 .kb{background:linear-gradient(135deg,#185FA5,#0C447C)}
 .kg{background:linear-gradient(135deg,#2E7D32,#1B5E20)}
-.kgd{background:linear-gradient(135deg,#1D9E75,#0F6E56)}
+.kgd{background:linear-gradient(135deg,#6B7280,#4B5563)}
 .kbd{background:linear-gradient(135deg,#C62828,#7B1111)}
 .kp{background:linear-gradient(135deg,#3C3489,#26215C)}
 .kl{font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
@@ -150,6 +150,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tog:hover{background:#ddd}
 .cl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sl{display:block;padding-left:26px;color:var(--text2);font-weight:400;font-size:12px;text-align:left}
+.sub-row td{background:#fafbff!important;border-bottom:0.5px solid #f5f5f5}
+.sub-row:hover td{background:#f5f4ff!important}
+.sub-item-name{font-size:12px;color:#666;font-weight:400;font-style:italic}
+@media(max-width:768px){
+  .sub-item-name{font-size:10.5px}
+  .sub-row td{font-size:10.5px}
+}
 .pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;white-space:nowrap}
 .pg{background:#E8F5E9;color:#2E7D32}.pb{background:#FFEBEE;color:#C62828}.pn{background:#f0f0f0;color:#999}
 .fci{width:84px;text-align:center;font-size:12px;font-family:inherit;font-weight:500;color:var(--brand);background:var(--brand-pale);border:1px solid #d4ceee;border-radius:99px;padding:3px 9px;outline:none;display:block;margin:0 auto}
@@ -211,7 +218,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* Mobile summary card colors */
 .m-sc.kb{background:linear-gradient(135deg,#185FA5,#0C447C)}
 .m-sc.kg{background:linear-gradient(135deg,#2E7D32,#1B5E20)}
-.m-sc.kgd{background:linear-gradient(135deg,#1D9E75,#0F6E56)}
+.m-sc.kgd{background:linear-gradient(135deg,#6B7280,#4B5563)}
 .m-sc.kbd{background:linear-gradient(135deg,#C62828,#7B1111)}
 .m-sc.kp{background:linear-gradient(135deg,#3C3489,#26215C)}
 
@@ -232,15 +239,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .hright .saved-ind,.hright .btn-so{display:none}
 
   /* STICKY OVERVIEW — frozen below app header */
-  /* Sticky overview — sticks to top of app-main scroll container */
+  /* Overview — scrollable with content, not sticky */
   .m-sticky-overview{
     background:#fff;
     padding:20px 18px 0;
     border-bottom:1px solid #f0f0f0;
-    box-shadow:0 2px 8px rgba(0,0,0,.04);
-    position:sticky;
-    top:0;
-    z-index:20;
+    box-shadow:0 2px 4px rgba(0,0,0,.03);
   }
   /* APP MAIN — simple scroll container, full height minus header+nav */
   .app-main{
@@ -898,7 +902,10 @@ function render(){
     if(exp){cd.items.forEach(item=>{
       const ib=getBV(item),ia=getAV(item),iF=getFV(cat,item.name);
       const ivar=mobile?pillMob(ib,ia):pill(ib,ia);
-      rows+=`<tr class="cr"><td><div class="nw" style="padding-left:${mobile?'4px':'14px'}">${eCatCell(item.name)}</div></td>`;
+      rows+=`<tr class="sub-row"><td><div class="nw" style="padding-left:${mobile?'20px':'32px'}">`+
+        `<span style="color:#bbb;font-size:10px;margin-right:2px">└</span>`+
+        `<span class="sub-item-name">${item.name}</span>`+
+      `</div></td>`;
       rows+=`<td>${eCell(ib,v=>saveBudget(cat,item.name,v))}</td>`;
       rows+=`<td>${eCell(ia,v=>saveActualDB(cat,item.name,v))}</td>`;
       rows+=`<td>${ivar}</td>`;
@@ -932,7 +939,7 @@ function render(){
     ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(vB_mtd))} over budget</span></div>`
     :`<div class="prog-track"><div class="prog-fill-good" style="width:${pctProg}%"></div></div><div class="prog-right"><span class="prog-pct-good">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(vB_mtd)}</strong> remaining</span></div>`;
 
-  const kpiVarCls=vB>=0?'kgd':'kbd';
+  const kpiVarCls=vB>=0?'kgd':'kbd'; // kgd is now grey for variance
   const vs=n=>n>=0?`+${$f(n)}`:`-${$f(Math.abs(n))}`;
 
   // Summary cards for mobile — defined here after all vars are ready
@@ -1205,19 +1212,22 @@ function renderCharts(){
   const totalA=aData.reduce((s,v)=>s+v,0);
 
   // Build SVG pie chart
-  function buildPie(vals,total,size){
+  function buildPie(vals,total,size,label,sublabel){
     if(!total)return`<circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="#f0f0f0"/>`;
     let slices='';let start=0;
-    const r=size/2-4;const cx=size/2;const cy=size/2;
+    const r=size/2-6;const ir=r*0.58;const cx=size/2;const cy=size/2;
     vals.forEach((v,i)=>{
       if(!v)return;
       const pct=v/total;const angle=pct*Math.PI*2;
       const x1=cx+r*Math.sin(start);const y1=cy-r*Math.cos(start);
       const x2=cx+r*Math.sin(start+angle);const y2=cy-r*Math.cos(start+angle);
       const large=angle>Math.PI?1:0;
-      slices+=`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${colors[i%colors.length]}" stroke="#fff" stroke-width="2"/>`;
+      slices+=`<path d="M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} L${cx+ir*Math.sin(start+angle)},${cy-ir*Math.cos(start+angle)} A${ir},${ir} 0 ${large},0 ${cx+ir*Math.sin(start)},${cy-ir*Math.cos(start)} Z" fill="${colors[i%colors.length]}" stroke="#fff" stroke-width="2"/>`;
       start+=angle;
     });
+    // Center label
+    slices+=`<text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="15" font-weight="700" fill="#111" font-family="-apple-system,sans-serif">${label}</text>`;
+    slices+=`<text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="10" fill="#999" font-family="-apple-system,sans-serif">${sublabel}</text>`;
     return slices;
   }
 
@@ -1319,8 +1329,8 @@ function renderSettings(){
     <div style="background:#fff;border-radius:14px;border:1px solid #efefef;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)">
       <div style="padding:14px 18px">
         <div style="font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Data</div>
-        ${settingsRow('📥','Export data','Download your budget history','')}
-        ${settingsRow('🔄','Sync','Last synced just now','')}
+        ${settingsRow('📥','Export data','Download your budget history','export')}
+        ${settingsRow('🔄','Sync','Last synced just now','sync')}
         ${settingsRow('🗑️','Clear demo data','Reset to a fresh start','red')}
       </div>
     </div>
@@ -1329,8 +1339,8 @@ function renderSettings(){
     <div style="background:#fff;border-radius:14px;border:1px solid #efefef;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)">
       <div style="padding:14px 18px">
         <div style="font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Account</div>
-        ${settingsRow('🔒','Change password','Update your login password','')}
-        ${settingsRow('📧','Contact support','Get help with PocketCFO','')}
+        ${settingsRow('🔒','Change password','Update your login password','password')}
+        ${settingsRow('📧','Contact support','Get help with PocketCFO','support')}
         <div onclick="doSignOut()" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer">
           <div style="display:flex;align-items:center;gap:12px">
             <div style="font-size:20px">🚪</div>
@@ -1344,13 +1354,36 @@ function renderSettings(){
     <div style="text-align:center;font-size:11px;color:#ccc;padding:8px 0 20px">PocketCFO v1.0 · Built with ❤️</div>`;
 }
 
+function settingsAction(type){
+  if(type==='password'){sb.auth.resetPasswordForEmail(CU.email,{redirectTo:window.location.origin}).then(()=>alert('Password reset email sent to '+CU.email));}
+  else if(type==='support'){window.open('mailto:support@pocketcfo.app?subject=PocketCFO Support','_blank');}
+  else if(type==='export'){exportData();}
+  else if(type==='sync'){render();alert('Synced!');}
+  else if(type==='red'){if(confirm('Clear all demo data and start fresh?'))clearData();}
+}
+async function exportData(){
+  if(!CU||!Object.keys(D).length)return;
+  const rows=[['Category','Item','Month','Budget','Actual']];
+  Object.keys(D).forEach(cat=>{D[cat].items.forEach(item=>{for(let m=0;m<12;m++){rows.push([cat,item.name,MNS[m],getB(item,m).toFixed(2),getA(item,m).toFixed(2)]);}});});
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='pocketcfo-export.csv';a.click();
+}
+async function clearData(){
+  if(!CU)return;
+  await sb.from('transactions').delete().eq('user_id',CU.id);
+  await sb.from('monthly_budgets').delete().eq('user_id',CU.id);
+  await sb.from('budget_line_items').delete().eq('user_id',CU.id);
+  await sb.from('budget_categories').delete().eq('user_id',CU.id);
+  D={};render();alert('Data cleared. Refresh to start fresh.');
+}
 function settingsRow(icon,title,sub,type){
   const right=type==='toggle'
     ?`<div style="width:44px;height:26px;background:#4B3FA0;border-radius:99px;position:relative;cursor:pointer"><div style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div></div>`
-    :type==='red'?''
+    :type==='red'||type===''?''
     :`<div style="color:#ccc;font-size:14px">›</div>`;
   const titleColor=type==='red'?'#C62828':'#111';
-  return`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid #f5f5f5;cursor:pointer">
+  const action=type&&type!=='toggle'&&type!==''?`onclick="settingsAction('${type}')"`:''
+  return`<div ${action} style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid #f5f5f5;cursor:pointer">
     <div style="display:flex;align-items:center;gap:12px">
       <div style="font-size:20px">${icon}</div>
       <div>
