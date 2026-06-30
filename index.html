@@ -18,6 +18,7 @@
   --green:#2E7D32;--red:#C62828;--text:#111;--text2:#555;--text3:#888;
   --bg:#fff;--bg2:#f7f7f7;--bg3:#f0f0f0;--border:#e0e0e0;--border2:#e8e8e8;
   --r:8px;--rl:12px;
+  --nav-h:50px; /* single source of truth for bottom nav height — used everywhere */
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:var(--text);font-size:13px;min-height:100vh}
 
@@ -235,7 +236,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   #app-screen{
     display:flex!important;
     flex-direction:column;
-    height:calc(100vh - 42px); /* leave room for shorter external fixed bottom nav */
+    height:calc(100vh - var(--nav-h)); /* leave room for bottom nav — single source of truth */
     min-height:0!important; /* override base min-height:100vh which was forcing full height */
     overflow:hidden;
     position:relative;
@@ -526,7 +527,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 
   <!-- Transactions page -->
-  <div id="page-transactions" style="display:none;position:fixed;top:0;left:0;right:0;bottom:68px;background:#fff;z-index:40;overflow-y:auto">
+  <div id="page-transactions" style="display:none;position:fixed;top:0;left:0;right:0;bottom:var(--nav-h);background:#fff;z-index:40;overflow-y:auto">
     <div style="background:#fff;padding:12px 18px;border-bottom:0.5px solid #f0f0f0;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px">
       <button onclick="navTo('budget')" style="background:none;border:none;font-size:20px;cursor:pointer;color:#4B3FA0;padding:0">‹</button>
       <div style="font-size:17px;font-weight:600;color:#111">Transactions</div>
@@ -536,7 +537,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 
   <!-- Charts page -->
-  <div id="page-charts" style="display:none;position:fixed;top:0;left:0;right:0;bottom:68px;background:#fff;z-index:40;overflow-y:auto">
+  <div id="page-charts" style="display:none;position:fixed;top:0;left:0;right:0;bottom:var(--nav-h);background:#fff;z-index:40;overflow-y:auto">
     <div style="background:#fff;padding:12px 18px;border-bottom:0.5px solid #f0f0f0;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px">
       <button onclick="navTo('budget')" style="background:none;border:none;font-size:20px;cursor:pointer;color:#4B3FA0;padding:0">‹</button>
       <div style="font-size:17px;font-weight:600;color:#111">Charts</div>
@@ -546,7 +547,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 
   <!-- Settings page -->
-  <div id="page-settings" style="display:none;position:fixed;top:0;left:0;right:0;bottom:68px;background:#f9f9f9;z-index:40;overflow-y:auto">
+  <div id="page-settings" style="display:none;position:fixed;top:0;left:0;right:0;bottom:var(--nav-h);background:#f9f9f9;z-index:40;overflow-y:auto">
     <div style="background:#fff;padding:12px 18px;border-bottom:0.5px solid #f0f0f0;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px">
       <button onclick="navTo('budget')" style="background:none;border:none;font-size:20px;cursor:pointer;color:#4B3FA0;padding:0">‹</button>
       <div style="font-size:17px;font-weight:600;color:#111">Settings</div>
@@ -730,6 +731,7 @@ async function loadApp(){
   if(bn)bn.style.display=isMobile()?'flex':'none';
   const cb=document.getElementById('chat-btn');
   if(cb){cb.style.display=isMobile()?'flex':'none';if(window._initChatDrag)window._initChatDrag();}
+  syncNavHeight(); // measure real nav bar height, sync CSS var — prevents future desync bugs
   if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{doSignOut();return;}}
   const{data:u}=await sb.from('users').select('account_number,display_name').eq('id',CU.id).single();
   if(u){
@@ -1144,6 +1146,21 @@ async function saveNewCat(){
   }
   closeOv('modal-addcat');showSaved();render();
 }
+
+// ── NAV HEIGHT SYNC — measures the real rendered nav bar height
+// and writes it to --nav-h so app-screen height calc + overlay pages
+// NEVER desync again, regardless of future padding/icon size changes ──
+function syncNavHeight(){
+  if(!isMobile())return;
+  const bn=document.getElementById('bottom-nav');
+  if(!bn)return;
+  requestAnimationFrame(()=>{
+    const h=bn.offsetHeight;
+    if(h>0)document.documentElement.style.setProperty('--nav-h',h+'px');
+  });
+}
+window.addEventListener('resize',syncNavHeight);
+window.addEventListener('orientationchange',()=>setTimeout(syncNavHeight,200));
 
 // ── NAVIGATION ─────────────────────────────────────────────
 let currentPage='budget';
