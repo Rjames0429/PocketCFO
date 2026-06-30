@@ -18,7 +18,7 @@
   --green:#2E7D32;--red:#C62828;--text:#111;--text2:#555;--text3:#888;
   --bg:#fff;--bg2:#f7f7f7;--bg3:#f0f0f0;--border:#e0e0e0;--border2:#e8e8e8;
   --r:8px;--rl:12px;
-  --nav-h:30px; /* single source of truth for bottom nav height — used everywhere */
+  --nav-h:40px; /* single source of truth for bottom nav height — used everywhere */
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:var(--text);font-size:13px;min-height:100vh}
 
@@ -365,11 +365,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .hint-wrap{display:none}
 
   /* BOTTOM NAV */
-  .bottom-nav{flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:0;align-items:center;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;z-index:60;height:30px;box-sizing:border-box}
-  .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:55px;cursor:pointer;height:100%}
-  .nav-icon{font-size:15px;color:#ccc;line-height:1}
+  .bottom-nav{flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:7px 0;align-items:center;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;z-index:60}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:55px;cursor:pointer}
+  .nav-icon{font-size:20px;color:#ccc}
   .nav-icon.active{color:var(--brand)}
-  .nav-lbl{font-size:7px;color:#ccc;font-weight:500;line-height:1}
+  .nav-lbl{font-size:9px;color:#ccc;font-weight:500}
   .nav-lbl.active{color:var(--brand);font-weight:600}
   .m-header-row{display:flex!important;align-items:center;justify-content:space-between}
 }
