@@ -586,6 +586,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
+const APP_VERSION='2026-06-29-charts-fix';
+(function(){
+  const stored=localStorage.getItem('pcf-app-version');
+  if(stored&&stored!==APP_VERSION){
+    // Version changed — force a hard reload to bust any stale cache
+    localStorage.setItem('pcf-app-version',APP_VERSION);
+    location.reload(true);
+  } else if(!stored){
+    localStorage.setItem('pcf-app-version',APP_VERSION);
+  }
+})();
 const SUPA_URL='https://omliytfwfkmzyvchlojf.supabase.co';
 const SUPA_KEY='sb_publishable_ZxsC3Vu69fuo05Y4O6mIRw_T8Krp00X';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
