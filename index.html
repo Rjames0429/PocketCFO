@@ -383,10 +383,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   #hdr-logo-desk{display:flex!important}
   .chat-btn{
     position:fixed;
-    top:100px;right:14px;z-index:55;
-    width:44px;height:44px;border-radius:50%;
+    bottom:56px;right:16px;z-index:55;
+    width:46px;height:46px;border-radius:50%;
     background:#4B3FA0;border:none;cursor:grab;
-    font-size:18px;align-items:center;justify-content:center;
+    font-size:19px;align-items:center;justify-content:center;
     box-shadow:0 4px 16px rgba(75,63,160,.35);
     touch-action:none;
     user-select:none;
@@ -1504,7 +1504,7 @@ function settingsRow(icon,title,sub,type){
         let newX=btnStartX+dx,newY=btnStartY+dy;
         // Keep within viewport bounds
         newX=Math.max(4,Math.min(window.innerWidth-52,newX));
-        newY=Math.max(60,Math.min(window.innerHeight-80,newY));
+        newY=Math.max(60,Math.min(window.innerHeight-100,newY));
         btn.style.left=newX+'px';
         btn.style.top=newY+'px';
         btn.style.right='auto';
