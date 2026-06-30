@@ -18,7 +18,7 @@
   --green:#2E7D32;--red:#C62828;--text:#111;--text2:#555;--text3:#888;
   --bg:#fff;--bg2:#f7f7f7;--bg3:#f0f0f0;--border:#e0e0e0;--border2:#e8e8e8;
   --r:8px;--rl:12px;
-  --nav-h:40px; /* single source of truth for bottom nav height — used everywhere */
+  --nav-h:30px; /* single source of truth for bottom nav height — used everywhere */
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:var(--text);font-size:13px;min-height:100vh}
 
@@ -126,7 +126,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .kpi{padding:16px 14px}.kpi+.kpi{border-left:1px solid rgba(255,255,255,.15)}
 .kb{background:linear-gradient(135deg,#185FA5,#0C447C)}
 .kg{background:linear-gradient(135deg,#2E7D32,#1B5E20)}
-.kgd{background:linear-gradient(135deg,#6B7280,#4B5563)}
+.kgd{background:linear-gradient(135deg,#94A0B0,#677488)}
 .kbd{background:linear-gradient(135deg,#C62828,#7B1111)}
 .kp{background:linear-gradient(135deg,#3C3489,#26215C)}
 .kl{font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
@@ -222,7 +222,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* Mobile summary card colors */
 .m-sc.kb{background:linear-gradient(135deg,#185FA5,#0C447C)}
 .m-sc.kg{background:linear-gradient(135deg,#2E7D32,#1B5E20)}
-.m-sc.kgd{background:linear-gradient(135deg,#6B7280,#4B5563)}
+.m-sc.kgd{background:linear-gradient(135deg,#94A0B0,#677488)}
 .m-sc.kbd{background:linear-gradient(135deg,#C62828,#7B1111)}
 .m-sc.kp{background:linear-gradient(135deg,#3C3489,#26215C)}
 
@@ -365,11 +365,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .hint-wrap{display:none}
 
   /* BOTTOM NAV */
-  .bottom-nav{flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:7px 0;align-items:center;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;z-index:60}
-  .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:55px;cursor:pointer}
-  .nav-icon{font-size:20px;color:#ccc}
+  .bottom-nav{flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:0;align-items:center;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;z-index:60;height:30px;box-sizing:border-box}
+  .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:55px;cursor:pointer;height:100%}
+  .nav-icon{font-size:15px;color:#ccc;line-height:1}
   .nav-icon.active{color:var(--brand)}
-  .nav-lbl{font-size:9px;color:#ccc;font-weight:500}
+  .nav-lbl{font-size:7px;color:#ccc;font-weight:500;line-height:1}
   .nav-lbl.active{color:var(--brand);font-weight:600}
   .m-header-row{display:flex!important;align-items:center;justify-content:space-between}
 }
@@ -383,10 +383,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   #hdr-logo-desk{display:flex!important}
   .chat-btn{
     position:fixed;
-    bottom:70px;right:18px;z-index:55;
-    width:48px;height:48px;border-radius:50%;
+    top:100px;right:14px;z-index:55;
+    width:44px;height:44px;border-radius:50%;
     background:#4B3FA0;border:none;cursor:grab;
-    font-size:20px;align-items:center;justify-content:center;
+    font-size:18px;align-items:center;justify-content:center;
     box-shadow:0 4px 16px rgba(75,63,160,.35);
     touch-action:none;
     user-select:none;
@@ -1504,7 +1504,7 @@ function settingsRow(icon,title,sub,type){
         let newX=btnStartX+dx,newY=btnStartY+dy;
         // Keep within viewport bounds
         newX=Math.max(4,Math.min(window.innerWidth-52,newX));
-        newY=Math.max(60,Math.min(window.innerHeight-120,newY));
+        newY=Math.max(60,Math.min(window.innerHeight-80,newY));
         btn.style.left=newX+'px';
         btn.style.top=newY+'px';
         btn.style.right='auto';
