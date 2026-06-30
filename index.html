@@ -323,7 +323,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   /* TABLE — overflow:visible is CRITICAL for position:sticky to work */
   .tw{
-    margin:0 18px 240px;border-radius:12px;
+    margin:0 18px 120px;border-radius:12px;
     border:1px solid #efefef;background:#fff;
     overflow:visible;
     box-shadow:0 1px 6px rgba(0,0,0,.05);
@@ -520,30 +520,48 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 
   <!-- Transactions page -->
-  <div id="page-transactions" style="display:none;position:fixed;inset:0;background:#fff;z-index:40;overflow-y:auto;padding-bottom:80px">
+  <div id="page-transactions" style="display:none;position:fixed;top:0;left:0;right:0;bottom:68px;background:#fff;z-index:40;overflow-y:auto">
     <div style="background:#fff;padding:12px 18px;border-bottom:0.5px solid #f0f0f0;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px">
       <button onclick="navTo('budget')" style="background:none;border:none;font-size:20px;cursor:pointer;color:#4B3FA0;padding:0">‹</button>
       <div style="font-size:17px;font-weight:600;color:#111">Transactions</div>
     </div>
     <div id="txn-content" style="padding:0 0 20px"></div>
+    <div class="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;z-index:46">
+      <div class="nav-item" onclick="navTo('budget')"><div class="nav-icon">📊</div><div class="nav-lbl">Budget</div></div>
+      <div class="nav-item" onclick="navTo('transactions')"><div class="nav-icon active">💳</div><div class="nav-lbl active">Transactions</div></div>
+      <div class="nav-item" onclick="navTo('charts')"><div class="nav-icon">📈</div><div class="nav-lbl">Charts</div></div>
+      <div class="nav-item" onclick="navTo('settings')"><div class="nav-icon">⚙️</div><div class="nav-lbl">Settings</div></div>
+    </div>
   </div>
 
   <!-- Charts page -->
-  <div id="page-charts" style="display:none;position:fixed;inset:0;background:#fff;z-index:40;overflow-y:auto;padding-bottom:80px">
+  <div id="page-charts" style="display:none;position:fixed;top:0;left:0;right:0;bottom:68px;background:#fff;z-index:40;overflow-y:auto">
     <div style="background:#fff;padding:12px 18px;border-bottom:0.5px solid #f0f0f0;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px">
       <button onclick="navTo('budget')" style="background:none;border:none;font-size:20px;cursor:pointer;color:#4B3FA0;padding:0">‹</button>
       <div style="font-size:17px;font-weight:600;color:#111">Charts</div>
     </div>
     <div id="charts-content" style="padding:20px 18px"></div>
+    <div class="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;z-index:46">
+      <div class="nav-item" onclick="navTo('budget')"><div class="nav-icon">📊</div><div class="nav-lbl">Budget</div></div>
+      <div class="nav-item" onclick="navTo('transactions')"><div class="nav-icon">💳</div><div class="nav-lbl">Transactions</div></div>
+      <div class="nav-item" onclick="navTo('charts')"><div class="nav-icon active">📈</div><div class="nav-lbl active">Charts</div></div>
+      <div class="nav-item" onclick="navTo('settings')"><div class="nav-icon">⚙️</div><div class="nav-lbl">Settings</div></div>
+    </div>
   </div>
 
   <!-- Settings page -->
-  <div id="page-settings" style="display:none;position:fixed;inset:0;background:#f9f9f9;z-index:40;overflow-y:auto;padding-bottom:80px">
+  <div id="page-settings" style="display:none;position:fixed;top:0;left:0;right:0;bottom:68px;background:#f9f9f9;z-index:40;overflow-y:auto">
     <div style="background:#fff;padding:12px 18px;border-bottom:0.5px solid #f0f0f0;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px">
       <button onclick="navTo('budget')" style="background:none;border:none;font-size:20px;cursor:pointer;color:#4B3FA0;padding:0">‹</button>
       <div style="font-size:17px;font-weight:600;color:#111">Settings</div>
     </div>
     <div id="settings-content" style="padding:20px 18px"></div>
+    <div class="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;z-index:46">
+      <div class="nav-item" onclick="navTo('budget')"><div class="nav-icon">📊</div><div class="nav-lbl">Budget</div></div>
+      <div class="nav-item" onclick="navTo('transactions')"><div class="nav-icon">💳</div><div class="nav-lbl">Transactions</div></div>
+      <div class="nav-item" onclick="navTo('charts')"><div class="nav-icon">📈</div><div class="nav-lbl">Charts</div></div>
+      <div class="nav-item" onclick="navTo('settings')"><div class="nav-icon active">⚙️</div><div class="nav-lbl active">Settings</div></div>
+    </div>
   </div>
 </div>
 
@@ -1124,7 +1142,7 @@ async function saveNewCat(){
 let currentPage='budget';
 function navTo(page){
   currentPage=page;
-  // Hide all pages
+  // Hide all overlay pages
   ['transactions','charts','settings'].forEach(p=>{
     const el=document.getElementById('page-'+p);
     if(el)el.style.display='none';
@@ -1138,7 +1156,8 @@ function navTo(page){
   });
   // Show selected page
   if(page==='budget'){
-    document.getElementById('app-screen').style.display='block';
+    // Restore proper display mode (flex on mobile, block on desktop)
+    document.getElementById('app-screen').style.display=isMobile()?'flex':'block';
   } else {
     const el=document.getElementById('page-'+page);
     if(el){el.style.display='block';renderPage(page);}
