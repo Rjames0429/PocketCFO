@@ -1028,7 +1028,7 @@ function render(){
   // P&L row — Revenue minus Total Expenses
   const plB=rB-tB;const plA=rA-tA;const plF=rF-tF;
   const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
-  const plLabel=plA>=0?'Profit':'Loss';
+  const plLabel='Profit / Loss';
   const plR=`<tr class="pl-row">
     <td>${plLabel}</td>
     <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
