@@ -1096,10 +1096,11 @@ function render(){
     // Table — both
     `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup>`+
     `<thead><tr>`+
-    `<th style="text-align:center!important">Category</th>`+
+    `<th style="text-align:left!important;padding-left:8px">Category</th>`+
     `<th>Budget</th>`+
     `<th>${VIEW==='annual'?'Run rate':VIEW==='bvf'?'Forecast':'Actual'}</th>`+
-    `<th>Variance</th><th class="cdiv">Forecast</th>`+
+    `<th>${VIEW==='bvf'?'Diff':'Variance'}</th>`+
+    `<th class="cdiv">${VIEW==='annual'||VIEW==='bvf'?'Fcst':'Forecast'}</th>`+
     `</tr></thead>`+
     `<tbody>`+
     // Revenue row — sits at top of tbody, above expenses
