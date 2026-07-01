@@ -253,10 +253,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     left:0;right:0;
     bottom:var(--nav-h);
     background:#fff;
-    overflow:hidden;
   }
 
-  /* APP SCREEN — just show/hide, inherits shell positioning */
+  /* APP SCREEN — just show/hide, fills shell exactly */
   #app-screen{
     display:flex!important;
     flex-direction:column;
@@ -615,7 +614,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
-const APP_VERSION='2026-06-30-appshell';
+const APP_VERSION='2026-06-30-appshell-v2';
 (function(){
   const stored=localStorage.getItem('pcf-app-version');
   if(stored&&stored!==APP_VERSION){
