@@ -346,6 +346,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .m-sc-lbl{font-size:8px;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:2px}
   .m-sc-val{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;text-shadow:0 1px 2px rgba(0,0,0,.15)}
   .m-sc-sub{font-size:7.5px;color:rgba(255,255,255,.65);margin-top:1px;font-weight:500}
+  .m-sc-chg{font-size:8px;font-weight:700;margin-top:2px}
+  .m-sc-chg.pos{color:rgba(255,255,255,.95)}
+  .m-sc-chg.neg{color:rgba(255,210,210,.95)}
 
   /* TABLE — overflow:visible is CRITICAL for position:sticky to work */
   .tw{
@@ -1090,11 +1093,51 @@ function render(){
     bvf:{b:'Annual budget',a:'Forecast total',v:'vs. forecast',f:'Forecast'}
   }[VIEW]||{b:mn,a:'Spent',v:'Var',f:'Forecast'};
 
+  // ── NEW KPI CARDS: Revenue / Expenses / Profit-Loss / Profit Margin ──
+  const revActual=getRevA(CM);
+  const revBudget=getRevB(CM);
+  const expActual=tA;
+  const expBudget=tB;
+  const pl=revActual-expActual;
+  const margin=revActual>0?((pl/revActual)*100):0;
+
+  // Last month profit margin for comparison
+  const prevM=CM>0?CM-1:null;
+  const prevRevA=prevM!==null?getRevA(prevM):0;
+  const prevExpA=prevM!==null?Object.keys(D).reduce((s,cat)=>s+D[cat].items.reduce((ss,it)=>ss+getA(it,prevM),0),0):0;
+  const prevPL=prevRevA-prevExpA;
+  const prevMargin=prevRevA>0?((prevPL/prevRevA)*100):0;
+  const marginDiff=margin-prevMargin;
+
+  const revDiff=revActual-revBudget;
+  const expDiff=expBudget-expActual; // positive = under budget (good)
+  const plDiff=pl-tF; // vs expense forecast (rough)
+
   const summaryCardsUpdated=mobile?`<div class="m-summary-cards">
-    <div class="m-sc kb"><div class="m-sc-lbl">Budget</div><div class="m-sc-val">${$f(tB)}</div><div class="m-sc-sub">${mCardSub.b}</div></div>
-    <div class="m-sc kg"><div class="m-sc-lbl">${VIEW==='bvf'?'Forecast':'Actual'}</div><div class="m-sc-val">${$f(tA)}</div><div class="m-sc-sub">${mCardSub.a}</div></div>
-    <div class="m-sc ${isOver?'kbd':'kgd'}"><div class="m-sc-lbl">Variance</div><div class="m-sc-val">${vs(vB)}</div><div class="m-sc-sub">${mCardSub.v}</div></div>
-    <div class="m-sc kp"><div class="m-sc-lbl">Forecast</div><div class="m-sc-val">${$f(tF)}</div><div class="m-sc-sub">${mCardSub.f}</div></div>
+    <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C)">
+      <div class="m-sc-lbl">Revenue</div>
+      <div class="m-sc-val">${$f(revActual)}</div>
+      <div class="m-sc-sub">Actual income</div>
+      <div class="m-sc-chg ${revDiff>=0?'pos':'neg'}">${revDiff>=0?'+':''}${$f(revDiff)} vs budget</div>
+    </div>
+    <div class="m-sc" style="background:linear-gradient(140deg,#185FA5,#0C3F72)">
+      <div class="m-sc-lbl">Expenses</div>
+      <div class="m-sc-val">${$f(expActual)}</div>
+      <div class="m-sc-sub">Actual spend</div>
+      <div class="m-sc-chg ${expDiff>=0?'pos':'neg'}">${expDiff>=0?'+':'-'}${$f(Math.abs(expDiff))} ${expDiff>=0?'under':'over'} budget</div>
+    </div>
+    <div class="m-sc" style="background:linear-gradient(140deg,${pl>=0?'#1D9E75,#0D6B50':'#C62828,#7B1111'})">
+      <div class="m-sc-lbl">Profit / Loss</div>
+      <div class="m-sc-val">${pl>=0?'+':''}${$f(pl)}</div>
+      <div class="m-sc-sub">Revenue - Expenses</div>
+      <div class="m-sc-chg pos">${plDiff>=0?'+':''}${$f(plDiff)} vs forecast</div>
+    </div>
+    <div class="m-sc" style="background:linear-gradient(140deg,#4B3FA0,#2D2460)">
+      <div class="m-sc-lbl">Profit Margin</div>
+      <div class="m-sc-val">${margin.toFixed(1)}%</div>
+      <div class="m-sc-sub">Of revenue kept</div>
+      <div class="m-sc-chg ${marginDiff>=0?'pos':'neg'}">${marginDiff>=0?'+':''}${marginDiff.toFixed(1)}% vs last month</div>
+    </div>
   </div>`:'';
 
   // On mobile: frozen overview sits above app-main scroll
