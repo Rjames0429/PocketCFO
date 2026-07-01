@@ -14,6 +14,7 @@
 <meta name="theme-color" content="#4B3FA0"/>
 <link rel="manifest" href="manifest.json"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-text-size-adjust:none}
 :root{
@@ -636,6 +637,48 @@ const APP_VERSION='2026-06-30-appshell-v2';
 const SUPA_URL='https://omliytfwfkmzyvchlojf.supabase.co';
 const SUPA_KEY='sb_publishable_ZxsC3Vu69fuo05Y4O6mIRw_T8Krp00X';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+/* ── SUPABASE SCHEMA REQUIRED ────────────────────────────────
+   Run this SQL in Supabase SQL Editor before using Plaid:
+
+   CREATE TABLE IF NOT EXISTS plaid_items (
+     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+     access_token text NOT NULL,
+     item_id text NOT NULL,
+     institution_id text,
+     institution_name text,
+     created_at timestamptz DEFAULT now(),
+     last_synced_at timestamptz
+   );
+   ALTER TABLE plaid_items ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "own_plaid_items" ON plaid_items FOR ALL USING (auth.uid()=user_id);
+
+   CREATE TABLE IF NOT EXISTS plaid_rules (
+     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+     merchant_pattern text NOT NULL,
+     category_name text NOT NULL,
+     created_at timestamptz DEFAULT now(),
+     UNIQUE(user_id, merchant_pattern)
+   );
+   ALTER TABLE plaid_rules ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "own_plaid_rules" ON plaid_rules FOR ALL USING (auth.uid()=user_id);
+
+   ALTER TABLE transactions
+     ADD COLUMN IF NOT EXISTS plaid_transaction_id text UNIQUE,
+     ADD COLUMN IF NOT EXISTS merchant_name text,
+     ADD COLUMN IF NOT EXISTS pending boolean DEFAULT false,
+     ADD COLUMN IF NOT EXISTS plaid_category text,
+     ADD COLUMN IF NOT EXISTS needs_review boolean DEFAULT false,
+     ADD COLUMN IF NOT EXISTS category_name text;
+   ──────────────────────────────────────────────────────────── */
+
+// ── PLAID CONFIG ───────────────────────────────────────────
+const PLAID_CLIENT_ID='6a44a08f9a4905000d0e3ec8';
+const PLAID_SECRET='7f33ba93dfe200b41565570715893c';
+const PLAID_ENV='sandbox';
+const PLAID_BASE=`https://${PLAID_ENV}.plaid.com`;
 
 // ── DEMO DATA ──────────────────────────────────────────────
 const DEMO={
@@ -1377,7 +1420,7 @@ function renderTransactions(){
     .select('*,budget_line_items(name),budget_categories(name)')
     .eq('user_id',CU.id)
     .order('date',{ascending:false})
-    .limit(100)
+    .limit(200)
     .then(({data:txns})=>{
       if(!txns||!txns.length){el.innerHTML='<div style="padding:40px;text-align:center;color:#aaa;font-size:14px">No transactions yet</div>';return;}
       // Group by date
@@ -1397,12 +1440,21 @@ function renderTransactions(){
           const itemName=t.budget_line_items?.name||t.merchant_name||'Transaction';
           const amt=parseFloat(t.amount)||0;
           const isLast=i===groups[date].length-1;
-          html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#fff;border-bottom:${isLast?'none':'0.5px solid #f5f5f5'}">
+          const needsReview=t.needs_review&&!t.category_name;
+          const cats=Object.keys(D);
+          const catSelector=needsReview?`
+            <select onchange="assignCategory('${t.plaid_transaction_id}','${(t.merchant_name||'').replace(/'/g,"\\'")}',this.value)"
+              style="font-size:11px;padding:3px 6px;border:1px solid #4B3FA0;border-radius:6px;color:#4B3FA0;background:#f0eefa;margin-top:4px;font-family:inherit;cursor:pointer">
+              <option value="">⚠️ Assign category...</option>
+              ${cats.map(cat=>`<option value="${cat}">${cat}</option>`).join('')}
+            </select>`:'';
+          html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:${needsReview?'#fffbf0':'#fff'};border-bottom:${isLast?'none':'0.5px solid #f5f5f5'}">
             <div style="display:flex;align-items:center;gap:13px">
-              <div style="width:40px;height:40px;border-radius:50%;background:#f0eefa;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${getCatEmoji(catName)}</div>
+              <div style="width:40px;height:40px;border-radius:50%;background:${needsReview?'#fff8e1':'#f0eefa'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${needsReview?'❓':getCatEmoji(catName)}</div>
               <div>
                 <div style="font-size:14px;font-weight:500;color:#111">${itemName}</div>
-                <div style="font-size:12px;color:#aaa;margin-top:2px">${catName}</div>
+                <div style="font-size:12px;color:${needsReview?'#F59E0B':'#aaa'};margin-top:2px">${needsReview?'Needs category':catName}</div>
+                ${catSelector}
               </div>
             </div>
             <div style="font-size:15px;font-weight:600;color:#111">-$${amt.toFixed(2)}</div>
@@ -1568,6 +1620,17 @@ function renderSettings(){
       </div>
     </div>
 
+    <!-- Bank Connections -->
+    <div style="background:#fff;border-radius:14px;border:1px solid #efefef;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)">
+      <div style="padding:14px 18px">
+        <div style="font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Bank Connections</div>
+        <div id="plaid-banks-list"></div>
+        <button onclick="connectBank()" style="width:100%;padding:12px;background:#4B3FA0;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:6px">
+          🏦 Connect a Bank Account
+        </button>
+      </div>
+    </div>
+
     <!-- Preferences -->
     <div style="background:#fff;border-radius:14px;border:1px solid #efefef;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)">
       <div style="padding:14px 18px;border-bottom:0.5px solid #f5f5f5">
@@ -1611,7 +1674,7 @@ function settingsAction(type){
   if(type==='password'){sb.auth.resetPasswordForEmail(CU.email,{redirectTo:window.location.origin}).then(()=>alert('Password reset email sent to '+CU.email));}
   else if(type==='support'){window.open('mailto:support@pocketcfo.app?subject=PocketCFO Support','_blank');}
   else if(type==='export'){exportData();}
-  else if(type==='sync'){render();alert('Synced!');}
+  else if(type==='sync'){syncPlaidTransactions().then(()=>{render();}).catch(()=>{render();});}
   else if(type==='red'){if(confirm('Clear all demo data and start fresh?'))clearData();}
 }
 async function exportData(){
@@ -1728,6 +1791,297 @@ async function sendChat(){
     msgs.innerHTML+=`<div class="chat-msg-bot"><div class="chat-bubble-bot">Sorry, something went wrong. Please try again!</div></div>`;
   }
   msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ── PLAID INTEGRATION ────────────────────────────────────
+
+// ── Step 1: Create Link Token (calls Plaid API directly from client)
+async function createLinkToken(){
+  const res=await fetch(`${PLAID_BASE}/link/token/create`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      client_id:PLAID_CLIENT_ID,
+      secret:PLAID_SECRET,
+      client_name:'PocketCFO',
+      user:{client_user_id:CU.id},
+      products:['transactions'],
+      country_codes:['US'],
+      language:'en'
+    })
+  });
+  const data=await res.json();
+  if(data.error_message)throw new Error(data.error_message);
+  return data.link_token;
+}
+
+// ── Step 2: Exchange public token for access token
+async function exchangeToken(publicToken){
+  const res=await fetch(`${PLAID_BASE}/item/public_token/exchange`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      client_id:PLAID_CLIENT_ID,
+      secret:PLAID_SECRET,
+      public_token:publicToken
+    })
+  });
+  return await res.json();
+}
+
+// ── Step 3: Get institution info
+async function getInstitution(institutionId){
+  const res=await fetch(`${PLAID_BASE}/institutions/get_by_id`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      client_id:PLAID_CLIENT_ID,
+      secret:PLAID_SECRET,
+      institution_id:institutionId,
+      country_codes:['US']
+    })
+  });
+  const data=await res.json();
+  return data.institution?.name||'Unknown Bank';
+}
+
+// ── Step 4: Open Plaid Link
+async function connectBank(){
+  try{
+    const btn=document.querySelector('[onclick="connectBank()"]');
+    if(btn){btn.textContent='🔄 Connecting...';btn.disabled=true;}
+    const linkToken=await createLinkToken();
+    const handler=Plaid.create({
+      token:linkToken,
+      onSuccess:async(publicToken,metadata)=>{
+        if(btn){btn.textContent='⏳ Saving...';btn.disabled=true;}
+        try{
+          // Exchange for access token
+          const{access_token,item_id}=await exchangeToken(publicToken);
+          const instName=metadata.institution?.name||await getInstitution(metadata.institution?.institution_id)||'Unknown Bank';
+          // Save to Supabase
+          const{error}=await sb.from('plaid_items').insert({
+            user_id:CU.id,
+            access_token,
+            item_id,
+            institution_id:metadata.institution?.institution_id||'',
+            institution_name:instName,
+            last_synced_at:new Date().toISOString()
+          });
+          if(error)throw error;
+          alert(`✅ ${instName} connected! Syncing transactions...`);
+          // Sync transactions immediately
+          await syncPlaidTransactions();
+          renderSettings();
+        }catch(e){
+          alert('Error saving bank connection: '+e.message);
+          if(btn){btn.textContent='🏦 Connect a Bank Account';btn.disabled=false;}
+        }
+      },
+      onExit:(err)=>{
+        if(btn){btn.textContent='🏦 Connect a Bank Account';btn.disabled=false;}
+        if(err)console.log('Plaid exit error:',err);
+      }
+    });
+    handler.open();
+  }catch(e){
+    alert('Error connecting bank: '+e.message);
+    const btn=document.querySelector('[onclick="connectBank()"]');
+    if(btn){btn.textContent='🏦 Connect a Bank Account';btn.disabled=false;}
+  }
+}
+
+// ── Step 5: Sync transactions from Plaid
+async function syncPlaidTransactions(){
+  if(!CU)return;
+  const{data:items}=await sb.from('plaid_items').select('*').eq('user_id',CU.id);
+  if(!items?.length)return;
+
+  // Get user's budget categories for Claude categorization
+  const cats=Object.keys(D);
+
+  for(const item of items){
+    try{
+      // Get transactions from last 90 days
+      const now=new Date();
+      const start=new Date(now-90*24*60*60*1000).toISOString().slice(0,10);
+      const end=now.toISOString().slice(0,10);
+
+      const res=await fetch(`${PLAID_BASE}/transactions/get`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          client_id:PLAID_CLIENT_ID,
+          secret:PLAID_SECRET,
+          access_token:item.access_token,
+          start_date:start,
+          end_date:end,
+          options:{count:250,offset:0}
+        })
+      });
+      const data=await res.json();
+      if(data.error_message){console.error('Plaid sync error:',data.error_message);continue;}
+
+      const txns=data.transactions||[];
+      if(!txns.length)continue;
+
+      // Load existing rules for fast matching
+      const{data:rules}=await sb.from('plaid_rules').select('*').eq('user_id',CU.id);
+      const ruleMap={};
+      (rules||[]).forEach(r=>ruleMap[r.merchant_pattern.toLowerCase()]=r.category_name);
+
+      // Process each transaction
+      const toInsert=[];
+      const toCategorizWithAI=[];
+
+      for(const t of txns){
+        if(t.pending)continue; // skip pending
+        const merchant=(t.merchant_name||t.name||'').trim();
+        const merchantLow=merchant.toLowerCase();
+
+        // Check existing rules first
+        let assignedCat=null;
+        for(const pattern of Object.keys(ruleMap)){
+          if(merchantLow.includes(pattern)){
+            assignedCat=ruleMap[pattern];
+            break;
+          }
+        }
+
+        toInsert.push({
+          user_id:CU.id,
+          date:t.date,
+          amount:Math.abs(t.amount),
+          merchant_name:merchant,
+          plaid_transaction_id:t.transaction_id,
+          plaid_category:t.personal_finance_category?.primary||t.category?.[0]||'',
+          pending:false,
+          category_name:assignedCat||null,
+          needs_review:!assignedCat
+        });
+
+        if(!assignedCat)toCategorizWithAI.push({id:t.transaction_id,merchant,amount:Math.abs(t.amount)});
+      }
+
+      // Upsert transactions (skip duplicates)
+      if(toInsert.length){
+        await sb.from('transactions').upsert(toInsert,{onConflict:'plaid_transaction_id',ignoreDuplicates:false});
+      }
+
+      // AI categorize uncategorized transactions in batch
+      if(toCategorizWithAI.length&&cats.length){
+        await aiCategorizeBatch(toCategorizWithAI,cats);
+      }
+
+      // Update last synced
+      await sb.from('plaid_items').update({last_synced_at:new Date().toISOString()}).eq('id',item.id);
+
+    }catch(e){console.error('Sync error for item',item.id,e);}
+  }
+
+  // Reload transactions view if on that tab
+  if(currentPage==='transactions')renderTransactions();
+}
+
+// ── Step 6: Claude AI categorization
+async function aiCategorizeBatch(transactions,categories){
+  if(!transactions.length)return;
+  try{
+    const prompt=`You are a financial transaction categorizer. Given these bank transactions and budget categories, assign each transaction to the most appropriate category.
+
+Budget categories: ${categories.join(', ')}
+
+Transactions to categorize (JSON array):
+${JSON.stringify(transactions.map(t=>({id:t.id,merchant:t.merchant,amount:t.amount})))}
+
+Respond with ONLY a JSON array like: [{"id":"txn_id","category":"Category Name","confidence":"high|medium|low"}]
+- Use ONLY categories from the list above
+- confidence "low" means you're unsure — these will be flagged for user review
+- If truly unclassifiable use the closest match`;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:2000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.[0]?.text||'[]';
+    const clean=text.replace(/```json|```/g,'').trim();
+    const results=JSON.parse(clean);
+
+    // Update transactions with AI categories
+    for(const r of results){
+      if(!r.id||!r.category)continue;
+      const needsReview=r.confidence==='low';
+      await sb.from('transactions')
+        .update({category_name:r.category,needs_review:needsReview})
+        .eq('plaid_transaction_id',r.id)
+        .eq('user_id',CU.id);
+
+      // Save rule if high confidence (so next time no AI needed)
+      if(r.confidence==='high'){
+        const txn=transactions.find(t=>t.id===r.id);
+        if(txn){
+          const key=txn.merchant.toLowerCase().split(' ')[0]; // first word as pattern
+          await sb.from('plaid_rules').upsert({
+            user_id:CU.id,
+            merchant_pattern:key,
+            category_name:r.category
+          },{onConflict:'user_id,merchant_pattern',ignoreDuplicates:true});
+        }
+      }
+    }
+  }catch(e){console.error('AI categorization error:',e);}
+}
+
+// ── Step 7: User manually assigns category (learns forever)
+async function assignCategory(plaidTxnId,merchant,category){
+  await sb.from('transactions')
+    .update({category_name:category,needs_review:false})
+    .eq('plaid_transaction_id',plaidTxnId)
+    .eq('user_id',CU.id);
+
+  // Save rule so this merchant is always assigned this category
+  const key=merchant.toLowerCase().split(' ')[0];
+  await sb.from('plaid_rules').upsert({
+    user_id:CU.id,
+    merchant_pattern:key,
+    category_name:category
+  },{onConflict:'user_id,merchant_pattern'});
+
+  renderTransactions();
+}
+
+// ── Step 8: Render connected banks in settings
+async function renderPlaidBanks(){
+  const el=document.getElementById('plaid-banks-list');
+  if(!el||!CU)return;
+  const{data:items}=await sb.from('plaid_items').select('*').eq('user_id',CU.id).order('created_at');
+  if(!items?.length){
+    el.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px 0">No banks connected yet</div>';
+    return;
+  }
+  el.innerHTML=items.map(item=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #f5f5f5">
+      <div>
+        <div style="font-size:14px;font-weight:500;color:#111">🏦 ${item.institution_name}</div>
+        <div style="font-size:11px;color:#aaa;margin-top:2px">Last synced: ${item.last_synced_at?new Date(item.last_synced_at).toLocaleDateString():'Never'}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="syncPlaidTransactions()" style="font-size:11px;padding:4px 10px;border:1px solid #4B3FA0;color:#4B3FA0;background:#fff;border-radius:6px;cursor:pointer;font-family:inherit">Sync</button>
+        <button onclick="disconnectBank('${item.id}')" style="font-size:11px;padding:4px 10px;border:1px solid #e0e0e0;color:#aaa;background:#fff;border-radius:6px;cursor:pointer;font-family:inherit">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+async function disconnectBank(itemId){
+  if(!confirm('Remove this bank connection? Your existing transactions will be kept.'))return;
+  await sb.from('plaid_items').delete().eq('id',itemId).eq('user_id',CU.id);
+  renderSettings();
 }
 
 // ── INIT ────────────────────────────────────────────────────
