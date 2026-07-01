@@ -342,13 +342,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   /* SUMMARY CARDS */
   .m-summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:20px 18px 10px}
-  .m-sc{border-radius:10px;padding:6px 12px}
-  .m-sc-lbl{font-size:8px;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:2px}
-  .m-sc-val{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;text-shadow:0 1px 2px rgba(0,0,0,.15)}
-  .m-sc-sub{font-size:7.5px;color:rgba(255,255,255,.65);margin-top:1px;font-weight:500}
-  .m-sc-chg{font-size:8px;font-weight:700;margin-top:2px}
-  .m-sc-chg.pos{color:rgba(255,255,255,.95)}
-  .m-sc-chg.neg{color:rgba(255,210,210,.95)}
+  .m-sc{border-radius:10px;padding:8px 10px}
+  .m-sc-top{display:flex;justify-content:space-between;align-items:flex-start}
+  .m-sc-left .m-sc-lbl{font-size:7.5px;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:2px}
+  .m-sc-left .m-sc-sub{font-size:6.5px;color:rgba(255,255,255,.5);font-style:italic;max-width:70px;line-height:1.3}
+  .m-sc-right .m-sc-val{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.4px;line-height:1;text-align:right}
+  .m-sc-bot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:6px;padding-top:5px;border-top:0.5px solid rgba(255,255,255,.15)}
+  .m-sc-bot-item{display:flex;flex-direction:column;gap:1px}
+  .m-sc-bot-lbl{font-size:6px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.4px}
+  .m-sc-bot-val{font-size:9px;font-weight:700;color:rgba(255,255,255,.8)}
+  .m-sc-bot-val.g{color:rgba(180,255,200,.95)}
+  .m-sc-bot-val.r{color:rgba(255,190,190,.95)}
+
 
   /* TABLE — overflow:visible is CRITICAL for position:sticky to work */
   .tw{
@@ -1115,24 +1120,44 @@ function render(){
 
   const summaryCardsUpdated=mobile?`<div class="m-summary-cards">
     <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C)">
-      <div class="m-sc-lbl">Revenue</div>
-      <div class="m-sc-val">${$f(revActual)}</div>
-      <div class="m-sc-chg ${revDiff>=0?'pos':'neg'}">${revDiff>=0?'+':''}${$f(revDiff)} vs budget</div>
+      <div class="m-sc-top">
+        <div class="m-sc-left"><div class="m-sc-lbl">Revenue</div><div class="m-sc-sub">Actual income</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${$f(revActual)}</div></div>
+      </div>
+      <div class="m-sc-bot">
+        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Budget</div><div class="m-sc-bot-val">${$f(revBudget)}</div></div>
+        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Diff</div><div class="m-sc-bot-val ${revDiff>=0?'g':'r'}">${revDiff>=0?'+':''}${$f(revDiff)}</div></div>
+      </div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#185FA5,#0C3F72)">
-      <div class="m-sc-lbl">Expenses</div>
-      <div class="m-sc-val">${$f(expActual)}</div>
-      <div class="m-sc-chg ${expDiff>=0?'pos':'neg'}">${expDiff>=0?'+':'-'}${$f(Math.abs(expDiff))} ${expDiff>=0?'under':'over'} budget</div>
+      <div class="m-sc-top">
+        <div class="m-sc-left"><div class="m-sc-lbl">Expenses</div><div class="m-sc-sub">Actual spend</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${$f(expActual)}</div></div>
+      </div>
+      <div class="m-sc-bot">
+        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Budget</div><div class="m-sc-bot-val">${$f(expBudget)}</div></div>
+        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Saved</div><div class="m-sc-bot-val ${expDiff>=0?'g':'r'}">${expDiff>=0?'+':'-'}${$f(Math.abs(expDiff))}</div></div>
+      </div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,${pl>=0?'#1D9E75,#0D6B50':'#C62828,#7B1111'})">
-      <div class="m-sc-lbl">Profit / Loss</div>
-      <div class="m-sc-val">${pl>=0?'+':''}${$f(pl)}</div>
-      <div class="m-sc-chg pos">${plDiff>=0?'+':''}${$f(plDiff)} vs forecast</div>
+      <div class="m-sc-top">
+        <div class="m-sc-left"><div class="m-sc-lbl">Profit / Loss</div><div class="m-sc-sub">Revenue minus expenses</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${pl>=0?'+':''}${$f(pl)}</div></div>
+      </div>
+      <div class="m-sc-bot">
+        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Forecast</div><div class="m-sc-bot-val">${$f(tF)}</div></div>
+        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Ahead</div><div class="m-sc-bot-val ${plDiff>=0?'g':'r'}">${plDiff>=0?'+':''}${$f(plDiff)}</div></div>
+      </div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#4B3FA0,#2D2460)">
-      <div class="m-sc-lbl">Profit Margin</div>
-      <div class="m-sc-val">${margin.toFixed(1)}%</div>
-      <div class="m-sc-chg ${marginDiff>=0?'pos':'neg'}">${marginDiff>=0?'+':''}${marginDiff.toFixed(1)}% vs last month</div>
+      <div class="m-sc-top">
+        <div class="m-sc-left"><div class="m-sc-lbl">Profit Margin</div><div class="m-sc-sub">% of revenue kept</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${margin.toFixed(1)}%</div></div>
+      </div>
+      <div class="m-sc-bot">
+        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Last month</div><div class="m-sc-bot-val">${prevMargin.toFixed(1)}%</div></div>
+        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Change</div><div class="m-sc-bot-val ${marginDiff>=0?'g':'r'}">${marginDiff>=0?'+':''}${marginDiff.toFixed(1)}%</div></div>
+      </div>
     </div>
   </div>`:'';
 
