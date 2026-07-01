@@ -1048,8 +1048,10 @@ function render(){
   const plB=rB-tB;const plA=rA-tA;const plF=rF-tF;
   const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
   const plLabel='Profit / Loss';
-  const plR=`<tr class="pl-row">
-    <td>${plLabel}</td>
+  const plBg=plA>=0?'#f0faf4':'#fff5f5';
+  const plLabelColor=plA>=0?'#2E7D32':'#C62828';
+  const plR=`<tr class="pl-row" style="background:${plBg}">
+    <td style="color:${plLabelColor};font-weight:700">${plLabel}</td>
     <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
     <td style="${plStyle};font-weight:700">${plA>=0?'+':''}${$f(Math.abs(plA))}</td>
     <td>${mobile?`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`:`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`}</td>
