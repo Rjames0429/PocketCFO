@@ -160,12 +160,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sub-row td{background:#fafbff!important;border-bottom:0.5px solid #f5f5f5}
 .rev-row td{background:#f0faf4;border-bottom:2px solid #e0f0e4;padding:9px 4px;font-size:11px;vertical-align:middle}
 .rev-label{text-align:left!important;font-weight:600;color:#2E7D32;font-size:11px;padding-left:24px!important}
-.pl-row td{background:#fafafa;border-top:1.5px solid #e0e0e0;padding:9px 4px;font-weight:700;font-size:11px}
+.pl-row td{background:#fafafa;border-top:1.5px solid #e0e0e0;padding:9px 4px;font-weight:700;font-size:13px}
 .pl-row td:first-child{padding-left:8px;color:#111;font-weight:700}
 @media(max-width:768px){
   .rev-label{padding-left:16px!important;font-size:11px;vertical-align:middle}
   .rev-row td{padding:9px 4px;vertical-align:middle}
-  .pl-row td{font-size:11px;font-weight:700}
+  .pl-row td{font-size:13px;font-weight:700}
   .pl-row td:first-child{padding-left:8px}
 
 }
@@ -1048,10 +1048,8 @@ function render(){
   const plB=rB-tB;const plA=rA-tA;const plF=rF-tF;
   const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
   const plLabel='Profit / Loss';
-  const plBg=plA>=0?'#f0faf4':'#fff5f5';
-  const plLabelColor=plA>=0?'#2E7D32':'#C62828';
-  const plR=`<tr class="pl-row" style="background:${plBg}">
-    <td style="color:${plLabelColor};font-weight:700">${plLabel}</td>
+  const plR=`<tr class="pl-row">
+    <td style="font-weight:700">${plLabel}</td>
     <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
     <td style="${plStyle};font-weight:700">${plA>=0?'+':''}${$f(Math.abs(plA))}</td>
     <td>${mobile?`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`:`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`}</td>
