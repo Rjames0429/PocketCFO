@@ -1117,25 +1117,21 @@ function render(){
     <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C)">
       <div class="m-sc-lbl">Revenue</div>
       <div class="m-sc-val">${$f(revActual)}</div>
-      <div class="m-sc-sub">Actual income</div>
       <div class="m-sc-chg ${revDiff>=0?'pos':'neg'}">${revDiff>=0?'+':''}${$f(revDiff)} vs budget</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#185FA5,#0C3F72)">
       <div class="m-sc-lbl">Expenses</div>
       <div class="m-sc-val">${$f(expActual)}</div>
-      <div class="m-sc-sub">Actual spend</div>
       <div class="m-sc-chg ${expDiff>=0?'pos':'neg'}">${expDiff>=0?'+':'-'}${$f(Math.abs(expDiff))} ${expDiff>=0?'under':'over'} budget</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,${pl>=0?'#1D9E75,#0D6B50':'#C62828,#7B1111'})">
       <div class="m-sc-lbl">Profit / Loss</div>
       <div class="m-sc-val">${pl>=0?'+':''}${$f(pl)}</div>
-      <div class="m-sc-sub">Revenue - Expenses</div>
       <div class="m-sc-chg pos">${plDiff>=0?'+':''}${$f(plDiff)} vs forecast</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#4B3FA0,#2D2460)">
       <div class="m-sc-lbl">Profit Margin</div>
       <div class="m-sc-val">${margin.toFixed(1)}%</div>
-      <div class="m-sc-sub">Of revenue kept</div>
       <div class="m-sc-chg ${marginDiff>=0?'pos':'neg'}">${marginDiff>=0?'+':''}${marginDiff.toFixed(1)}% vs last month</div>
     </div>
   </div>`:'';
