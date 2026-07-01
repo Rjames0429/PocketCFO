@@ -155,14 +155,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sl{display:block;padding-left:26px;color:var(--text2);font-weight:400;font-size:12px;text-align:left}
 .sub-row td{background:#fafbff!important;border-bottom:0.5px solid #f5f5f5}
-.rev-row td{background:#f0faf4;border-bottom:3px solid #e8f5e9;padding:9px 4px}
-.rev-label{text-align:left!important;font-weight:600;color:#2E7D32;font-size:12px;padding-left:24px!important}
-.pl-row td{background:#fafafa;border-top:1.5px solid #e0e0e0;padding:9px 4px;font-weight:700;font-size:12px}
+.rev-row td{background:#f0faf4;border-bottom:3px solid #e8f5e9;padding:9px 4px;font-size:11px}
+.rev-label{text-align:left!important;font-weight:600;color:#2E7D32;font-size:11px;padding-left:24px!important}
+.pl-row td{background:#fafafa;border-top:1.5px solid #e0e0e0;padding:9px 4px;font-weight:700;font-size:11px}
 .pl-row td:first-child{padding-left:12px;color:#111}
 @media(max-width:768px){
-  .rev-label{padding-left:16px!important;font-size:12px}
+  .rev-label{padding-left:16px!important;font-size:11px}
   .rev-row td{padding:9px 4px}
-  .pl-row td{font-size:12px}
+  .pl-row td{font-size:11px}
   .pl-row td:first-child{padding-left:8px}
 
 }
@@ -359,10 +359,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .tw th:first-child{text-align:left!important;padding-left:8px}
   .tw th+th{border-left:0.5px solid #e8e5fb}
   .tw th:last-child{padding-right:8px}
-  .tw td{padding:9px 4px;font-size:12px;text-align:center;white-space:nowrap;overflow:hidden}
-  .tw td:first-child{text-align:left;font-weight:600;padding-left:8px;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+  .tw td{padding:9px 4px;font-size:11px;text-align:center;white-space:nowrap;overflow:hidden}
+  .tw td:first-child{text-align:left;font-weight:600;padding-left:8px;overflow:hidden;text-overflow:ellipsis;font-size:11px}
   .tw .sub-row td:first-child{font-weight:400;padding-left:0}
-  .tw .tr td{font-size:12px;font-weight:700}
+  .tw .tr td{font-size:11px;font-weight:700}
   .nw{gap:7px}
   .tog{width:20px;height:20px;font-size:9px}
   .pill{font-size:9.5px;padding:2px 7px}
@@ -980,7 +980,7 @@ function render(){
   });
 
   const addR=`<tr class="addr"><td colspan="5"><button class="addb" onclick="openOv('modal-addcat')">＋ Add category</button></td></tr>`;
-  const totR=`<tr class="tr"><td style="padding-left:${mobile?'6px':'16px'}">Total expenses</td><td>${$f(tB)}</td><td>${$f(tA)}</td><td>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv">${$f(tF)}</td></tr>`;
+  const totR=`<tr class="tr"><td style="padding-left:${mobile?'6px':'16px'}">Expenses</td><td>${$f(tB)}</td><td>${$f(tA)}</td><td>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv">${$f(tF)}</td></tr>`;
 
   // Revenue row — editable, sits above the category table
   const rB=VIEW==='ytd'?Array.from({length:CM+1},(_,i)=>getRevB(i)).reduce((s,v)=>s+v,0):VIEW==='annual'?getRevB(CM)*12:VIEW==='bvf'?getRevB(CM)*12:getRevB(CM);
@@ -995,7 +995,7 @@ function render(){
   // P&L row — Revenue minus Total Expenses
   const plB=rB-tB;const plA=rA-tA;const plF=rF-tF;
   const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
-  const plLabel=plA>=0?'Net profit':'Net loss';
+  const plLabel=plA>=0?'Profit':'Loss';
   const plR=`<tr class="pl-row">
     <td>${plLabel}</td>
     <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
