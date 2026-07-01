@@ -603,7 +603,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
-const APP_VERSION='2026-06-29-permanent-fixes';
+const APP_VERSION='2026-06-30-safearea-v4';
 (function(){
   const stored=localStorage.getItem('pcf-app-version');
   if(stored&&stored!==APP_VERSION){
@@ -1243,6 +1243,40 @@ async function saveNewCat(){
 // ── NAV HEIGHT SYNC — measures the real rendered nav bar height
 // and writes it to --nav-h so app-screen height calc + overlay pages
 // NEVER desync again, regardless of future padding/icon size changes ──
+// Apply safe area inset directly via JS — works even on cached CSS
+(function applySafeArea(){
+  const inset = parseInt(
+    getComputedStyle(document.documentElement).getPropertyValue('--sat') ||
+    getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-top)') ||
+    '0'
+  ) || 0;
+  // Write safe area to a CSS variable we can use everywhere
+  document.documentElement.style.setProperty('--safe-top', 
+    `env(safe-area-inset-top, 0px)`
+  );
+  // Directly patch header padding on load and resize
+  function patchHeader(){
+    const hdr = document.querySelector('.app-header');
+    if(!hdr || window.innerWidth > 768) return;
+    // Read actual computed safe area
+    const tmp = document.createElement('div');
+    tmp.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);height:0;pointer-events:none';
+    document.body.appendChild(tmp);
+    const safeTop = tmp.getBoundingClientRect().top;
+    document.body.removeChild(tmp);
+    const pad = Math.max(10, safeTop);
+    hdr.style.paddingTop = pad + 'px';
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', patchHeader);
+  } else {
+    patchHeader();
+  }
+  window.addEventListener('resize', patchHeader);
+  window.addEventListener('orientationchange', () => setTimeout(patchHeader, 300));
+  window._patchHeader = patchHeader;
+})();
+
 function syncNavHeight(){
   if(!isMobile())return;
   const bn=document.getElementById('bottom-nav');
