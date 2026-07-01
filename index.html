@@ -155,6 +155,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sl{display:block;padding-left:26px;color:var(--text2);font-weight:400;font-size:12px;text-align:left}
 .sub-row td{background:#fafbff!important;border-bottom:0.5px solid #f5f5f5}
+.rev-row td{background:#f0faf4!important;border-bottom:1px solid #c8e6c9}
+.rev-row td:first-child{font-weight:700;color:#2E7D32;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding-left:12px}
+.pl-row td{background:#fafafa!important;border-top:2px solid #e0e0e0}
+.pl-row td:first-child{font-weight:700;color:#111;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding-left:12px}
+@media(max-width:768px){
+  .rev-row td:first-child{padding-left:8px;font-size:10px}
+  .pl-row td:first-child{padding-left:8px;font-size:10px}
+}
 .sub-row:hover td{background:#f5f4ff!important}
 .sub-item-name{font-size:12px;color:#666;font-weight:400;font-style:italic}
 @media(max-width:768px){
@@ -880,6 +888,17 @@ async function saveCatName(catName,newName){
   showSaved();render();
 }
 
+// ── REVENUE STATE — stored in localStorage, editable per month
+const REV_KEY='pcf-revenue';
+function getRevData(){try{return JSON.parse(localStorage.getItem(REV_KEY)||'{}')}catch{return{}}}
+function saveRevData(d){localStorage.setItem(REV_KEY,JSON.stringify(d))}
+function getRevB(m){const d=getRevData();return d[`b_${m}`]??6500;} // default $6500 budget
+function getRevA(m){const d=getRevData();return d[`a_${m}`]??6200;} // default $6200 actual
+function setRevB(m,v){const d=getRevData();d[`b_${m}`]=v;saveRevData(d);}
+function setRevA(m,v){const d=getRevData();d[`a_${m}`]=v;saveRevData(d);}
+function getRevF(m){const d=getRevData();return d[`f_${m}`]??d[`b_${m}`]??6500;}
+function setRevF(m,v){const d=getRevData();d[`f_${m}`]=v;saveRevData(d);}
+
 let cid=0;
 function eCell(val,fn){
   const id='e'+(cid++);
@@ -957,7 +976,32 @@ function render(){
   });
 
   const addR=`<tr class="addr"><td colspan="5"><button class="addb" onclick="openOv('modal-addcat')">＋ Add category</button></td></tr>`;
-  const totR=`<tr class="tr"><td style="padding-left:${mobile?'6px':'16px'}">Total</td><td>${$f(tB)}</td><td>${$f(tA)}</td><td>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv">${$f(tF)}</td></tr>`;
+  const totR=`<tr class="tr"><td style="padding-left:${mobile?'6px':'16px'}">Total expenses</td><td>${$f(tB)}</td><td>${$f(tA)}</td><td>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv">${$f(tF)}</td></tr>`;
+
+  // Revenue row — editable, sits above the category table
+  const rB=VIEW==='ytd'?Array.from({length:CM+1},(_,i)=>getRevB(i)).reduce((s,v)=>s+v,0):VIEW==='annual'?getRevB(CM)*12:VIEW==='bvf'?getRevB(CM)*12:getRevB(CM);
+  const rA=VIEW==='ytd'?Array.from({length:CM+1},(_,i)=>getRevA(i)).reduce((s,v)=>s+v,0):VIEW==='annual'?getRevA(CM)*12:VIEW==='bvf'?getRevF(CM)*12:getRevA(CM);
+  const rF=getRevF(CM);
+  const rVar=rB-rA;
+  const revR=`<tr class="rev-row">
+    <td>Revenue</td>
+    <td><span class="ecn" ondblclick="this.style.display='none';this.nextElementSibling.style.display='block';this.nextElementSibling.focus()">${$f(rB)}</span><input class="ein" style="display:none" value="${$iv(rB)}" onblur="setRevB(${CM},pn(this.value));this.style.display='none';this.previousElementSibling.style.display='';this.previousElementSibling.textContent=$f(getRevB(${CM}));render()" onkeydown="if(event.key==='Enter')this.blur()" onfocus="this.select()"/></td>
+    <td><span class="ecn" ondblclick="this.style.display='none';this.nextElementSibling.style.display='block';this.nextElementSibling.focus()">${$f(rA)}</span><input class="ein" style="display:none" value="${$iv(rA)}" onblur="setRevA(${CM},pn(this.value));this.style.display='none';this.previousElementSibling.style.display='';this.previousElementSibling.textContent=$f(getRevA(${CM}));render()" onkeydown="if(event.key==='Enter')this.blur()" onfocus="this.select()"/></td>
+    <td>${mobile?pillMob(rA+rVar,rA):pill(rA+rVar,rA)}</td>
+    <td class="cdiv"><input class="fci" value="$${$iv(rF)}" onchange="setRevF(${CM},pn(this.value));render()" onfocus="this.select()"/></td>
+  </tr>`;
+
+  // P&L row — Revenue minus Total Expenses
+  const plB=rB-tB;const plA=rA-tA;const plF=rF-tF;
+  const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
+  const plLabel=plA>=0?'Net profit':'Net loss';
+  const plR=`<tr class="pl-row">
+    <td>${plLabel}</td>
+    <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
+    <td style="${plStyle};font-weight:700">${plA>=0?'+':''}${$f(Math.abs(plA))}</td>
+    <td>${mobile?`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`:`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`}</td>
+    <td class="cdiv" style="${plF>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plF>=0?'+':''}${$f(Math.abs(plF))}</td>
+  </tr>`;
 
   // Update header stats
   const rem=tB-tA;const over=rem<0;
@@ -1055,7 +1099,7 @@ function render(){
     `<th>Budget</th>`+
     `<th>${VIEW==='annual'?'Run rate':VIEW==='bvf'?'Forecast':'Actual'}</th>`+
     `<th>Variance</th><th class="cdiv">Forecast</th>`+
-    `</tr></thead><tbody>${rows}${addR}${totR}</tbody></table></div>`+
+    `</tr></thead><tbody>${revR}${rows}${addR}${totR}${plR}</tbody></table></div>`+
     (VIEW==='annual'?`<div style="font-size:11px;color:#aaa;text-align:center;padding:6px 20px 0">Actuals to date + average monthly spend × remaining months</div>`:'')+
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
 }
