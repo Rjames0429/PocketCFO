@@ -1099,17 +1099,17 @@ function render(){
   }[VIEW]||{b:mn,a:'Spent',v:'Var',f:'Forecast'};
 
   // ── NEW KPI CARDS: Revenue / Expenses / Profit-Loss / Profit Margin ──
-  const revActual=getRevA(CM);
-  const revBudget=getRevB(CM);
-  const expActual=tA;
-  const expBudget=tB;
+  const revActual=rA;   // view-aware: MTD/YTD/Annual/BVF
+  const revBudget=rB;   // view-aware
+  const expActual=tA;   // already view-aware from getBV/getAV
+  const expBudget=tB;   // already view-aware
   const pl=revActual-expActual;
   const margin=revActual>0?((pl/revActual)*100):0;
 
-  // Last month profit margin for comparison
+  // Prior period for margin comparison — view-aware
   const prevM=CM>0?CM-1:null;
-  const prevRevA=prevM!==null?getRevA(prevM):0;
-  const prevExpA=prevM!==null?Object.keys(D).reduce((s,cat)=>s+D[cat].items.reduce((ss,it)=>ss+getA(it,prevM),0),0):0;
+  const prevRevA=prevM!==null?(VIEW==='ytd'?Array.from({length:CM},(_,i)=>getRevA(i)).reduce((s,v)=>s+v,0):getRevA(prevM)):0;
+  const prevExpA=prevM!==null?Object.keys(D).reduce((s,cat)=>s+D[cat].items.reduce((ss,it)=>ss+(VIEW==='ytd'?Array.from({length:CM},(_,i)=>getA(it,i)).reduce((a,b)=>a+b,0):getA(it,prevM)),0),0):0;
   const prevPL=prevRevA-prevExpA;
   const prevMargin=prevRevA>0?((prevPL/prevRevA)*100):0;
   const marginDiff=margin-prevMargin;
