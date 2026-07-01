@@ -778,7 +778,10 @@ async function loadApp(){
   const cb=document.getElementById('chat-btn');
   if(cb){cb.style.display=isMobile()?'flex':'none';if(window._initChatDrag)window._initChatDrag();}
   // syncNavHeight after a frame so nav is fully painted and offsetHeight is accurate
-  requestAnimationFrame(syncNavHeight);
+  requestAnimationFrame(()=>{
+    syncNavHeight();
+    if(window._patchHeader)window._patchHeader(); // re-apply safe area padding after sign-in
+  });
   if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{cleanupUI();document.getElementById('auth-screen').style.display='flex';authTab('in');return;}}
   const{data:u}=await sb.from('users').select('account_number,display_name').eq('id',CU.id).single();
   if(u){
