@@ -1121,7 +1121,7 @@ function render(){
   const summaryCardsUpdated=mobile?`<div class="m-summary-cards">
     <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C)">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Revenue</div><div class="m-sc-sub">Actual income</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Revenue</div><div class="m-sc-sub">Actual Income</div></div>
         <div class="m-sc-right"><div class="m-sc-val">${$f(revActual)}</div></div>
       </div>
       <div class="m-sc-bot">
@@ -1131,7 +1131,7 @@ function render(){
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#185FA5,#0C3F72)">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Expenses</div><div class="m-sc-sub">Actual spend</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Expenses</div><div class="m-sc-sub">Actual Spend</div></div>
         <div class="m-sc-right"><div class="m-sc-val">${$f(expActual)}</div></div>
       </div>
       <div class="m-sc-bot">
@@ -1141,7 +1141,7 @@ function render(){
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,${pl>=0?'#1D9E75,#0D6B50':'#C62828,#7B1111'})">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Profit / Loss</div><div class="m-sc-sub">Revenue minus expenses</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Profit / Loss</div><div class="m-sc-sub">Revenue Minus Expenses</div></div>
         <div class="m-sc-right"><div class="m-sc-val">${pl>=0?'+':''}${$f(pl)}</div></div>
       </div>
       <div class="m-sc-bot">
@@ -1151,7 +1151,7 @@ function render(){
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#4B3FA0,#2D2460)">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Profit Margin</div><div class="m-sc-sub">% of revenue kept</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Profit Margin</div><div class="m-sc-sub">% Of Revenue Kept</div></div>
         <div class="m-sc-right"><div class="m-sc-val">${margin.toFixed(1)}%</div></div>
       </div>
       <div class="m-sc-bot">
@@ -1508,7 +1508,7 @@ function renderCharts(){
 
     <!-- Actual donut -->
     <div style="${cardStyle}">
-      <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:2px">Actual spending</div>
+      <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:2px">Actual Spending</div>
       <div style="font-size:12px;color:#aaa;margin-bottom:18px">${MNS[CM]} ${YEAR} · spent to date</div>
       <div style="display:flex;justify-content:center;margin-bottom:18px">
         <svg width="190" height="190" viewBox="0 0 190 190">${buildPie(aData,totalA,190,'$'+Math.round(totalA).toLocaleString(),'TOTAL SPENT')}</svg>
