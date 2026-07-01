@@ -244,20 +244,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
    MOBILE STYLES — max-width 768px
 ══════════════════════════════════════ */
 @media(max-width:768px){
-  body{background:#fff}
+  body{
+    background:#fff;
+    /* Safe area padding on body — works natively, no JS needed, survives sign in/out */
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
 
-  /* APP SCREEN — flex column, fills viewport exactly. No calc() guessing. */
+  /* APP SCREEN — flex column */
   #app-screen{
     display:flex!important;
     flex-direction:column;
-    height:calc(100vh - var(--nav-h) - env(safe-area-inset-top)); /* account for iPhone notch/Dynamic Island */
-    min-height:0!important; /* override base min-height:100vh which was forcing full height */
+    height:calc(100vh - var(--nav-h) - env(safe-area-inset-top));
+    min-height:0!important;
     overflow:hidden;
     position:relative;
   }
 
-  /* HEADER — logo + single badge — fixed size flex item */
-  .app-header{height:auto;padding:10px 18px;padding-top:max(10px, env(safe-area-inset-top));flex-direction:row;align-items:center;background:#fff;border-bottom:0.5px solid #f0f0f0;flex-shrink:0;position:static}
+  /* HEADER — no manual safe area padding needed, body handles it */
+  .app-header{height:auto;padding:10px 18px;flex-direction:row;align-items:center;background:#fff;border-bottom:0.5px solid #f0f0f0;flex-shrink:0;position:static}
   .app-header-row1{display:none}
   #hdr-logo-desk{display:flex!important}
   .hlogo .name{font-size:16px;font-weight:700}
@@ -603,7 +608,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
-const APP_VERSION='2026-06-30-safearea-v4';
+const APP_VERSION='2026-06-30-safearea-css-body';
 (function(){
   const stored=localStorage.getItem('pcf-app-version');
   if(stored&&stored!==APP_VERSION){
@@ -778,10 +783,7 @@ async function loadApp(){
   const cb=document.getElementById('chat-btn');
   if(cb){cb.style.display=isMobile()?'flex':'none';if(window._initChatDrag)window._initChatDrag();}
   // syncNavHeight after a frame so nav is fully painted and offsetHeight is accurate
-  requestAnimationFrame(()=>{
-    syncNavHeight();
-    if(window._patchHeader)window._patchHeader(); // re-apply safe area padding after sign-in
-  });
+  requestAnimationFrame(syncNavHeight);
   if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{cleanupUI();document.getElementById('auth-screen').style.display='flex';authTab('in');return;}}
   const{data:u}=await sb.from('users').select('account_number,display_name').eq('id',CU.id).single();
   if(u){
@@ -1246,40 +1248,6 @@ async function saveNewCat(){
 // ── NAV HEIGHT SYNC — measures the real rendered nav bar height
 // and writes it to --nav-h so app-screen height calc + overlay pages
 // NEVER desync again, regardless of future padding/icon size changes ──
-// Apply safe area inset directly via JS — works even on cached CSS
-(function applySafeArea(){
-  const inset = parseInt(
-    getComputedStyle(document.documentElement).getPropertyValue('--sat') ||
-    getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-top)') ||
-    '0'
-  ) || 0;
-  // Write safe area to a CSS variable we can use everywhere
-  document.documentElement.style.setProperty('--safe-top', 
-    `env(safe-area-inset-top, 0px)`
-  );
-  // Directly patch header padding on load and resize
-  function patchHeader(){
-    const hdr = document.querySelector('.app-header');
-    if(!hdr || window.innerWidth > 768) return;
-    // Read actual computed safe area
-    const tmp = document.createElement('div');
-    tmp.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);height:0;pointer-events:none';
-    document.body.appendChild(tmp);
-    const safeTop = tmp.getBoundingClientRect().top;
-    document.body.removeChild(tmp);
-    const pad = Math.max(10, safeTop);
-    hdr.style.paddingTop = pad + 'px';
-  }
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', patchHeader);
-  } else {
-    patchHeader();
-  }
-  window.addEventListener('resize', patchHeader);
-  window.addEventListener('orientationchange', () => setTimeout(patchHeader, 300));
-  window._patchHeader = patchHeader;
-})();
-
 function syncNavHeight(){
   if(!isMobile())return;
   const bn=document.getElementById('bottom-nav');
