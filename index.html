@@ -1416,10 +1416,12 @@ function renderPage(page){
 function renderTransactions(){
   const el=document.getElementById('txn-content');
   if(!el||!CU)return;
-  el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px"><div class="ld"></div><br>Loading transactions…</div>';
-  sb.from('transactions')
-    .select('*,budget_line_items(name),budget_categories(name)')
-    .eq('user_id',CU.id)
+  el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px"><div class="ld"></div><br>Syncing transactions…</div>';
+  // Auto-sync from Plaid first, then render
+  syncPlaidTransactions().finally(()=>{
+    sb.from('transactions')
+      .select('*,budget_line_items(name),budget_categories(name)')
+      .eq('user_id',CU.id)
     .order('date',{ascending:false})
     .limit(200)
     .then(({data:txns})=>{
@@ -1464,6 +1466,7 @@ function renderTransactions(){
       });
       el.innerHTML=html;
     });
+  });
 }
 
 function getCatEmoji(cat){
