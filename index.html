@@ -1416,9 +1416,13 @@ function renderPage(page){
 function renderTransactions(){
   const el=document.getElementById('txn-content');
   if(!el||!CU)return;
-  el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px"><div class="ld"></div><br>Syncing transactions…</div>';
-  // Auto-sync from Plaid first, then render
-  syncPlaidTransactions().finally(()=>{
+  el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px"><div class="ld"></div><br>Loading transactions…</div>';
+  // Only sync from Plaid once per session to avoid flicker
+  const lastSync=sessionStorage.getItem('plaid_last_sync');
+  const now=Date.now();
+  const oneHour=60*60*1000;
+  const shouldSync=!lastSync||(now-parseInt(lastSync))>oneHour;
+  const loadTxns=()=>{
     sb.from('transactions')
       .select('*,budget_line_items(name),budget_categories(name)')
       .eq('user_id',CU.id)
@@ -1466,7 +1470,13 @@ function renderTransactions(){
       });
       el.innerHTML=html;
     });
-  });
+  };
+  if(shouldSync){
+    sessionStorage.setItem('plaid_last_sync',now.toString());
+    syncPlaidTransactions().finally(loadTxns);
+  } else {
+    loadTxns();
+  }
 }
 
 function getCatEmoji(cat){
