@@ -1795,54 +1795,33 @@ async function sendChat(){
 
 // ── PLAID INTEGRATION ────────────────────────────────────
 
-// ── Step 1: Create Link Token (calls Plaid API directly from client)
-async function createLinkToken(){
-  const res=await fetch(`${PLAID_BASE}/link/token/create`,{
+// ── Plaid Edge Function helper — all Plaid calls go through here (no CORS issues)
+async function plaidCall(action, body={}){
+  const{data:{session}}=await sb.auth.getSession();
+  const res=await fetch(`${SUPA_URL}/functions/v1/plaid`,{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      client_id:PLAID_CLIENT_ID,
-      secret:PLAID_SECRET,
-      client_name:'PocketCFO',
-      user:{client_user_id:CU.id},
-      products:['transactions'],
-      country_codes:['US'],
-      language:'en'
-    })
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':`Bearer ${session.access_token}`,
+      'apikey':SUPA_KEY
+    },
+    body:JSON.stringify({action,...body})
   });
   const data=await res.json();
+  if(data.error)throw new Error(data.error);
+  return data;
+}
+
+// ── Step 1: Create Link Token via Edge Function
+async function createLinkToken(){
+  const data=await plaidCall('create_link_token');
   if(data.error_message)throw new Error(data.error_message);
   return data.link_token;
 }
 
-// ── Step 2: Exchange public token for access token
-async function exchangeToken(publicToken){
-  const res=await fetch(`${PLAID_BASE}/item/public_token/exchange`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      client_id:PLAID_CLIENT_ID,
-      secret:PLAID_SECRET,
-      public_token:publicToken
-    })
-  });
-  return await res.json();
-}
-
-// ── Step 3: Get institution info
-async function getInstitution(institutionId){
-  const res=await fetch(`${PLAID_BASE}/institutions/get_by_id`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      client_id:PLAID_CLIENT_ID,
-      secret:PLAID_SECRET,
-      institution_id:institutionId,
-      country_codes:['US']
-    })
-  });
-  const data=await res.json();
-  return data.institution?.name||'Unknown Bank';
+// ── Step 2: Exchange handled by Edge Function
+async function exchangeToken(publicToken, institutionName, institutionId){
+  return await plaidCall('exchange_token',{public_token:publicToken,institution_name:institutionName,institution_id:institutionId});
 }
 
 // ── Step 4: Open Plaid Link
@@ -1857,18 +1836,8 @@ async function connectBank(){
         if(btn){btn.textContent='⏳ Saving...';btn.disabled=true;}
         try{
           // Exchange for access token
-          const{access_token,item_id}=await exchangeToken(publicToken);
-          const instName=metadata.institution?.name||await getInstitution(metadata.institution?.institution_id)||'Unknown Bank';
-          // Save to Supabase
-          const{error}=await sb.from('plaid_items').insert({
-            user_id:CU.id,
-            access_token,
-            item_id,
-            institution_id:metadata.institution?.institution_id||'',
-            institution_name:instName,
-            last_synced_at:new Date().toISOString()
-          });
-          if(error)throw error;
+          const instName=metadata.institution?.name||'Unknown Bank';
+          await exchangeToken(publicToken,instName,metadata.institution?.institution_id||'');
           alert(`✅ ${instName} connected! Syncing transactions...`);
           // Sync transactions immediately
           await syncPlaidTransactions();
@@ -1894,90 +1863,17 @@ async function connectBank(){
 // ── Step 5: Sync transactions from Plaid
 async function syncPlaidTransactions(){
   if(!CU)return;
-  const{data:items}=await sb.from('plaid_items').select('*').eq('user_id',CU.id);
-  if(!items?.length)return;
-
-  // Get user's budget categories for Claude categorization
-  const cats=Object.keys(D);
-
-  for(const item of items){
-    try{
-      // Get transactions from last 90 days
-      const now=new Date();
-      const start=new Date(now-90*24*60*60*1000).toISOString().slice(0,10);
-      const end=now.toISOString().slice(0,10);
-
-      const res=await fetch(`${PLAID_BASE}/transactions/get`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          client_id:PLAID_CLIENT_ID,
-          secret:PLAID_SECRET,
-          access_token:item.access_token,
-          start_date:start,
-          end_date:end,
-          options:{count:250,offset:0}
-        })
-      });
-      const data=await res.json();
-      if(data.error_message){console.error('Plaid sync error:',data.error_message);continue;}
-
-      const txns=data.transactions||[];
-      if(!txns.length)continue;
-
-      // Load existing rules for fast matching
-      const{data:rules}=await sb.from('plaid_rules').select('*').eq('user_id',CU.id);
-      const ruleMap={};
-      (rules||[]).forEach(r=>ruleMap[r.merchant_pattern.toLowerCase()]=r.category_name);
-
-      // Process each transaction
-      const toInsert=[];
-      const toCategorizWithAI=[];
-
-      for(const t of txns){
-        if(t.pending)continue; // skip pending
-        const merchant=(t.merchant_name||t.name||'').trim();
-        const merchantLow=merchant.toLowerCase();
-
-        // Check existing rules first
-        let assignedCat=null;
-        for(const pattern of Object.keys(ruleMap)){
-          if(merchantLow.includes(pattern)){
-            assignedCat=ruleMap[pattern];
-            break;
-          }
-        }
-
-        toInsert.push({
-          user_id:CU.id,
-          date:t.date,
-          amount:Math.abs(t.amount),
-          merchant_name:merchant,
-          plaid_transaction_id:t.transaction_id,
-          plaid_category:t.personal_finance_category?.primary||t.category?.[0]||'',
-          pending:false,
-          category_name:assignedCat||null,
-          needs_review:!assignedCat
-        });
-
-        if(!assignedCat)toCategorizWithAI.push({id:t.transaction_id,merchant,amount:Math.abs(t.amount)});
-      }
-
-      // Upsert transactions (skip duplicates)
-      if(toInsert.length){
-        await sb.from('transactions').upsert(toInsert,{onConflict:'plaid_transaction_id',ignoreDuplicates:false});
-      }
-
-      // AI categorize uncategorized transactions in batch
-      if(toCategorizWithAI.length&&cats.length){
-        await aiCategorizeBatch(toCategorizWithAI,cats);
-      }
-
-      // Update last synced
-      await sb.from('plaid_items').update({last_synced_at:new Date().toISOString()}).eq('id',item.id);
-
-    }catch(e){console.error('Sync error for item',item.id,e);}
-  }
+  try{
+    const result=await plaidCall('sync_transactions');
+    console.log('Synced',result.synced,'transactions');
+    // Now AI categorize any needs_review transactions
+    const{data:uncat}=await sb.from('transactions')
+      .select('*').eq('user_id',CU.id).eq('needs_review',true).limit(50);
+    if(uncat?.length&&Object.keys(D).length){
+      const cats=Object.keys(D);
+      await aiCategorizeBatch(uncat.map(t=>({id:t.plaid_transaction_id,merchant:t.merchant_name||'',amount:t.amount})),cats);
+    }
+  }catch(e){console.error('Sync error:',e);}
 
   // Reload transactions view if on that tab
   if(currentPage==='transactions')renderTransactions();
@@ -2040,19 +1936,11 @@ Respond with ONLY a JSON array like: [{"id":"txn_id","category":"Category Name",
 
 // ── Step 7: User manually assigns category (learns forever)
 async function assignCategory(plaidTxnId,merchant,category){
-  await sb.from('transactions')
-    .update({category_name:category,needs_review:false})
-    .eq('plaid_transaction_id',plaidTxnId)
-    .eq('user_id',CU.id);
-
-  // Save rule so this merchant is always assigned this category
-  const key=merchant.toLowerCase().split(' ')[0];
-  await sb.from('plaid_rules').upsert({
-    user_id:CU.id,
-    merchant_pattern:key,
+  await plaidCall('save_rule',{
+    plaid_transaction_id:plaidTxnId,
+    merchant_pattern:merchant.toLowerCase().split(' ')[0],
     category_name:category
-  },{onConflict:'user_id,merchant_pattern'});
-
+  });
   renderTransactions();
 }
 
