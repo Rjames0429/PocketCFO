@@ -864,6 +864,8 @@ async function fetchData(){
   const{data:items}=await sb.from('budget_line_items').select('*').eq('user_id',CU.id).eq('is_active',true).order('sort_order');
   const{data:budgets}=await sb.from('monthly_budgets').select('*').eq('user_id',CU.id).eq('year',YEAR);
   const{data:txns}=await sb.from('transactions').select('*').eq('user_id',CU.id).eq('is_excluded',false).gte('date',`${YEAR}-01-01`).lte('date',`${YEAR}-12-31`);
+  // Also load Plaid transactions (they have category_name, not line_item_id)
+  const{data:plaidTxns}=await sb.from('transactions').select('*').eq('user_id',CU.id).not('plaid_transaction_id','is',null).not('category_name','is',null).gte('date',`${YEAR}-01-01`).lte('date',`${YEAR}-12-31`);
   cats.forEach(cat=>{D[cat.name]={id:cat.id,catObj:cat,items:[]};});
   (items||[]).forEach(item=>{
     const cat=cats.find(c=>c.id===item.category_id);if(!cat)return;
@@ -873,7 +875,14 @@ async function fetchData(){
       bMap[m]=b?parseFloat(b.budget_amount):0;
       const fo=(budgets||[]).find(bd=>bd.line_item_id===item.id&&bd.month===m+1&&bd.forecast_amount!=null);
       if(fo)FO[`${cat.name}::${item.name}::${m}`]=parseFloat(fo.forecast_amount);
-      aMap[m]=(txns||[]).filter(t=>t.line_item_id===item.id&&new Date(t.date).getMonth()===m).reduce((s,t)=>s+parseFloat(t.amount),0);
+      // Manual actuals (linked by line_item_id)
+      const manualActuals=(txns||[]).filter(t=>t.line_item_id===item.id&&new Date(t.date).getMonth()===m).reduce((s,t)=>s+parseFloat(t.amount),0);
+      // Plaid actuals (linked by category_name matching the parent category)
+      // Distribute evenly across line items in the category
+      const catItems=(items||[]).filter(i=>i.category_id===cat.id);
+      const catCount=catItems.length||1;
+      const plaidActuals=(plaidTxns||[]).filter(t=>t.category_name===cat.name&&new Date(t.date).getMonth()===m).reduce((s,t)=>s+parseFloat(t.amount),0);
+      aMap[m]=manualActuals+(plaidActuals/catCount);
     }
     D[cat.name].items.push({id:item.id,name:item.name,budgets:bMap,actuals:aMap});
   });
