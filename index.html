@@ -1426,11 +1426,6 @@ function renderTransactions(){
   const el=document.getElementById('txn-content');
   if(!el||!CU)return;
   el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px"><div class="ld"></div><br>Loading transactions…</div>';
-  // Only sync from Plaid once per session to avoid flicker
-  const lastSync=sessionStorage.getItem('plaid_last_sync');
-  const now=Date.now();
-  const oneHour=60*60*1000;
-  const shouldSync=!lastSync||(now-parseInt(lastSync))>oneHour;
   const loadTxns=()=>{
     sb.from('transactions')
       .select('*,budget_line_items(name),budget_categories(name)')
@@ -1480,12 +1475,7 @@ function renderTransactions(){
       el.innerHTML=html;
     });
   };
-  if(shouldSync){
-    sessionStorage.setItem('plaid_last_sync',now.toString());
-    syncPlaidTransactions().finally(loadTxns);
-  } else {
-    loadTxns();
-  }
+  loadTxns();
 }
 
 function getCatEmoji(cat){
@@ -1697,7 +1687,17 @@ function settingsAction(type){
   if(type==='password'){sb.auth.resetPasswordForEmail(CU.email,{redirectTo:window.location.origin}).then(()=>alert('Password reset email sent to '+CU.email));}
   else if(type==='support'){window.open('mailto:support@pocketcfo.app?subject=PocketCFO Support','_blank');}
   else if(type==='export'){exportData();}
-  else if(type==='sync'){syncPlaidTransactions().then(()=>{render();}).catch(()=>{render();});}
+  else if(type==='sync'){
+    const btn=event?.target?.closest('[onclick]');
+    if(btn)btn.textContent='⏳ Syncing...';
+    syncPlaidTransactions().then(()=>{
+      if(btn)btn.textContent='✅ Synced!';
+      setTimeout(()=>renderSettings(),1500);
+    }).catch(e=>{
+      if(btn)btn.textContent='❌ Failed';
+      console.error(e);
+    });
+  }
   else if(type==='red'){if(confirm('Clear all demo data and start fresh?'))clearData();}
 }
 async function exportData(){
@@ -1915,17 +1915,17 @@ async function syncPlaidTransactions(){
   try{
     const result=await plaidCall('sync_transactions');
     console.log('Synced',result.synced,'transactions');
-    // Now AI categorize any needs_review transactions
+    // AI categorize uncategorized transactions
     const{data:uncat}=await sb.from('transactions')
       .select('*').eq('user_id',CU.id).eq('needs_review',true).limit(50);
     if(uncat?.length&&Object.keys(D).length){
       const cats=Object.keys(D);
       await aiCategorizeBatch(uncat.map(t=>({id:t.plaid_transaction_id,merchant:t.merchant_name||'',amount:t.amount})),cats);
     }
+    // Refresh budget data so actuals update
+    await fetchData();
+    render();
   }catch(e){console.error('Sync error:',e);}
-
-  // Reload transactions view if on that tab
-  if(currentPage==='transactions')renderTransactions();
 }
 
 // ── Step 6: Claude AI categorization
