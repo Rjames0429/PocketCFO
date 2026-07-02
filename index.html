@@ -852,6 +852,7 @@ async function loadApp(){
     }
   }
   await fetchData();render();
+  checkPlaidRedirect();
 }
 function dismissDemo(){document.getElementById('demo-banner').style.display='none';sessionStorage.setItem('demo-dismissed','1');}
 
@@ -1830,33 +1831,59 @@ async function connectBank(){
     const btn=document.querySelector('[onclick="connectBank()"]');
     if(btn){btn.textContent='🔄 Connecting...';btn.disabled=true;}
     const linkToken=await createLinkToken();
-    const handler=Plaid.create({
-      token:linkToken,
-      onSuccess:async(publicToken,metadata)=>{
-        if(btn){btn.textContent='⏳ Saving...';btn.disabled=true;}
-        try{
-          // Exchange for access token
-          const instName=metadata.institution?.name||'Unknown Bank';
-          await exchangeToken(publicToken,instName,metadata.institution?.institution_id||'');
-          alert(`✅ ${instName} connected! Syncing transactions...`);
-          // Sync transactions immediately
-          await syncPlaidTransactions();
-          renderSettings();
-        }catch(e){
-          alert('Error saving bank connection: '+e.message);
-          if(btn){btn.textContent='🏦 Connect a Bank Account';btn.disabled=false;}
-        }
-      },
-      onExit:(err)=>{
-        if(btn){btn.textContent='🏦 Connect a Bank Account';btn.disabled=false;}
-        if(err)console.log('Plaid exit error:',err);
-      }
-    });
-    handler.open();
+    // Store token in sessionStorage for redirect flow on mobile
+    sessionStorage.setItem('plaid_link_token', linkToken);
+    openPlaidLink(linkToken, btn);
   }catch(e){
     alert('Error connecting bank: '+e.message);
     const btn=document.querySelector('[onclick="connectBank()"]');
     if(btn){btn.textContent='🏦 Connect a Bank Account';btn.disabled=false;}
+  }
+}
+
+function openPlaidLink(linkToken, btn){
+  const config = {
+    token: linkToken,
+    onSuccess: async(publicToken, metadata)=>{
+      sessionStorage.removeItem('plaid_link_token');
+      if(btn){btn.textContent='⏳ Saving...';btn.disabled=true;}
+      try{
+        const instName=metadata.institution?.name||'Unknown Bank';
+        await exchangeToken(publicToken, instName, metadata.institution?.institution_id||'');
+        await syncPlaidTransactions();
+        renderSettings();
+        alert('✅ '+instName+' connected! Transactions synced.');
+      }catch(e){
+        alert('Error saving connection: '+e.message);
+        if(btn){btn.textContent='🏦 Connect a Bank Account';btn.disabled=false;}
+      }
+    },
+    onExit:(err,metadata)=>{
+      if(btn){btn.textContent='🏦 Connect a Bank Account';btn.disabled=false;}
+      sessionStorage.removeItem('plaid_link_token');
+      if(err)console.log('Plaid exit:',err);
+    },
+    onEvent:(eventName,metadata)=>{
+      console.log('Plaid event:',eventName,metadata);
+      // Handle HANDOFF event which fires when user clicks "Continue to PocketCFO"
+      if(eventName==='HANDOFF'){
+        console.log('Handoff received');
+      }
+    }
+  };
+  // Check if we're returning from OAuth redirect
+  if(window.location.href.includes('oauth_state_id')){
+    config.receivedRedirectUri = window.location.href;
+  }
+  const handler = Plaid.create(config);
+  handler.open();
+}
+
+// Check for OAuth redirect on page load
+function checkPlaidRedirect(){
+  const savedToken = sessionStorage.getItem('plaid_link_token');
+  if(savedToken && window.location.href.includes('oauth_state_id')){
+    openPlaidLink(savedToken, null);
   }
 }
 
