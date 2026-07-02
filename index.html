@@ -564,12 +564,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   <!-- Transactions page -->
   <div id="page-transactions" style="display:none;position:fixed;top:0;left:0;right:0;bottom:var(--nav-h);background:#fff;z-index:40;overflow-y:auto">
-    <div style="background:#fff;padding:12px 18px;border-bottom:0.5px solid #f0f0f0;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px">
-      <button onclick="navTo('budget')" style="background:none;border:none;font-size:20px;cursor:pointer;color:#4B3FA0;padding:0">‹</button>
-      <div style="font-size:17px;font-weight:600;color:#111">Transactions</div>
+    <div style="background:#fff;padding:12px 18px;border-bottom:0.5px solid #f0f0f0;position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="navTo('budget')" style="background:none;border:none;font-size:20px;cursor:pointer;color:#4B3FA0;padding:0">‹</button>
+        <div style="font-size:17px;font-weight:600;color:#111">Transactions</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <select id="txn-month-picker" onchange="renderTransactions()" style="font-size:12px;padding:4px 8px;border:1px solid #e0e0e0;border-radius:8px;color:#555;font-family:inherit;background:#fff">
+          <option value="0">Jan</option><option value="1">Feb</option><option value="2">Mar</option>
+          <option value="3">Apr</option><option value="4">May</option><option value="5" selected>Jun</option>
+          <option value="6">Jul</option><option value="7">Aug</option><option value="8">Sep</option>
+          <option value="9">Oct</option><option value="10">Nov</option><option value="11">Dec</option>
+        </select>
+        <button onclick="syncAndRefreshTxns(this)" style="font-size:11px;padding:4px 10px;border:1px solid #4B3FA0;color:#4B3FA0;background:#fff;border-radius:6px;cursor:pointer;font-family:inherit">🔄 Sync</button>
+      </div>
     </div>
     <div id="txn-content" style="padding:0 0 20px"></div>
-
   </div>
 
   <!-- Charts page -->
@@ -1427,9 +1437,17 @@ function renderTransactions(){
   if(!el||!CU)return;
   el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px"><div class="ld"></div><br>Loading transactions…</div>';
   const loadTxns=()=>{
+    // Use month picker if available, else current month
+    const picker=document.getElementById('txn-month-picker');
+    const txnMonth=picker?parseInt(picker.value):CM;
+    if(picker)picker.value=String(txnMonth);
+    const txnMonthStart=`${YEAR}-${String(txnMonth+1).padStart(2,'0')}-01`;
+    const txnMonthEnd=`${YEAR}-${String(txnMonth+1).padStart(2,'0')}-31`;
     sb.from('transactions')
       .select('*,budget_line_items(name),budget_categories(name)')
       .eq('user_id',CU.id)
+      .gte('date',txnMonthStart)
+      .lte('date',txnMonthEnd)
     .order('date',{ascending:false})
     .limit(200)
     .then(({data:txns})=>{
@@ -1910,17 +1928,29 @@ function checkPlaidRedirect(){
 }
 
 // ── Step 5: Sync transactions from Plaid
+async function syncAndRefreshTxns(btn){
+  if(btn){btn.textContent='⏳';btn.disabled=true;}
+  await syncPlaidTransactions();
+  if(btn){btn.textContent='🔄 Sync';btn.disabled=false;}
+  renderTransactions();
+}
+
 async function syncPlaidTransactions(){
   if(!CU)return;
   try{
     const result=await plaidCall('sync_transactions');
     console.log('Synced',result.synced,'transactions');
-    // AI categorize uncategorized transactions
+    // Auto-categorize ALL uncategorized transactions via Claude
     const{data:uncat}=await sb.from('transactions')
-      .select('*').eq('user_id',CU.id).eq('needs_review',true).limit(50);
+      .select('*').eq('user_id',CU.id).eq('needs_review',true).limit(100);
     if(uncat?.length&&Object.keys(D).length){
       const cats=Object.keys(D);
-      await aiCategorizeBatch(uncat.map(t=>({id:t.plaid_transaction_id,merchant:t.merchant_name||'',amount:t.amount})),cats);
+      const batches=[];
+      for(let i=0;i<uncat.length;i+=20)batches.push(uncat.slice(i,i+20));
+      for(const batch of batches){
+        await aiCategorizeBatch(batch.map(t=>({id:t.plaid_transaction_id,merchant:t.merchant_name||t.description||'Unknown',amount:t.amount})),cats);
+      }
+      console.log(`Auto-categorized ${uncat.length} transactions`);
     }
     // Refresh budget data so actuals update
     await fetchData();
