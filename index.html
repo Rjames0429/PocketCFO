@@ -873,7 +873,7 @@ async function fetchData(){
   if(!cats||!cats.length){await loadDemoData(CU.id);const{data:cats2}=await sb.from('budget_categories').select('*').eq('user_id',CU.id).eq('is_active',true).order('sort_order');if(!cats2||!cats2.length)return;return fetchData();}
   const{data:items}=await sb.from('budget_line_items').select('*').eq('user_id',CU.id).eq('is_active',true).order('sort_order');
   const{data:budgets}=await sb.from('monthly_budgets').select('*').eq('user_id',CU.id).eq('year',YEAR);
-  const{data:txns}=await sb.from('transactions').select('*').eq('user_id',CU.id).eq('is_excluded',false).gte('date',`${YEAR}-01-01`).lte('date',`${YEAR}-12-31`);
+  const{data:txns}=await sb.from('transactions').select('*').eq('user_id',CU.id).gte('date',`${YEAR}-01-01`).lte('date',`${YEAR}-12-31`);
   // Also load Plaid transactions (they have category_name, not line_item_id)
   const{data:plaidTxns}=await sb.from('transactions').select('*').eq('user_id',CU.id).not('plaid_transaction_id','is',null).not('category_name','is',null).gte('date',`${YEAR}-01-01`).lte('date',`${YEAR}-12-31`);
   cats.forEach(cat=>{D[cat.name]={id:cat.id,catObj:cat,items:[]};});
@@ -1449,8 +1449,8 @@ function renderTransactions(){
       .eq('user_id',CU.id)
       .gte('date',txnMonthStart)
       .lte('date',txnMonthEnd)
-    .order('date',{ascending:false})
-    .limit(200)
+      .order('date',{ascending:false})
+      .limit(200)
     .then(({data:txns})=>{
       if(!txns||!txns.length){el.innerHTML='<div style="padding:40px;text-align:center;color:#aaa;font-size:14px">No transactions yet<br><br><button onclick="syncAndRefreshTxns(this)" style="margin-top:8px;padding:10px 20px;background:#4B3FA0;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">🔄 Sync from Bank</button></div>';return;}
       // Group by date
