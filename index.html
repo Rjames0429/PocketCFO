@@ -1265,7 +1265,7 @@ function render(){
     // Both: KPI cards (hidden on mobile by CSS, replaced by summaryCardsUpdated)
     `<div class="kpis"><div class="kpi kb"><div class="kl">Budget</div><div class="kv">${$f(tB)}</div><div class="ks">${VIEW==='mtd'?mn+' '+YEAR:VIEW==='ytd'?'Jan–'+mn:YEAR}</div></div>`+
     `<div class="kpi kg"><div class="kl">${VIEW==='bvf'?'Forecast':'Actual'}</div><div class="kv">${$f(tA)}</div><div class="ks">${VIEW==='annual'?'Run rate est.':VIEW==='bvf'?'vs. budget':'Spent so far'}</div></div>`+
-    `<div class="kpi ${kpiVarCls}"><div class="kl">Variance</div><div class="kv">${vs(vB)}</div><div class="ks">${pctB}% ${vB>=0?'favorable':'over'}</div></div>`+
+    `<div class="kpi ${kpiVarCls}"><div class="kl">+/−</div><div class="kv">${vs(vB)}</div><div class="ks">${pctB}% ${vB>=0?'favorable':'over'}</div></div>`+
     `<div class="kpi kp"><div class="kl">Forecast</div><div class="kv">${$f(tF)}</div><div class="ks">${VIEW==='bvf'?'Annual forecast':'Carries forward'}</div></div></div>`+
     // Mobile summary cards
     summaryCardsUpdated+
@@ -1275,7 +1275,7 @@ function render(){
     `<th style="text-align:center!important">Category</th>`+
     `<th>Budget</th>`+
     `<th>Actual</th>`+
-    `<th>Variance</th>`+
+    `<th>+/−</th>`+
     `<th class="cdiv">Forecast</th>`+
     `</tr></thead>`+
     `<tbody>`+
