@@ -639,11 +639,14 @@ const APP_VERSION='2026-07-02-table-redesign';
 (function(){
   const stored=localStorage.getItem('pcf-app-version');
   if(stored&&stored!==APP_VERSION){
-    // Version changed — force a hard reload to bust any stale cache
     localStorage.setItem('pcf-app-version',APP_VERSION);
-    location.reload(true);
-  } else if(!stored){
+    // Safari ignores location.reload(true) — use URL param to force fresh fetch
+    const url=window.location.href.split('?')[0]+'?bust='+APP_VERSION;
+    window.location.replace(url);
+  } else {
     localStorage.setItem('pcf-app-version',APP_VERSION);
+    // Clean up bust param from URL if present
+    if(window.location.search)window.history.replaceState({},'',window.location.pathname);
   }
 })();
 const SUPA_URL='https://omliytfwfkmzyvchlojf.supabase.co';
