@@ -1381,6 +1381,11 @@ async function saveNewCat(){
 // ── NAV HEIGHT SYNC — measures the real rendered nav bar height
 // and writes it to --nav-h so app-screen height calc + overlay pages
 // NEVER desync again, regardless of future padding/icon size changes ──
+function fixTableHeaders(){
+  const th=document.querySelector('.tw th:first-child');
+  if(th)th.style.paddingLeft='16px';
+}
+
 function syncNavHeight(){
   if(!isMobile())return;
   const bn=document.getElementById('bottom-nav');
