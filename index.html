@@ -1079,14 +1079,12 @@ function render(){
     const exp=!!EXP[cat];
     const varPill=mobile?pillMob(b,a):pill(b,a);
 
-    const mTd=mobile?'style="text-align:right!important;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-variant-numeric:tabular-nums"':'';
-    const mTd1=mobile?'style="text-align:left!important;color:#4B3FA0;font-size:10.5px;padding:7px 4px"':'';
-    const mTdc=mobile?'style="text-align:center!important;padding:7px 2px"':'';
-    rows+=`<tr class="cr"><td ${mTd1}><div class="nw"><button class="tog" onclick="tc(${ci})">${exp?'▾':'▸'}</button><span class="cl">${eCatCell(cat)}</span></div></td>`;
-    rows+=`<td ${mTd}>${eCell(b,v=>saveBudget(cat,cd.items[0]?.name,v))}</td>`;
-    rows+=`<td ${mTd}>${eCell(a,v=>saveActualDB(cat,cd.items[0]?.name,v))}</td>`;
-    rows+=`<td ${mTdc}>${varPill}</td>`;
-    rows+=`<td class="cdiv" ${mTdc}>${fcCell(cat,null,f,CM+1)}</td></tr>`;
+    rows+=`<tr class="cr">`;
+    rows+=`<td style="text-align:left;color:#4B3FA0;font-size:10.5px;padding:7px 4px"><div class="nw"><button class="tog" onclick="tc(${ci})">${exp?'▾':'▸'}</button><span class="cl">${eCatCell(cat)}</span></div></td>`;
+    rows+=`<td style="text-align:right;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-variant-numeric:tabular-nums">${eCell(b,v=>saveBudget(cat,cd.items[0]?.name,v))}</td>`;
+    rows+=`<td style="text-align:right;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-variant-numeric:tabular-nums">${eCell(a,v=>saveActualDB(cat,cd.items[0]?.name,v))}</td>`;
+    rows+=`<td style="text-align:center;padding:7px 2px">${varPill}</td>`;
+    rows+=`<td class="cdiv" style="text-align:center;padding:7px 2px">${fcCell(cat,null,f,CM+1)}</td></tr>`;
 
     if(exp){cd.items.forEach(item=>{
       const ib=getBV(item),ia=getAV(item),iF=getFV(cat,item.name);
@@ -1095,18 +1093,21 @@ function render(){
         `<span style="color:#ccc;font-size:9px;flex-shrink:0">└</span>`+
         `<span class="sub-item-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.name}</span>`+
       `</div></td>`;
-      rows+=`<td ${mTd}>${eCell(ib,v=>saveBudget(cat,item.name,v))}</td>`;
-      rows+=`<td ${mTd}>${eCell(ia,v=>saveActualDB(cat,item.name,v))}</td>`;
-      rows+=`<td ${mTdc}>${ivar}</td>`;
-      rows+=`<td class="cdiv" ${mTdc}>${fcCell(cat,item.name,iF,CM+1)}</td></tr>`;
+      rows+=`<td style="text-align:right;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-variant-numeric:tabular-nums">${eCell(ib,v=>saveBudget(cat,item.name,v))}</td>`;
+      rows+=`<td style="text-align:right;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-variant-numeric:tabular-nums">${eCell(ia,v=>saveActualDB(cat,item.name,v))}</td>`;
+      rows+=`<td style="text-align:center;padding:7px 2px">${ivar}</td>`;
+      rows+=`<td class="cdiv" style="text-align:center;padding:7px 2px">${fcCell(cat,item.name,iF,CM+1)}</td></tr>`;
     });}
   });
 
   const addR=`<tr class="addr"><td colspan="5"><button class="addb" onclick="openOv('modal-addcat')">＋ Add category</button></td></tr>`;
-  const mTotTd=mobile?'style="text-align:right!important;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-weight:700;font-variant-numeric:tabular-nums"':'';
-  const mTotTd1=mobile?'style="text-align:left!important;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-weight:700;padding-left:8px"':'';
-  const mTotTdc=mobile?'style="text-align:center!important;padding:7px 2px;font-weight:700"':'';
-  const totR=`<tr class="tr"><td ${mTotTd1}>Expenses</td><td ${mTotTd}>${$f(tB)}</td><td ${mTotTd}>${$f(tA)}</td><td ${mTotTdc}>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv" ${mTotTdc}>${$f(tF)}</td></tr>`;
+  const totR=`<tr class="tr">
+    <td style="text-align:left;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-weight:700">Expenses</td>
+    <td style="text-align:right;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-weight:700;font-variant-numeric:tabular-nums">${$f(tB)}</td>
+    <td style="text-align:right;color:#4B3FA0;font-size:10.5px;padding:7px 4px;font-weight:700;font-variant-numeric:tabular-nums">${$f(tA)}</td>
+    <td style="text-align:center;padding:7px 2px;font-weight:700">${mobile?pillMob(tB,tA):pill(tB,tA)}</td>
+    <td class="cdiv" style="text-align:center;padding:7px 2px;font-weight:700">${$f(tF)}</td>
+    </tr>`;
 
   // Revenue row — editable, sits above the category table
   const rB=VIEW==='ytd'?Array.from({length:CM+1},(_,i)=>getRevB(i)).reduce((s,v)=>s+v,0):VIEW==='annual'?getRevB(CM)*12:VIEW==='bvf'?getRevB(CM)*12:getRevB(CM);
