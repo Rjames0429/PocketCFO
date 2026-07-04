@@ -313,7 +313,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   /* CONTROLS — view pill + month + update on one line */
   .tabs-toolbar{
     display:flex;flex-direction:row;align-items:center;
-    gap:6px;padding-bottom:14px;
+    justify-content:space-between;
+    gap:8px;padding:10px 18px 12px;
     border-bottom:0.5px solid #f0f0f0;margin-bottom:0;
   }
   .tabs-v{display:none}
@@ -1255,7 +1256,7 @@ function render(){
         `<div class="page-label">Budget Overview</div>`+
         `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
         `<div class="prog-wrap">${progHTML}</div>`+
-        `<div class="tabs-toolbar" style="position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 18px 12px">`+
+        `<div class="tabs-toolbar" style="position:relative">`+
           `<div style="position:relative;flex-shrink:0">`+
             `<div class="m-view-pill" onclick="togViewDD(event)" style="width:140px;height:30px;font-size:10px"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
             `<div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:200;min-width:220px;overflow:hidden">`+
@@ -1307,6 +1308,11 @@ function render(){
     `</tbody></table></div>`+
     (VIEW==='annual'?`<div style="font-size:11px;color:#aaa;text-align:center;padding:6px 20px 0">Actuals to date + average monthly spend × remaining months</div>`:'')+
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
+  // Fix toolbar spacing via JS
+  setTimeout(()=>{
+    const tb=document.querySelector('.tabs-toolbar');
+    if(tb&&window.innerWidth<=768){tb.style.cssText+=';justify-content:space-between!important;gap:8px!important;padding:10px 18px 12px!important';}
+  },10);
 }
 
 function togViewDD(e){
