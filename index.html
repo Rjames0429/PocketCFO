@@ -1044,7 +1044,7 @@ function svCat(id){
 
 function fcCell(cat,iname,val,nextMo){
   const fkey=`fc_${cat}_${iname||'total'}`;
-  return`<div><input class="fci" style="width:${isMobile()?'70%':'84px'}" data-cat="${cat}" data-item="${iname||''}" value="$${$iv(val)}" onchange="onFC(this)" onfocus="this.select()" id="${fkey}"/>${!isMobile()?`<div class="fc-carry">→ carries to ${MNS[CM+1]||'next year'}</div>`:''}</div>`;
+  return`<div><input class="fci" style="width:${isMobile()?'55%':'84px'}" data-cat="${cat}" data-item="${iname||''}" value="$${$iv(val)}" onchange="onFC(this)" onfocus="this.select()" id="${fkey}"/>${!isMobile()?`<div class="fc-carry">→ carries to ${MNS[CM+1]||'next year'}</div>`:''}</div>`;
 }
 function onFC(el){
   const cat=el.dataset.cat,item=el.dataset.item,raw=pn(el.value);
