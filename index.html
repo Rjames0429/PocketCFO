@@ -1307,6 +1307,7 @@ function render(){
     `</tbody></table></div>`+
     (VIEW==='annual'?`<div style="font-size:11px;color:#aaa;text-align:center;padding:6px 20px 0">Actuals to date + average monthly spend × remaining months</div>`:'')+
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
+  requestAnimationFrame(fixTableHeaders);
 }
 
 function togViewDD(e){
