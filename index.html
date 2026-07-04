@@ -870,7 +870,7 @@ async function loadApp(){
   const cb=document.getElementById('chat-btn');
   if(cb){cb.style.display=isMobile()?'flex':'none';if(window._initChatDrag)window._initChatDrag();}
   // syncNavHeight after a frame so nav is fully painted and offsetHeight is accurate
-  requestAnimationFrame(()=>{syncNavHeight();fixTableHeaders();});
+  requestAnimationFrame(syncNavHeight);
   if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{cleanupUI();document.getElementById('auth-screen').style.display='flex';authTab('in');return;}}
   const{data:u}=await sb.from('users').select('account_number,display_name').eq('id',CU.id).single();
   if(u){
@@ -1132,7 +1132,7 @@ function render(){
   const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
   const plLabel='Profit / Loss';
   const plR=`<tr class="pl-row">
-    <td style="font-weight:700">${plLabel}</td>
+    <td style="font-weight:700;padding-left:6px">${plLabel}</td>
     <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
     <td style="${plStyle};font-weight:700">${plA>=0?'+':''}${$f(Math.abs(plA))}</td>
     <td>${mobile?`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`:`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`}</td>
@@ -1257,7 +1257,7 @@ function render(){
         `<div class="prog-wrap">${progHTML}</div>`+
         `<div class="tabs-toolbar" style="position:relative">`+
           `<div class="m-view-wrap" style="position:relative;flex:1">`+
-            `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
+            `<div class="m-view-pill" onclick="togViewDD(event)" style="flex:0 1 auto;min-width:0;width:fit-content"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
             `<div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:200;min-width:220px;overflow:hidden">`+
             viewKeys.map((v,i)=>`<div class="mopt${VIEW===v?' sel':''}" onclick="setV('${v}');closeMViewDD()" style="padding:12px 16px;font-size:13px;cursor:pointer;border-bottom:0.5px solid #f5f5f5">${viewLabels[i]}</div>`).join('')+
             `</div>`+
@@ -1307,7 +1307,6 @@ function render(){
     `</tbody></table></div>`+
     (VIEW==='annual'?`<div style="font-size:11px;color:#aaa;text-align:center;padding:6px 20px 0">Actuals to date + average monthly spend × remaining months</div>`:'')+
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
-  setTimeout(fixTableHeaders, 50);
 }
 
 function togViewDD(e){
