@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="-1"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
@@ -636,14 +639,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 const APP_VERSION='2026-07-03-header-align';
 (function(){
-  const stored=localStorage.getItem('pcf-app-version');
-  if(stored&&stored!==APP_VERSION){
-    // Version changed — force a hard reload to bust any stale cache
-    localStorage.setItem('pcf-app-version',APP_VERSION);
-    location.reload(true);
-  } else if(!stored){
-    localStorage.setItem('pcf-app-version',APP_VERSION);
-  }
+  // Fetch version.txt fresh from server — this bypasses Safari bookmark cache
+  // because fetch() with no-store always goes to network
+  fetch('/version.txt?t='+Date.now(),{cache:'no-store'})
+    .then(r=>r.text())
+    .then(sv=>{
+      sv=sv.trim();
+      const stored=localStorage.getItem('pcf-app-version');
+      if(sv&&stored&&stored!==sv){
+        localStorage.setItem('pcf-app-version',sv);
+        window.location.replace(window.location.pathname+'?v='+sv);
+      } else {
+        if(sv)localStorage.setItem('pcf-app-version',sv);
+        if(window.location.search)window.history.replaceState({},'',window.location.pathname);
+      }
+    })
+    .catch(()=>{
+      const stored=localStorage.getItem('pcf-app-version');
+      if(stored&&stored!==APP_VERSION){
+        localStorage.setItem('pcf-app-version',APP_VERSION);
+        window.location.replace(window.location.pathname+'?v='+APP_VERSION);
+      } else {
+        localStorage.setItem('pcf-app-version',APP_VERSION);
+      }
+    });
 })();
 const SUPA_URL='https://omliytfwfkmzyvchlojf.supabase.co';
 const SUPA_KEY='sb_publishable_ZxsC3Vu69fuo05Y4O6mIRw_T8Krp00X';
