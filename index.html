@@ -1402,8 +1402,25 @@ async function saveNewCat(){
 // and writes it to --nav-h so app-screen height calc + overlay pages
 // NEVER desync again, regardless of future padding/icon size changes ──
 function fixTableHeaders(){
-  const th=document.querySelector('.tw th:first-child');
-  if(th)th.style.paddingLeft='16px';
+  if(!isMobile())return;
+  const ths=document.querySelectorAll('.tw th');
+  ths.forEach((th,i)=>{
+    th.style.height='36px';
+    th.style.verticalAlign='middle';
+    th.style.lineHeight='1';
+    th.style.padding='0 3px';
+    th.style.boxSizing='border-box';
+    if(i===0){
+      th.style.textAlign='left';
+      th.style.paddingLeft='4px';
+    }
+  });
+  // Align P&L row with Expenses
+  const plTd=document.querySelector('.pl-row td:first-child');
+  if(plTd)plTd.style.paddingLeft='6px';
+  // Shrink view pill to fit text
+  const pill=document.querySelector('.m-view-pill');
+  if(pill){pill.style.flex='0 1 auto';pill.style.minWidth='0';}
 }
 
 function syncNavHeight(){
