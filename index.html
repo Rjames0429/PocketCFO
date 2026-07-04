@@ -1106,7 +1106,7 @@ function render(){
   // Revenue editable cells — placed inside thead so Revenue appears ABOVE the column headers
   const revR_b=`<span class="ecn" ondblclick="this.style.display='none';this.nextElementSibling.style.display='block';this.nextElementSibling.focus()">${$f(rB)}</span><input class="ein" style="display:none" value="${$iv(rB)}" onblur="setRevB(${CM},pn(this.value));this.style.display='none';this.previousElementSibling.style.display='';this.previousElementSibling.textContent=$f(getRevB(${CM}));render()" onkeydown="if(event.key==='Enter')this.blur()" onfocus="this.select()"/>`;
   const revR_a=`<span class="ecn" ondblclick="this.style.display='none';this.nextElementSibling.style.display='block';this.nextElementSibling.focus()">${$f(rA)}</span><input class="ein" style="display:none" value="${$iv(rA)}" onblur="setRevA(${CM},pn(this.value));this.style.display='none';this.previousElementSibling.style.display='';this.previousElementSibling.textContent=$f(getRevA(${CM}));render()" onkeydown="if(event.key==='Enter')this.blur()" onfocus="this.select()"/>`;
-  const revR_f=`<input class="fci" value="$${$iv(rF)}" onchange="setRevF(${CM},pn(this.value));render()" onfocus="this.select()"/>`;
+  const revR_f=`<input class="fci" style="width:70%!important" value="$${$iv(rF)}" onchange="setRevF(${CM},pn(this.value));render()" onfocus="this.select()"/>`;
 
   // P&L row — Revenue minus Total Expenses
   const plB=rB-tB;const plA=rA-tA;const plF=rF-tF;
