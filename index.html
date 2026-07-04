@@ -2,9 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0"/>
-<meta http-equiv="Pragma" content="no-cache"/>
-<meta http-equiv="Expires" content="-1"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
@@ -167,10 +164,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .pl-row td{background:#fafafa;border-top:1.5px solid #e0e0e0;padding:9px 4px;font-weight:700;font-size:13px}
 .pl-row td:first-child{padding-left:8px;color:#111;font-weight:700}
 @media(max-width:768px){
-  .rev-label{padding-left:4px!important;font-size:11px;vertical-align:middle;display:flex;align-items:center}
+  .rev-label{padding-left:4px!important;font-size:11px;vertical-align:middle}
   .rev-row td{padding:9px 4px;vertical-align:middle}
   .pl-row td{font-size:13px;font-weight:700}
-  .pl-row td:first-child{padding-left:6px}
+  .pl-row td:first-child{padding-left:8px}
 
 }
 .sub-row:hover td{background:#f5f4ff!important}
@@ -313,8 +310,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   /* CONTROLS — view pill + month + update on one line */
   .tabs-toolbar{
     display:flex;flex-direction:row;align-items:center;
-    justify-content:space-between;
-    gap:8px;padding:10px 18px 12px;
+    gap:6px;padding-bottom:14px;
     border-bottom:0.5px solid #f0f0f0;margin-bottom:0;
   }
   .tabs-v{display:none}
@@ -324,7 +320,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     gap:6px;padding:0 10px;height:32px;
     font-size:10px;font-weight:600;color:#4B3FA0;
     background:#f0eefa;border:1.5px solid #ddd8f5;border-radius:99px;
-    flex:0 1 auto;min-width:0;cursor:pointer;
+    flex:1;cursor:pointer;
   }
   .m-view-pill .arr{font-size:9px;color:#9B93D0}
   /* Month pill — slightly bigger */
@@ -332,7 +328,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     display:flex;align-items:center;gap:5px;padding:0 13px;height:32px;
     font-size:12px;font-weight:600;color:#555;
     background:#fff;border:0.5px solid #e5e5e5;border-radius:99px;
-    cursor:pointer;flex-shrink:0;margin:0 auto;
+    cursor:pointer;flex-shrink:0;
   }
   .m-month-pill .arr{font-size:9px;color:#ccc}
   .m-act-btn{
@@ -638,32 +634,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
-const APP_VERSION='20260704192222';
+const APP_VERSION='2026-07-02-table-redesign';
 (function(){
-  // Fetch version.txt fresh from server — this bypasses Safari bookmark cache
-  // because fetch() with no-store always goes to network
-  fetch('/version.txt?t='+Date.now(),{cache:'no-store'})
-    .then(r=>r.text())
-    .then(sv=>{
-      sv=sv.trim();
-      const stored=localStorage.getItem('pcf-app-version');
-      if(sv&&stored&&stored!==sv){
-        localStorage.setItem('pcf-app-version',sv);
-        window.location.replace(window.location.pathname+'?v='+sv);
-      } else {
-        if(sv)localStorage.setItem('pcf-app-version',sv);
-        if(window.location.search)window.history.replaceState({},'',window.location.pathname);
-      }
-    })
-    .catch(()=>{
-      const stored=localStorage.getItem('pcf-app-version');
-      if(stored&&stored!==APP_VERSION){
-        localStorage.setItem('pcf-app-version',APP_VERSION);
-        window.location.replace(window.location.pathname+'?v='+APP_VERSION);
-      } else {
-        localStorage.setItem('pcf-app-version',APP_VERSION);
-      }
-    });
+  const stored=localStorage.getItem('pcf-app-version');
+  if(stored&&stored!==APP_VERSION){
+    // Version changed — force a hard reload to bust any stale cache
+    localStorage.setItem('pcf-app-version',APP_VERSION);
+    location.reload(true);
+  } else if(!stored){
+    localStorage.setItem('pcf-app-version',APP_VERSION);
+  }
 })();
 const SUPA_URL='https://omliytfwfkmzyvchlojf.supabase.co';
 const SUPA_KEY='sb_publishable_ZxsC3Vu69fuo05Y4O6mIRw_T8Krp00X';
@@ -1133,7 +1113,7 @@ function render(){
   const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
   const plLabel='Profit / Loss';
   const plR=`<tr class="pl-row">
-    <td style="font-weight:700;padding-left:6px">${plLabel}</td>
+    <td style="font-weight:700">${plLabel}</td>
     <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
     <td style="${plStyle};font-weight:700">${plA>=0?'+':''}${$f(Math.abs(plA))}</td>
     <td>${mobile?`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`:`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`}</td>
@@ -1256,18 +1236,18 @@ function render(){
         `<div class="page-label">Budget Overview</div>`+
         `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
         `<div class="prog-wrap">${progHTML}</div>`+
-        `<div class="tabs-toolbar" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:10px 18px 12px;border-bottom:0.5px solid #f0f0f0;position:relative">`+
-          `<div style="position:relative;flex-shrink:0">`+
-            `<div class="m-view-pill" onclick="togViewDD(event)" style="width:140px;height:30px;font-size:10px"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
+        `<div class="tabs-toolbar" style="position:relative">`+
+          `<div class="m-view-wrap" style="position:relative;flex:1">`+
+            `<div class="m-view-pill" onclick="togViewDD(event)"><span id="m-view-lbl">${viewLabel}</span><span class="arr">▾</span></div>`+
             `<div class="m-view-dd" id="m-view-dd" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:200;min-width:220px;overflow:hidden">`+
             viewKeys.map((v,i)=>`<div class="mopt${VIEW===v?' sel':''}" onclick="setV('${v}');closeMViewDD()" style="padding:12px 16px;font-size:13px;cursor:pointer;border-bottom:0.5px solid #f5f5f5">${viewLabels[i]}</div>`).join('')+
             `</div>`+
           `</div>`+
-          `<div style="position:relative;flex-shrink:0">`+
-            `<div class="m-month-pill" onclick="togMP(event)" style="height:30px;font-size:11px"><span id="m-mpl">${MNS[CM].slice(0,3)} ${YEAR}</span><span class="arr">▾</span></div>`+
+          `<div class="m-month-wrap" style="position:relative;flex-shrink:0">`+
+            `<div class="m-month-pill" onclick="togMP(event)"><span id="m-mpl">${MNS[CM].slice(0,3)} ${YEAR}</span><span class="arr">▾</span></div>`+
             `<div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div>`+
           `</div>`+
-          `<button class="m-act-btn" onclick="openOv('modal-actuals')" style="flex-shrink:0;height:30px;font-size:10px">📥 Update</button>`+
+          `<button class="m-act-btn" onclick="openOv('modal-actuals')">📥 Update</button>`+
         `</div>`+
       `</div>`
     :
@@ -1288,7 +1268,7 @@ function render(){
     // Table — both
     `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup>`+
     `<thead><tr>`+
-    `<th style="text-align:left!important;padding:9px 3px 9px 4px;vertical-align:middle;line-height:1;height:36px">☰&nbsp;&nbsp;&nbsp;Category</th>`+
+    `<th style="text-align:left!important;padding-left:4px;vertical-align:middle;line-height:1;height:36px">☰&nbsp;&nbsp;&nbsp;Category</th>`+
     `<th>Budget</th>`+
     `<th>Actual</th>`+
     `<th>Var</th>`+
@@ -1308,11 +1288,6 @@ function render(){
     `</tbody></table></div>`+
     (VIEW==='annual'?`<div style="font-size:11px;color:#aaa;text-align:center;padding:6px 20px 0">Actuals to date + average monthly spend × remaining months</div>`:'')+
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
-  // Fix toolbar spacing via JS
-  setTimeout(()=>{
-    const tb=document.querySelector('.tabs-toolbar');
-    if(tb&&window.innerWidth<=768){tb.style.cssText+=';justify-content:space-between!important;gap:8px!important;padding:10px 18px 12px!important';}
-  },10);
 }
 
 function togViewDD(e){
@@ -1408,27 +1383,8 @@ async function saveNewCat(){
 // and writes it to --nav-h so app-screen height calc + overlay pages
 // NEVER desync again, regardless of future padding/icon size changes ──
 function fixTableHeaders(){
-  console.log('fixTableHeaders running, mobile='+isMobile());
-  const ths=document.querySelectorAll('.tw th');
-  console.log('found',ths.length,'th elements');
-  ths.forEach((th,i)=>{
-    th.style.setProperty('height','36px','important');
-    th.style.setProperty('vertical-align','middle','important');
-    th.style.setProperty('line-height','1','important');
-    th.style.setProperty('padding','0 3px','important');
-    th.style.setProperty('box-sizing','border-box','important');
-    if(i===0){
-      th.style.setProperty('text-align','left','important');
-      th.style.setProperty('padding-left','4px','important');
-    }
-  });
-  const plTd=document.querySelector('.pl-row td:first-child');
-  if(plTd)plTd.style.setProperty('padding-left','6px','important');
-  const pill=document.querySelector('.m-view-pill');
-  if(pill){
-    pill.style.setProperty('flex','0 1 auto','important');
-    pill.style.setProperty('min-width','0','important');
-  }
+  const th=document.querySelector('.tw th:first-child');
+  if(th)th.style.paddingLeft='16px';
 }
 
 function syncNavHeight(){
