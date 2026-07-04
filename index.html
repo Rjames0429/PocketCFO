@@ -1263,7 +1263,7 @@ function render(){
             `</div>`+
           `</div>`+
           `<div class="m-month-wrap" style="position:relative;flex-shrink:0">`+
-            `<div class="m-month-pill" onclick="togMP(event)"><span id="m-mpl">${MNS[CM].slice(0,3)} ${YEAR}</span><span class="arr">▾</span></div>`+
+            `<div class="m-month-pill" onclick="togMP(event)" style="margin:0 auto"><span id="m-mpl">${MNS[CM].slice(0,3)} ${YEAR}</span><span class="arr">▾</span></div>`+
             `<div class="mdd" id="mdd">${MNS.map((m,i)=>`<div class="mopt${i===CM?' sel':''}" onclick="pickM(${i})">${m} ${YEAR}</div>`).join('')}</div>`+
           `</div>`+
           `<button class="m-act-btn" onclick="openOv('modal-actuals')">📥 Update</button>`+
