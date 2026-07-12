@@ -1182,46 +1182,39 @@ function render(){
   const expDiff=expBudget-expActual; // positive = under budget (good)
   const plDiff=pl-tF; // vs expense forecast (rough)
 
+  // Cash flow KPI calculations
+  const remainingSpend=Math.max(0,tF-tA);
+  const projectedBalance=revActual-remainingSpend;
+  const availableToSave=Math.max(0,projectedBalance);
+
   const summaryCardsUpdated=mobile?`<div class="m-summary-cards">
-    <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C)">
+    <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C)" onclick="editCashBalance()">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Revenue</div><div class="m-sc-sub">Actual Income</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Current Cash Balance</div></div>
         <div class="m-sc-right"><div class="m-sc-val">${$f(revActual)}</div></div>
       </div>
-      <div class="m-sc-bot">
-        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Budget</div><div class="m-sc-bot-val">${$f(revBudget)}</div></div>
-        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">VAR</div><div class="m-sc-bot-val ${revDiff>=0?'g':'r'}">${revDiff>=0?'+':''}${$f(revDiff)}</div></div>
-      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.55);margin-top:4px">✏️ Tap to edit</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#185FA5,#0C3F72)">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Expenses</div><div class="m-sc-sub">Actual Spend</div></div>
-        <div class="m-sc-right"><div class="m-sc-val">${$f(expActual)}</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Projected Month-End Balance</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${projectedBalance>=0?'+':''}${$f(projectedBalance)}</div></div>
       </div>
-      <div class="m-sc-bot">
-        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Budget</div><div class="m-sc-bot-val">${$f(expBudget)}</div></div>
-        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Saved</div><div class="m-sc-bot-val ${expDiff>=0?'g':'r'}">${expDiff>=0?'+':'-'}${$f(Math.abs(expDiff))}</div></div>
-      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.55);margin-top:4px">Expected cash left this month</div>
     </div>
-    <div class="m-sc" style="background:linear-gradient(140deg,${pl>=0?'#1D9E75,#0D6B50':'#C62828,#7B1111'})">
+    <div class="m-sc" style="background:linear-gradient(140deg,#1D9E75,#0D6B50)">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Profit / Loss</div><div class="m-sc-sub">Revenue - Expenses</div></div>
-        <div class="m-sc-right"><div class="m-sc-val">${pl>=0?'+':''}${$f(pl)}</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Remaining Expenses</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${$f(remainingSpend)}</div></div>
       </div>
-      <div class="m-sc-bot">
-        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Revenue</div><div class="m-sc-bot-val">${$f(revActual)}</div></div>
-        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Expenses</div><div class="m-sc-bot-val">${$f(expActual)}</div></div>
-      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.55);margin-top:4px">Still expected this month</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#4B3FA0,#2D2460)">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Profit Margin</div><div class="m-sc-sub">% Of Revenue Kept</div></div>
-        <div class="m-sc-right"><div class="m-sc-val">${margin.toFixed(1)}%</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Available to Save</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${$f(availableToSave)}</div></div>
       </div>
-      <div class="m-sc-bot">
-        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Last month</div><div class="m-sc-bot-val">${prevMargin.toFixed(1)}%</div></div>
-        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Change</div><div class="m-sc-bot-val ${marginDiff>=0?'g':'r'}">${marginDiff>=0?'+':''}${marginDiff.toFixed(1)}%</div></div>
-      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.55);margin-top:4px">From projected balance</div>
     </div>
   </div>`:'';
 
@@ -1385,6 +1378,15 @@ async function saveNewCat(){
 function fixTableHeaders(){
   const th=document.querySelector('.tw th:first-child');
   if(th)th.style.paddingLeft='16px';
+}
+
+function editCashBalance(){
+  const current = prompt('Enter current cash balance:', $f(getRevA(CM)).replace('$','').replace(/,/g,''));
+  if(current===null)return;
+  const val = parseFloat(current.replace(/[^0-9.]/g,''));
+  if(isNaN(val))return;
+  saveRevA(CM, val);
+  render();
 }
 
 function syncNavHeight(){
