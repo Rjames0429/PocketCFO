@@ -358,7 +358,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 
   /* DRAG REORDER */
-  .cr{transition:opacity .15s}
+  .cr{transition:transform .2s;position:relative;overflow:hidden}
+  .cr-inner{display:flex;transition:transform .2s}
+  .cr-delete{position:absolute;right:0;top:0;bottom:0;width:70px;background:#C62828;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;cursor:pointer;flex-direction:column;gap:2px}
   .cr.dragging{opacity:.4;background:#f0eefa}
   .cr.drag-over{border-top:2px solid #4B3FA0}
   .drag-handle{cursor:grab;color:#ccc;font-size:14px;padding:0 4px 0 0;flex-shrink:0;user-select:none}
@@ -1095,7 +1097,7 @@ function render(){
       if(catB>0&&catA/catB>=0.85)return`<span style="font-size:7.5px;font-weight:600;color:#F59E0B;display:block;margin-top:1px">⚠ Approaching limit</span>`;
       return'';
     };
-    rows+=`<tr class="cr" draggable="true" data-cat="${cat}" ondragstart="dragStart(event,${ci})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropCat(event,${ci})"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:8px;width:100%"><div style="display:inline-flex;align-items:center;gap:8px;flex:1" onclick="tc(${ci})"><div style="width:28px;height:28px;border-radius:8px;background:${catBg};display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer">${catE}</div><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden"><span style="font-size:11px;font-weight:600;color:#111;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div><button onclick="event.stopPropagation();showCatMenu('${cat}')" style="background:none;border:none;color:#ccc;font-size:18px;padding:0 2px;cursor:pointer;flex-shrink:0;line-height:1">⋮</button></div></td>`;
+    rows+=`<tr class="cr" draggable="true" data-cat="${cat}" ondragstart="dragStart(event,${ci})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropCat(event,${ci})" ontouchstart="swipeStart(event,this)" ontouchmove="swipeMove(event,this)" ontouchend="swipeEnd(event,this,'${cat}')"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:8px;width:100%"><div style="display:inline-flex;align-items:center;gap:8px;width:100%" onclick="tc(${ci})"><div style="width:28px;height:28px;border-radius:8px;background:${catBg};display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer">${catE}</div><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden"><span style="font-size:11px;font-weight:600;color:#111;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div></div></td>`;
     rows+=`<td>${eCell(b,v=>saveBudget(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${eCell(a,v=>saveActualDB(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${varPill}</td>`;
@@ -1194,7 +1196,9 @@ function render(){
     const catB=D[cat].items.reduce((s,i)=>s+getBV(i),0);
     return sum+Math.max(0,catA-catB);
   },0);
-  const progHTML=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#aaa;margin-bottom:4px"><span>Spending progress · ${daysLeft} days left</span><span style="color:#B8860B;font-weight:700;font-size:12px">${$f(remainingSpend)} left</span></div><div class="prog-track"><div style="height:100%;background:linear-gradient(90deg,#B8860B,#FFD700);border-radius:99px;width:${spendPct}%"></div></div><div style="font-size:10px;color:#bbb;margin-top:3px;text-align:right">${$f(tA)} spent of ${$f(tF)} forecast · ${spendPct.toFixed(0)}%</div>`;
+  const progHTML=spendPct>=100
+    ?`<div class="prog-track"><div class="prog-fill-over"></div></div><div class="prog-right"><span class="prog-pct-over">${spendPct.toFixed(1)}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(remainingSpend))} over</span></div>`
+    :`<div class="prog-track"><div class="prog-fill-good" style="width:${spendPct}%"></div></div><div class="prog-right"><span class="prog-pct-good">${spendPct.toFixed(1)}%</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(remainingSpend)}</strong> left · ${daysLeft} days</span></div>`;
   const revBudget=rB;   // view-aware
   const expActual=tA;   // already view-aware from getBV/getAV
   const expBudget=tB;   // already view-aware
@@ -1432,6 +1436,46 @@ async function dropCat(e,targetIdx){
   await Promise.all(keys.map((k,i)=>sb.from('budget_categories').update({sort_order:i}).eq('id',D[k].id).eq('user_id',CU.id)));
   dragSrcIdx=null;
   render();
+}
+
+// ── SWIPE TO DELETE ──
+let _swX=0,_swActive=false;
+function swipeStart(e,row){_swX=e.touches[0].clientX;_swActive=true;}
+function swipeMove(e,row){
+  if(!_swActive)return;
+  const dx=e.touches[0].clientX-_swX;
+  if(dx<-10){
+    e.preventDefault();
+    const del=row.querySelector('.cr-del-btn');
+    if(del)del.style.opacity=Math.min(1,Math.abs(dx)/60)+'';
+    row.style.transform=`translateX(${Math.max(-70,dx)}px)`;
+  } else if(dx>5){
+    row.style.transform='';
+    row.style.opacity='';
+  }
+}
+function swipeEnd(e,row,cat){
+  _swActive=false;
+  const dx=e.changedTouches[0].clientX-_swX;
+  if(dx<-50){
+    row.style.transform='translateX(-70px)';
+    // Show delete button
+    let btn=row.querySelector('.cr-del-btn');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.className='cr-del-btn';
+      btn.style.cssText='position:absolute;right:0;top:0;bottom:0;width:70px;background:#C62828;color:#fff;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px';
+      btn.innerHTML='🗑️<span>Delete</span>';
+      btn.onclick=(ev)=>{ev.stopPropagation();row.style.transform='';deleteCategory(cat);};
+      row.style.position='relative';
+      row.style.overflow='hidden';
+      row.appendChild(btn);
+    }
+  } else {
+    row.style.transform='';
+    const btn=row.querySelector('.cr-del-btn');
+    if(btn)btn.remove();
+  }
 }
 
 function showCatMenu(cat){
