@@ -295,7 +295,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   }
 
   /* BUDGET OVERVIEW */
-  .page-label{font-size:9px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:3px;display:block;padding-top:18px}
+  .page-label{font-size:9px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:3px;display:block}
   .month-h{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px}
   .month-h .yr{font-size:15px;font-weight:400;color:#888}
 
@@ -329,7 +329,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     display:flex;align-items:center;gap:5px;padding:0 13px;height:32px;
     font-size:11px;font-weight:600;color:#555;
     background:#fff;border:0.5px solid #e5e5e5;border-radius:99px;
-    cursor:pointer;flex-shrink:0;white-space:nowrap;
+    cursor:pointer;flex-shrink:0;white-space:nowrap;margin:0 auto;
   }
   .m-month-pill .arr{font-size:9px;color:#ccc}
   .m-act-btn{
@@ -344,7 +344,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   /* SUMMARY CARDS */
   .m-summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}
-  .m-sc{border-radius:11px;padding:8px 10px}
+  .m-sc{border-radius:11px;padding:8px 10px;min-height:72px;display:flex;flex-direction:column;justify-content:space-between}
   .m-sc-top{display:flex;justify-content:space-between;align-items:flex-start}
   .m-sc-left .m-sc-lbl{font-size:9px;color:rgba(255,255,255,.95);text-transform:uppercase;letter-spacing:.5px;font-weight:800;margin-bottom:2px}
   .m-sc-left .m-sc-sub{font-size:6.5px;color:rgba(255,255,255,.5);font-style:italic;max-width:70px;line-height:1.3}
@@ -1117,7 +1117,7 @@ function render(){
     });}
   });
 
-  const addR=mobile?`<tr><td colspan="5" style="padding:6px 4px;border-top:0.5px solid #f0f0f0;border-bottom:0.5px solid #f0f0f0"><div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openOv('modal-addcat')"><div style="width:28px;height:28px;border-radius:8px;background:#f0eefa;border:1.5px dashed #c8c3f0;display:inline-flex;align-items:center;justify-content:center;font-size:18px;color:#4B3FA0;flex-shrink:0">+</div><span style="font-size:11px;font-weight:600;color:#4B3FA0">Add category</span></div></td></tr>`:`<tr class="addr"><td colspan="5"><button class="addb" onclick="openOv('modal-addcat')">＋ Add category</button></td></tr>`;
+  const addR=mobile?`<tr><td colspan="5" style="padding:6px 4px;border-top:1.5px solid #e8e5fb;border-bottom:0.5px solid #f0f0f0"><div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openOv('modal-addcat')"><div style="width:28px;height:28px;border-radius:8px;background:#f0eefa;border:1.5px dashed #c8c3f0;display:inline-flex;align-items:center;justify-content:center;font-size:18px;color:#4B3FA0;flex-shrink:0">+</div><span style="font-size:11px;font-weight:600;color:#4B3FA0">Add category</span></div></td></tr>`:`<tr class="addr"><td colspan="5"><button class="addb" onclick="openOv('modal-addcat')">＋ Add category</button></td></tr>`;
   const totR=`<tr class="tr"><td style="padding-left:4px;font-weight:700">Expenses</td><td>${$f(tB)}</td><td>${$f(tA)}</td><td>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv">${$f(tF)}</td></tr>`;
 
   // Revenue row — editable, sits above the category table
@@ -1247,7 +1247,7 @@ function render(){
   document.getElementById('app-main').innerHTML=
     // Mobile: sticky overview inside scroll container
     (mobile?
-      `<div class="m-sticky-overview" style="padding-top:25px">`+
+      `<div class="m-sticky-overview">`+
         `<div class="page-label">Budget Overview</div>`+
         `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
         `<div class="prog-wrap">${progHTML}</div>`+
