@@ -300,8 +300,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .month-h .yr{font-size:15px;font-weight:400;color:#888}
 
   /* PROGRESS */
-  .prog-wrap{margin-bottom:8px;display:block}
-  .prog-track{width:100%;height:6px}
+  .prog-wrap{margin-bottom:12px;display:flex;align-items:center;gap:10px}
+  .prog-track{width:auto;flex:1;height:5px}
   .prog-pct-good{font-size:12px;font-weight:700;color:#7B4A0A}
   .prog-pct-over{font-size:12px;font-weight:700}
   .prog-rem-good{font-size:11px}
@@ -1197,8 +1197,8 @@ function render(){
     return sum+Math.max(0,catA-catB);
   },0);
   const progHTML=spendPct>=100
-    ?`<div class="prog-track"><div class="prog-fill-over"></div></div><div class="prog-right"><span class="prog-pct-over">${spendPct.toFixed(1)}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(remainingSpend))} over</span></div>`
-    :`<div class="prog-track"><div class="prog-fill-good" style="width:${spendPct}%"></div></div><div class="prog-right"><span class="prog-pct-good">${spendPct.toFixed(1)}%</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(remainingSpend)}</strong> left · ${daysLeft} days</span></div>`;
+    ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${spendPct.toFixed(1)}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(remainingSpend))} over budget</span></div>`
+    :`<div class="prog-track"><div class="prog-fill-good" style="width:${spendPct}%"></div></div><div class="prog-right"><span class="prog-pct-good">${spendPct.toFixed(1)}%</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(remainingSpend)}</strong> left · ${daysLeft}d</span></div>`;
   const revBudget=rB;   // view-aware
   const expActual=tA;   // already view-aware from getBV/getAV
   const expBudget=tB;   // already view-aware
