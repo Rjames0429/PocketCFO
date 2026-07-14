@@ -280,13 +280,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   /* Overview — scrollable with content, not sticky */
   .m-sticky-overview{
     background:#fff;
-    padding:0 16px 0;
+    padding:0;
     border-bottom:1px solid #f0f0f0;
     box-shadow:0 2px 4px rgba(0,0,0,.03);
   }
   /* APP MAIN — flex:1 fills remaining space automatically, no calc() needed */
   .app-main{
-    padding:0;background:#fff;
+    padding:0 16px;background:#fff;
     flex:1 1 auto;
     overflow-y:auto;
     -webkit-overflow-scrolling:auto;
@@ -343,7 +343,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .kpis{display:none}
 
   /* SUMMARY CARDS */
-  .m-summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0 10px}
+  .m-summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}
   .m-sc{border-radius:11px;padding:8px 10px}
   .m-sc-top{display:flex;justify-content:space-between;align-items:flex-start}
   .m-sc-left .m-sc-lbl{font-size:9px;color:rgba(255,255,255,.95);text-transform:uppercase;letter-spacing:.5px;font-weight:800;margin-bottom:2px}
@@ -359,10 +359,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   /* TABLE — overflow:visible is CRITICAL for position:sticky to work */
   .tw{
-    margin:0 0 50px;border-radius:0;
-    border:none;background:#fff;
+    margin:0 0 50px;background:#fff;
     overflow:visible;
-    box-shadow:none;
   }
   .tw table{font-size:9px}
   .tw col.d-cat{width:36%}
