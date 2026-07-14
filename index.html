@@ -343,7 +343,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   /* SUMMARY CARDS */
   .m-summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0 8px}
-  .m-sc{border-radius:12px;padding:10px 11px;min-height:80px;display:flex;flex-direction:column;justify-content:space-between}
+  .m-sc{border-radius:11px;padding:8px 10px}
   .m-sc-top{display:flex;justify-content:space-between;align-items:flex-start}
   .m-sc-left .m-sc-lbl{font-size:9px;color:rgba(255,255,255,.95);text-transform:uppercase;letter-spacing:.5px;font-weight:800;margin-bottom:2px}
   .m-sc-left .m-sc-sub{font-size:6.5px;color:rgba(255,255,255,.5);font-style:italic;max-width:70px;line-height:1.3}
@@ -1208,24 +1208,24 @@ function render(){
 
   const summaryCardsUpdated=mobile?`<div class="m-summary-cards">
     <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C);cursor:pointer" onclick="editCashBalance()">
-      <div style="font-size:8px;color:rgba(255,255,255,.85);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;line-height:1.3">Current Cash Balance</div>
-      <div style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(revActual)}</div>
-      <div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:4px">✏️ Tap to edit</div>
+      <div style="font-size:7px;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;line-height:1.3">Current Cash Balance</div>
+      <div style="font-size:17px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(revActual)}</div>
+      <div style="font-size:6.5px;color:rgba(255,255,255,.6);margin-top:3px">✏️ Tap to edit</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#185FA5,#0C3F72)">
-      <div style="font-size:8px;color:rgba(255,255,255,.85);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;line-height:1.3">Projected Month-End Balance</div>
-      <div style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${projectedBalance>=0?'+':''}${$f(Math.abs(projectedBalance))}</div>
-      <div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:4px">${$f(availableToSave)} available to save</div>
+      <div style="font-size:7px;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;line-height:1.3">Projected Month-End Balance</div>
+      <div style="font-size:17px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${projectedBalance>=0?'+':''}${$f(Math.abs(projectedBalance))}</div>
+      <div style="font-size:6.5px;color:rgba(255,255,255,.6);margin-top:3px">${$f(availableToSave)} available to save</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#1D9E75,#0D6B50)">
-      <div style="font-size:8px;color:rgba(255,255,255,.85);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;line-height:1.3">Remaining Expenses</div>
-      <div style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(remainingSpend)}</div>
-      <div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:4px">${daysLeft} days left this month</div>
+      <div style="font-size:7px;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;line-height:1.3">Remaining Expenses</div>
+      <div style="font-size:17px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(remainingSpend)}</div>
+      <div style="font-size:6.5px;color:rgba(255,255,255,.6);margin-top:3px">${daysLeft} days left this month</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#4B3FA0,#2D2460)">
-      <div style="font-size:8px;color:rgba(255,255,255,.85);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;line-height:1.3">Unplanned Spending</div>
-      <div style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(unplannedSpend)}</div>
-      <div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:4px">Outside your budget</div>
+      <div style="font-size:7px;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;line-height:1.3">Unplanned Spending</div>
+      <div style="font-size:17px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(unplannedSpend)}</div>
+      <div style="font-size:6.5px;color:rgba(255,255,255,.6);margin-top:3px">Outside your budget</div>
     </div>
   </div>`:'';
 
