@@ -319,7 +319,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .m-view-pill{
     display:flex;align-items:center;justify-content:space-between;
     gap:6px;padding:0 10px;height:32px;
-    font-size:10px;font-weight:600;color:#4B3FA0;
+    font-size:12px;font-weight:600;color:#4B3FA0;
     background:#f0eefa;border:1.5px solid #ddd8f5;border-radius:99px;
     flex:0 0 auto;width:140px;cursor:pointer;
   }
@@ -334,7 +334,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .m-month-pill .arr{font-size:9px;color:#ccc}
   .m-act-btn{
     display:flex;align-items:center;gap:4px;padding:0 11px;height:32px;
-    font-size:10px;font-weight:600;color:#4B3FA0;
+    font-size:12px;font-weight:600;color:#4B3FA0;
     background:#fff;border:1.5px solid #ddd8f5;border-radius:99px;
     cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;
   }
@@ -1095,7 +1095,7 @@ function render(){
       if(catB>0&&catA/catB>=0.85)return`<span style="font-size:7.5px;font-weight:600;color:#F59E0B;display:block;margin-top:1px">⚠ Approaching limit</span>`;
       return'';
     };
-    rows+=`<tr class="cr" draggable="true" data-cat="${cat}" ondragstart="dragStart(event,${ci})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropCat(event,${ci})"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:8px;width:100%" onclick="tc(${ci})"><div style="width:28px;height:28px;border-radius:8px;background:${catBg};display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer">${catE}</div><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden"><span style="font-size:11px;font-weight:600;color:#111;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div></td>`;
+    rows+=`<tr class="cr" draggable="true" data-cat="${cat}" ondragstart="dragStart(event,${ci})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropCat(event,${ci})"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:8px;width:100%"><div style="display:inline-flex;align-items:center;gap:8px;flex:1" onclick="tc(${ci})"><div style="width:28px;height:28px;border-radius:8px;background:${catBg};display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer">${catE}</div><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden"><span style="font-size:11px;font-weight:600;color:#111;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div><button onclick="event.stopPropagation();showCatMenu('${cat}')" style="background:none;border:none;color:#ccc;font-size:18px;padding:0 2px;cursor:pointer;flex-shrink:0;line-height:1">⋮</button></div></td>`;
     rows+=`<td>${eCell(b,v=>saveBudget(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${eCell(a,v=>saveActualDB(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${varPill}</td>`;
@@ -1194,7 +1194,7 @@ function render(){
     const catB=D[cat].items.reduce((s,i)=>s+getBV(i),0);
     return sum+Math.max(0,catA-catB);
   },0);
-  const progHTML=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#aaa;margin-bottom:4px"><span>Spending progress · ${daysLeft} days left</span><span style="color:#B8860B;font-weight:700;font-size:11px">${$f(remainingSpend)} left</span></div><div class="prog-track"><div style="height:100%;background:linear-gradient(90deg,#B8860B,#FFD700);border-radius:99px;width:${spendPct}%"></div></div><div style="font-size:8.5px;color:#bbb;margin-top:3px;text-align:right">${$f(tA)} spent of ${$f(tF)} forecast · ${spendPct.toFixed(0)}%</div>`;
+  const progHTML=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#aaa;margin-bottom:4px"><span>Spending progress · ${daysLeft} days left</span><span style="color:#B8860B;font-weight:700;font-size:12px">${$f(remainingSpend)} left</span></div><div class="prog-track"><div style="height:100%;background:linear-gradient(90deg,#B8860B,#FFD700);border-radius:99px;width:${spendPct}%"></div></div><div style="font-size:10px;color:#bbb;margin-top:3px;text-align:right">${$f(tA)} spent of ${$f(tF)} forecast · ${spendPct.toFixed(0)}%</div>`;
   const revBudget=rB;   // view-aware
   const expActual=tA;   // already view-aware from getBV/getAV
   const expBudget=tB;   // already view-aware
@@ -1431,6 +1431,29 @@ async function dropCat(e,targetIdx){
   // Save sort_order to Supabase
   await Promise.all(keys.map((k,i)=>sb.from('budget_categories').update({sort_order:i}).eq('id',D[k].id).eq('user_id',CU.id)));
   dragSrcIdx=null;
+  render();
+}
+
+function showCatMenu(cat){
+  const menu=document.createElement('div');
+  menu.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:flex-end';
+  menu.innerHTML=`<div style="background:#fff;width:100%;border-radius:20px 20px 0 0;padding:16px">
+    <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:14px;text-align:center">${cat}</div>
+    <button onclick="this.closest('[style*=fixed]').remove();deleteCategory('${cat}')" style="width:100%;padding:14px;background:#ffebee;color:#C62828;border:none;border-radius:12px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:8px">🗑 Delete category</button>
+    <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;padding:14px;background:#f5f5f5;color:#555;border:none;border-radius:12px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer">Cancel</button>
+  </div>`;
+  document.body.appendChild(menu);
+  menu.addEventListener('click',e=>{if(e.target===menu)menu.remove();});
+}
+
+async function deleteCategory(catName){
+  if(!confirm(`Delete "${catName}" and all its data? This cannot be undone.`))return;
+  const cat=D[catName];
+  if(!cat)return;
+  // Delete from supabase
+  await sb.from('budget_items').delete().eq('category_id',cat.id);
+  await sb.from('budget_categories').delete().eq('id',cat.id).eq('user_id',CU.id);
+  delete D[catName];
   render();
 }
 
