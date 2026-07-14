@@ -357,6 +357,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .m-sc-bot-val.r{color:rgba(255,190,190,.95)}
 
 
+  /* DRAG REORDER */
+  .cr{transition:opacity .15s;touch-action:none}
+  .cr.dragging{opacity:.4;background:#f0eefa}
+  .cr.drag-over{border-top:2px solid #4B3FA0}
+  .drag-handle{cursor:grab;color:#ccc;font-size:14px;padding:0 4px 0 0;flex-shrink:0;user-select:none}
+
   /* TABLE — overflow:visible is CRITICAL for position:sticky to work */
   .tw{
     margin:0 0 50px;background:#fff;
@@ -1089,7 +1095,7 @@ function render(){
       if(catB>0&&catA/catB>=0.85)return`<span style="font-size:7.5px;font-weight:600;color:#F59E0B;display:block;margin-top:1px">⚠ Approaching limit</span>`;
       return'';
     };
-    rows+=`<tr class="cr"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:8px;width:100%" onclick="tc(${ci})"><div style="width:28px;height:28px;border-radius:8px;background:${catBg};display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer">${catE}</div><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden"><span style="font-size:11px;font-weight:600;color:#111;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div></td>`;
+    rows+=`<tr class="cr" draggable="true" data-cat="${cat}" ondragstart="dragStart(event,${ci})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropCat(event,${ci})"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:8px;width:100%" onclick="tc(${ci})"><div style="width:28px;height:28px;border-radius:8px;background:${catBg};display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer">${catE}</div><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden"><span style="font-size:11px;font-weight:600;color:#111;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div></td>`;
     rows+=`<td>${eCell(b,v=>saveBudget(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${eCell(a,v=>saveActualDB(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${varPill}</td>`;
@@ -1390,6 +1396,42 @@ async function saveNewCat(){
 function fixTableHeaders(){
   const th=document.querySelector('.tw th:first-child');
   if(th)th.style.paddingLeft='16px';
+}
+
+// ── DRAG TO REORDER CATEGORIES ──
+let dragSrcIdx=null;
+const catKeys=()=>Object.keys(D);
+
+function dragStart(e,idx){
+  dragSrcIdx=idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+}
+function dragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.cr').forEach(r=>r.classList.remove('drag-over'));
+  e.currentTarget.classList.add('drag-over');
+}
+function dragLeave(e){
+  e.currentTarget.classList.remove('drag-over');
+}
+async function dropCat(e,targetIdx){
+  e.preventDefault();
+  document.querySelectorAll('.cr').forEach(r=>{r.classList.remove('drag-over');r.classList.remove('dragging');});
+  if(dragSrcIdx===null||dragSrcIdx===targetIdx)return;
+  // Reorder D keys
+  const keys=[...catKeys()];
+  const moved=keys.splice(dragSrcIdx,1)[0];
+  keys.splice(targetIdx,0,moved);
+  // Rebuild D in new order
+  const newD={};
+  keys.forEach(k=>{newD[k]=D[k];});
+  D=newD;
+  // Save sort_order to Supabase
+  await Promise.all(keys.map((k,i)=>sb.from('budget_categories').update({sort_order:i}).eq('id',D[k].id).eq('user_id',CU.id)));
+  dragSrcIdx=null;
+  render();
 }
 
 function editCashBalance(){
