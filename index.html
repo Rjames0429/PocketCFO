@@ -1152,18 +1152,7 @@ function render(){
   const pctB=tB_mtd>0?Math.abs(vB_mtd/tB_mtd*100).toFixed(1):0;
   const isOver=tA>tB;
 
-  // Spending-based progress: actual ÷ forecast (per spec)
-  const spendPct=tF>0?Math.min(100,(tA/tF)*100):0;
-  const remainingSpend=Math.max(0,tF-tA);
-  const projectedBalance=revActual-remainingSpend;
-  const availableToSave=Math.max(0,projectedBalance);
-  const daysLeft=new Date(YEAR,CM+1,0).getDate()-new Date().getDate();
-  const unplannedSpend=Object.keys(D).reduce((sum,cat)=>{
-    const catA=D[cat].items.reduce((s,i)=>s+getAV(i),0);
-    const catB=D[cat].items.reduce((s,i)=>s+getBV(i),0);
-    return sum+Math.max(0,catA-catB);
-  },0);
-  const progHTML=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#aaa;margin-bottom:4px"><span>Spending progress · ${daysLeft} days left</span><span style="color:#B8860B;font-weight:700;font-size:11px">${$f(remainingSpend)} left</span></div><div class="prog-track"><div style="height:100%;background:linear-gradient(90deg,#B8860B,#FFD700);border-radius:99px;width:${spendPct}%"></div></div><div style="font-size:8.5px;color:#bbb;margin-top:3px;text-align:right">${$f(tA)} spent of ${$f(tF)} forecast · ${spendPct.toFixed(0)}%</div>`;
+  // KPI calcs moved below after revActual is defined
 
   const kpiVarCls=vB>=0?'kgd':'kbd'; // kgd is now grey for variance
   const vs=n=>n>=0?`+${$f(n)}`:`-${$f(Math.abs(n))}`;
@@ -1186,6 +1175,19 @@ function render(){
 
   // ── NEW KPI CARDS: Revenue / Expenses / Profit-Loss / Profit Margin ──
   const revActual=rA;   // view-aware: MTD/YTD/Annual/BVF
+
+  // Spending-based progress: actual ÷ forecast (per spec)
+  const spendPct=tF>0?Math.min(100,(tA/tF)*100):0;
+  const remainingSpend=Math.max(0,tF-tA);
+  const projectedBalance=revActual-remainingSpend;
+  const availableToSave=Math.max(0,projectedBalance);
+  const daysLeft=new Date(YEAR,CM+1,0).getDate()-new Date().getDate();
+  const unplannedSpend=Object.keys(D).reduce((sum,cat)=>{
+    const catA=D[cat].items.reduce((s,i)=>s+getAV(i),0);
+    const catB=D[cat].items.reduce((s,i)=>s+getBV(i),0);
+    return sum+Math.max(0,catA-catB);
+  },0);
+  const progHTML=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#aaa;margin-bottom:4px"><span>Spending progress · ${daysLeft} days left</span><span style="color:#B8860B;font-weight:700;font-size:11px">${$f(remainingSpend)} left</span></div><div class="prog-track"><div style="height:100%;background:linear-gradient(90deg,#B8860B,#FFD700);border-radius:99px;width:${spendPct}%"></div></div><div style="font-size:8.5px;color:#bbb;margin-top:3px;text-align:right">${$f(tA)} spent of ${$f(tF)} forecast · ${spendPct.toFixed(0)}%</div>`;
   const revBudget=rB;   // view-aware
   const expActual=tA;   // already view-aware from getBV/getAV
   const expBudget=tB;   // already view-aware
