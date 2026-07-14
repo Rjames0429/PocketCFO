@@ -523,13 +523,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="nav-icon active" id="ni-budget">📊</div>
     <div class="nav-lbl active" id="nl-budget">Budget</div>
   </div>
+  <div class="nav-item" onclick="navTo('charts')">
+    <div class="nav-icon" id="ni-charts">📈</div>
+    <div class="nav-lbl" id="nl-charts">Charts</div>
+  </div>
   <div class="nav-item" onclick="navTo('transactions')">
     <div class="nav-icon" id="ni-transactions">💳</div>
     <div class="nav-lbl" id="nl-transactions">Transactions</div>
   </div>
-  <div class="nav-item" onclick="navTo('charts')">
-    <div class="nav-icon" id="ni-charts">📈</div>
-    <div class="nav-lbl" id="nl-charts">Charts</div>
+  <div class="nav-item" onclick="navTo('discover')">
+    <div class="nav-icon" id="ni-discover">🧭</div>
+    <div class="nav-lbl" id="nl-discover">Discover</div>
   </div>
   <div class="nav-item" onclick="navTo('settings')">
     <div class="nav-icon" id="ni-settings">⚙️</div>
@@ -789,7 +793,7 @@ function cleanupUI(){
   const cb=document.getElementById('chat-btn');
   if(cb)cb.style.display='none';
   // Reset nav active state to budget
-  ['budget','transactions','charts','settings'].forEach(p=>{
+  ['budget','transactions','charts','settings','discover'].forEach(p=>{
     const icon=document.getElementById('ni-'+p);
     const lbl=document.getElementById('nl-'+p);
     if(icon)icon.classList.toggle('active',p==='budget');
@@ -1075,7 +1079,16 @@ function render(){
     const exp=!!EXP[cat];
     const varPill=mobile?pillMob(b,a):pill(b,a);
 
-    rows+=`<tr class="cr"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:4px;width:100%"><button class="tog" onclick="tc(${ci})" style="flex-shrink:0">${exp?'▾':'▸'}</button><span class="cl" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${eCatCell(cat)}</span></div></td>`;
+    const {e:catE,bg:catBg}=getCatEmoji(cat);
+    const statusLbl=()=>{
+      const catA=cd.items.reduce((s,i)=>s+getAV(i),0);
+      const catB=cd.items.reduce((s,i)=>s+getBV(i),0);
+      const catF=getFV(cat,null);
+      if(catA>catB)return`<span style="font-size:7.5px;font-weight:600;color:#C62828;display:block;margin-top:1px">● Over budget</span>`;
+      if(catB>0&&catA/catB>=0.85)return`<span style="font-size:7.5px;font-weight:600;color:#F59E0B;display:block;margin-top:1px">⚠ Approaching limit</span>`;
+      return'';
+    };
+    rows+=`<tr class="cr"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:8px;width:100%" onclick="tc(${ci})"><div style="width:28px;height:28px;border-radius:8px;background:${catBg};display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer">${catE}</div><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden"><span style="font-size:11px;font-weight:600;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${eCatCell(cat)}</span>${statusLbl()}</div></div></td>`;
     rows+=`<td>${eCell(b,v=>saveBudget(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${eCell(a,v=>saveActualDB(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${varPill}</td>`;
@@ -1095,8 +1108,8 @@ function render(){
     });}
   });
 
-  const addR=`<tr class="addr"><td colspan="5"><button class="addb" onclick="openOv('modal-addcat')">＋ Add category</button></td></tr>`;
-  const totR=`<tr class="tr"><td style="padding-left:${mobile?'6px':'16px'}">Expenses</td><td>${$f(tB)}</td><td>${$f(tA)}</td><td>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv">${$f(tF)}</td></tr>`;
+  const addR=mobile?`<tr><td colspan="5" style="padding:6px 4px;border-top:0.5px solid #f0f0f0;border-bottom:0.5px solid #f0f0f0"><div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openOv('modal-addcat')"><div style="width:28px;height:28px;border-radius:8px;background:#f0eefa;border:1.5px dashed #c8c3f0;display:inline-flex;align-items:center;justify-content:center;font-size:18px;color:#4B3FA0;flex-shrink:0">+</div><span style="font-size:11px;font-weight:600;color:#4B3FA0">Add category</span></div></td></tr>`:`<tr class="addr"><td colspan="5"><button class="addb" onclick="openOv('modal-addcat')">＋ Add category</button></td></tr>`;
+  const totR=`<tr class="tr"><td style="padding-left:4px;font-weight:700">Expenses</td><td>${$f(tB)}</td><td>${$f(tA)}</td><td>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv">${$f(tF)}</td></tr>`;
 
   // Revenue row — editable, sits above the category table
   const rB=VIEW==='ytd'?Array.from({length:CM+1},(_,i)=>getRevB(i)).reduce((s,v)=>s+v,0):VIEW==='annual'?getRevB(CM)*12:VIEW==='bvf'?getRevB(CM)*12:getRevB(CM);
@@ -1113,7 +1126,7 @@ function render(){
   const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
   const plLabel='Profit / Loss';
   const plR=`<tr class="pl-row">
-    <td style="font-weight:700;padding-left:${mobile?'6px':'16px'}">${plLabel}</td>
+    <td style="font-weight:700;padding-left:4px">${plLabel}</td>
     <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
     <td style="${plStyle};font-weight:700">${plA>=0?'+':''}${$f(Math.abs(plA))}</td>
     <td>${mobile?`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`:`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`}</td>
@@ -1139,9 +1152,18 @@ function render(){
   const pctB=tB_mtd>0?Math.abs(vB_mtd/tB_mtd*100).toFixed(1):0;
   const isOver=tA>tB;
 
-  const progHTML=isOverMtd
-    ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(vB_mtd))} over budget</span></div>`
-    :`<div class="prog-track"><div class="prog-fill-good" style="width:${pctProg}%"></div></div><div class="prog-right"><span class="prog-pct-good">${pctUsed}% used</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(vB_mtd)}</strong> remaining</span></div>`;
+  // Spending-based progress: actual ÷ forecast (per spec)
+  const spendPct=tF>0?Math.min(100,(tA/tF)*100):0;
+  const remainingSpend=Math.max(0,tF-tA);
+  const projectedBalance=revActual-remainingSpend;
+  const availableToSave=Math.max(0,projectedBalance);
+  const daysLeft=new Date(YEAR,CM+1,0).getDate()-new Date().getDate();
+  const unplannedSpend=Object.keys(D).reduce((sum,cat)=>{
+    const catA=D[cat].items.reduce((s,i)=>s+getAV(i),0);
+    const catB=D[cat].items.reduce((s,i)=>s+getBV(i),0);
+    return sum+Math.max(0,catA-catB);
+  },0);
+  const progHTML=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#aaa;margin-bottom:4px"><span>Spending progress · ${daysLeft} days left</span><span style="color:#B8860B;font-weight:700;font-size:11px">${$f(remainingSpend)} left</span></div><div class="prog-track"><div style="height:100%;background:linear-gradient(90deg,#B8860B,#FFD700);border-radius:99px;width:${spendPct}%"></div></div><div style="font-size:8.5px;color:#bbb;margin-top:3px;text-align:right">${$f(tA)} spent of ${$f(tF)} forecast · ${spendPct.toFixed(0)}%</div>`;
 
   const kpiVarCls=vB>=0?'kgd':'kbd'; // kgd is now grey for variance
   const vs=n=>n>=0?`+${$f(n)}`:`-${$f(Math.abs(n))}`;
@@ -1183,45 +1205,33 @@ function render(){
   const plDiff=pl-tF; // vs expense forecast (rough)
 
   const summaryCardsUpdated=mobile?`<div class="m-summary-cards">
-    <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C)">
+    <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C)" onclick="editCashBalance()">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Revenue</div><div class="m-sc-sub">Actual Income</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Current Cash Balance</div></div>
         <div class="m-sc-right"><div class="m-sc-val">${$f(revActual)}</div></div>
       </div>
-      <div class="m-sc-bot">
-        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Budget</div><div class="m-sc-bot-val">${$f(revBudget)}</div></div>
-        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">VAR</div><div class="m-sc-bot-val ${revDiff>=0?'g':'r'}">${revDiff>=0?'+':''}${$f(revDiff)}</div></div>
-      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.55);margin-top:4px">✏️ Tap to edit</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#185FA5,#0C3F72)">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Expenses</div><div class="m-sc-sub">Actual Spend</div></div>
-        <div class="m-sc-right"><div class="m-sc-val">${$f(expActual)}</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Projected Month-End Balance</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${projectedBalance>=0?'+':''}${$f(Math.abs(projectedBalance))}</div></div>
       </div>
-      <div class="m-sc-bot">
-        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Budget</div><div class="m-sc-bot-val">${$f(expBudget)}</div></div>
-        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Saved</div><div class="m-sc-bot-val ${expDiff>=0?'g':'r'}">${expDiff>=0?'+':'-'}${$f(Math.abs(expDiff))}</div></div>
-      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.55);margin-top:4px">${$f(availableToSave)} available to save</div>
     </div>
-    <div class="m-sc" style="background:linear-gradient(140deg,${pl>=0?'#1D9E75,#0D6B50':'#C62828,#7B1111'})">
+    <div class="m-sc" style="background:linear-gradient(140deg,#1D9E75,#0D6B50)">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Profit / Loss</div><div class="m-sc-sub">Revenue - Expenses</div></div>
-        <div class="m-sc-right"><div class="m-sc-val">${pl>=0?'+':''}${$f(pl)}</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Remaining Expenses</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${$f(remainingSpend)}</div></div>
       </div>
-      <div class="m-sc-bot">
-        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Revenue</div><div class="m-sc-bot-val">${$f(revActual)}</div></div>
-        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Expenses</div><div class="m-sc-bot-val">${$f(expActual)}</div></div>
-      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.55);margin-top:4px">${daysLeft} days left this month</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(140deg,#4B3FA0,#2D2460)">
       <div class="m-sc-top">
-        <div class="m-sc-left"><div class="m-sc-lbl">Profit Margin</div><div class="m-sc-sub">% Of Revenue Kept</div></div>
-        <div class="m-sc-right"><div class="m-sc-val">${margin.toFixed(1)}%</div></div>
+        <div class="m-sc-left"><div class="m-sc-lbl">Unplanned Spending</div></div>
+        <div class="m-sc-right"><div class="m-sc-val">${$f(unplannedSpend)}</div></div>
       </div>
-      <div class="m-sc-bot">
-        <div class="m-sc-bot-item"><div class="m-sc-bot-lbl">Last month</div><div class="m-sc-bot-val">${prevMargin.toFixed(1)}%</div></div>
-        <div class="m-sc-bot-item" style="text-align:right"><div class="m-sc-bot-lbl">Change</div><div class="m-sc-bot-val ${marginDiff>=0?'g':'r'}">${marginDiff>=0?'+':''}${marginDiff.toFixed(1)}%</div></div>
-      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.55);margin-top:4px">Outside your budget</div>
     </div>
   </div>`:'';
 
@@ -1232,7 +1242,7 @@ function render(){
   document.getElementById('app-main').innerHTML=
     // Mobile: sticky overview inside scroll container
     (mobile?
-      `<div class="m-sticky-overview">`+
+      `<div class="m-sticky-overview" style="padding-top:25px">`+
         `<div class="page-label">Budget Overview</div>`+
         `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
         `<div class="prog-wrap">${progHTML}</div>`+
@@ -1268,7 +1278,7 @@ function render(){
     // Table — both
     `<div class="tw"><table><colgroup><col class="d-cat"/><col class="d-bud"/><col class="d-act"/><col class="d-var"/><col class="d-fc"/></colgroup>`+
     `<thead><tr>`+
-    `<th style="text-align:left!important;padding-left:4px;vertical-align:middle;line-height:1;height:36px"><span style="display:inline-block;width:16px;text-align:center">☰</span>Category</th>`+
+    `<th style="text-align:left!important;padding-left:4px;vertical-align:middle"><div style="display:inline-flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:8px;background:#e8e5ff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#4B3FA0;font-weight:800;flex-shrink:0">☰</div><span>Category</span></div></th>`+
     `<th>Budget</th>`+
     `<th>Actual</th>`+
     `<th>Var</th>`+
@@ -1277,7 +1287,7 @@ function render(){
     `<tbody>`+
     // Revenue row — sits at top of tbody, above expenses
     `<tr class="rev-row">`+
-    `<td style="padding-left:4px;background:#f0faf4;vertical-align:middle"><div style="display:inline-flex;align-items:center;gap:4px;width:100%"><span style="width:18px;height:18px;border-radius:50%;background:#2E7D32;color:#fff;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">$</span><span style="font-size:11px;font-weight:600;color:#2E7D32;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Revenue</span></div></td>`+
+    `<td style="padding-left:4px;background:#f0faf4;vertical-align:middle"><div style="display:inline-flex;align-items:center;gap:8px;width:100%"><div style="width:28px;height:28px;border-radius:8px;background:#e8f5e9;display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">💵</div><span style="font-size:11px;font-weight:700;color:#2E7D32">Revenue</span></div></td>`+
     `<td>${revR_b}</td>`+
     `<td>${revR_a}</td>`+
     `<td>${mobile?pillMob(rA+rVar,rA):pill(rA+rVar,rA)}</td>`+
@@ -1387,6 +1397,34 @@ function fixTableHeaders(){
   if(th)th.style.paddingLeft='16px';
 }
 
+function editCashBalance(){
+  const curr=prompt('Enter current cash balance:','');
+  if(curr===null)return;
+  const val=parseFloat(curr.replace(/[^0-9.]/g,''));
+  if(isNaN(val))return;
+  saveRevA(CM,val);
+  render();
+}
+
+function getCatEmoji(catName){
+  const n=catName.toLowerCase();
+  if(n.includes('hous'))return{e:'🏠',bg:'#e3f2fd'};
+  if(n.includes('util')||n.includes('electric')||n.includes('gas'))return{e:'⚡',bg:'#fff3e0'};
+  if(n.includes('groc')||n.includes('food'))return{e:'🛒',bg:'#f3e5f5'};
+  if(n.includes('transport')||n.includes('uber')||n.includes('car')||n.includes('auto'))return{e:'🚗',bg:'#e8f5e9'};
+  if(n.includes('fun')||n.includes('personal')||n.includes('entertain'))return{e:'🙂',bg:'#f5f5f5'};
+  if(n.includes('except')||n.includes('misc'))return{e:'💳',bg:'#ffebee'};
+  if(n.includes('insur'))return{e:'🛡️',bg:'#e8eaf6'};
+  if(n.includes('subscri')||n.includes('stream'))return{e:'📺',bg:'#f3e5f5'};
+  if(n.includes('phone')||n.includes('cell')||n.includes('mobile'))return{e:'📱',bg:'#e3f2fd'};
+  if(n.includes('health')||n.includes('medical')||n.includes('pharma'))return{e:'💊',bg:'#f1f8e9'};
+  if(n.includes('dine')||n.includes('dining')||n.includes('restaur'))return{e:'🍽️',bg:'#fff8e1'};
+  if(n.includes('travel')||n.includes('vacation'))return{e:'✈️',bg:'#e3f2fd'};
+  if(n.includes('pet'))return{e:'🐶',bg:'#f9fbe7'};
+  if(n.includes('child')||n.includes('kid')||n.includes('baby'))return{e:'👶',bg:'#fce4ec'};
+  return{e:'💳',bg:'#ffebee'};
+}
+
 function syncNavHeight(){
   if(!isMobile())return;
   const bn=document.getElementById('bottom-nav');
@@ -1409,7 +1447,7 @@ function navTo(page){
     if(el)el.style.display='none';
   });
   // Update nav active state
-  ['budget','transactions','charts','settings'].forEach(p=>{
+  ['budget','transactions','charts','settings','discover'].forEach(p=>{
     const icon=document.getElementById('ni-'+p);
     const lbl=document.getElementById('nl-'+p);
     if(icon)icon.classList.toggle('active',p===page);
@@ -1435,6 +1473,7 @@ function renderPage(page){
   if(page==='transactions') renderTransactions();
   if(page==='charts') renderCharts();
   if(page==='settings') renderSettings();
+  if(page==='discover') document.getElementById('app-main').innerHTML=`<div style="padding:60px 24px;text-align:center"><div style="font-size:52px;margin-bottom:16px">🧭</div><div style="font-size:22px;font-weight:800;color:#111;margin-bottom:12px">Discover</div><div style="font-size:14px;color:#888;line-height:1.8">Financial products to help you grow your savings.<br><br><span style="color:#4B3FA0;font-weight:700">Coming soon.</span></div></div>`;
 }
 
 // ── TRANSACTIONS ────────────────────────────────────────────
