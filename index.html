@@ -1097,7 +1097,7 @@ function render(){
       if(catB>0&&catA/catB>=0.85)return`<span style="font-size:7.5px;font-weight:600;color:#F59E0B;display:block;margin-top:1px">⚠ Approaching limit</span>`;
       return'';
     };
-    rows+=`<tr class="cr" draggable="true" data-cat="${cat}" ondragstart="dragStart(event,${ci})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropCat(event,${ci})" ontouchstart="swipeStart(event,this)" ontouchmove="swipeMove(event,this)" ontouchend="swipeEnd(event,this,'${cat}')"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:8px;width:100%"><div style="display:inline-flex;align-items:center;gap:8px;width:100%" onclick="tc(${ci})"><div style="width:28px;height:28px;border-radius:8px;background:${catBg};display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer">${catE}</div><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden"><span style="font-size:11px;font-weight:600;color:#111;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div></div></td>`;
+    rows+=`<tr class="cr" draggable="true" data-cat="${cat}" ondragstart="dragStart(event,${ci})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropCat(event,${ci})" ontouchstart="swipeStart(event,this)" ontouchmove="swipeMove(event,this)" ontouchend="swipeEnd(event,this,'${cat}')"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:8px;width:100%"><div style="display:inline-flex;align-items:center;gap:8px;width:100%" onclick="tc(${ci})"><div style="width:28px;height:28px;border-radius:8px;background:${catBg};display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer" ontouchstart="lpStart(event,'${cat}')" ontouchend="lpEnd()" onmousedown="lpStart(event,'${cat}')" onmouseup="lpEnd()" onmouseleave="lpEnd()">${catE}</div><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden"><span style="font-size:11px;font-weight:600;color:#111;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div></div></td>`;
     rows+=`<td>${eCell(b,v=>saveBudget(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${eCell(a,v=>saveActualDB(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${varPill}</td>`;
@@ -1438,80 +1438,42 @@ async function dropCat(e,targetIdx){
   render();
 }
 
-// ── SWIPE TO DELETE ──
-let _swX=0,_swY=0,_swActive=false,_swRow=null,_swRevealed=false;
+// ── LONG PRESS TO DELETE ──
+let _lpTimer=null;
 
-function swipeStart(e,row){
-  _swX=e.touches[0].clientX;
-  _swY=e.touches[0].clientY;
-  _swActive=true;
-  _swRow=row;
+function lpStart(e,cat){
+  _lpTimer=setTimeout(()=>{
+    // Haptic if available
+    if(navigator.vibrate)navigator.vibrate(40);
+    showDeleteSheet(cat);
+  },600);
 }
 
-function swipeMove(e,row){
-  if(!_swActive)return;
-  const dx=e.touches[0].clientX-_swX;
-  const dy=e.touches[0].clientY-_swY;
-  // Only handle horizontal swipes
-  if(Math.abs(dy)>Math.abs(dx))return;
-  if(dx<-8){
-    e.preventDefault();
-    e.stopPropagation();
-    const clamped=Math.max(-72,dx);
-    row.style.transform=`translateX(${clamped}px)`;
-    row.style.transition='none';
-  } else if(dx>8&&!_swRevealed){
-    row.style.transform='';
-  }
+function lpEnd(){
+  clearTimeout(_lpTimer);
 }
 
-function swipeEnd(e,row,cat){
-  if(!_swActive)return;
-  _swActive=false;
-  const dx=e.changedTouches[0].clientX-_swX;
-  row.style.transition='transform .2s';
-  if(dx<-40){
-    row.style.transform='translateX(-72px)';
-    _swRevealed=true;
-    // Add delete btn if not already there
-    if(!row.querySelector('.cr-del-btn')){
-      const btn=document.createElement('td');
-      btn.className='cr-del-btn';
-      btn.style.cssText='position:absolute;right:0;top:0;bottom:0;width:72px;background:#C62828;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;cursor:pointer;color:#fff;font-size:10px;font-weight:700';
-      btn.innerHTML='<span style="font-size:18px">🗑️</span>Delete';
-      btn.onclick=(ev)=>{
-        ev.stopPropagation();
-        if(confirm('Delete "'+cat+'"?')){
-          row.style.transform='';
-          btn.remove();
-          deleteCategory(cat);
-        } else {
-          row.style.transform='';
-          btn.remove();
-          _swRevealed=false;
-        }
-      };
-      row.style.position='relative';
-      row.style.overflow='visible';
-      row.appendChild(btn);
-    }
-  } else {
-    row.style.transform='';
-    _swRevealed=false;
-    const btn=row.querySelector('.cr-del-btn');
-    if(btn)btn.remove();
-  }
+function showDeleteSheet(cat){
+  const sheet=document.createElement('div');
+  sheet.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:flex-end;animation:fadeIn .2s';
+  sheet.innerHTML=`
+    <div style="background:#fff;width:100%;border-radius:20px 20px 0 0;padding:20px 16px 40px;box-shadow:0 -4px 20px rgba(0,0,0,.15)">
+      <div style="width:36px;height:4px;background:#e0e0e0;border-radius:99px;margin:0 auto 20px"></div>
+      <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:6px;text-align:center">${cat}</div>
+      <div style="font-size:12px;color:#aaa;text-align:center;margin-bottom:20px">Deleting will remove all budget data for this category</div>
+      <button id="del-confirm" style="width:100%;padding:14px;background:#C62828;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:10px">Delete "${cat}"</button>
+      <button id="del-cancel" style="width:100%;padding:14px;background:#f5f5f5;color:#555;border:none;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer">Cancel</button>
+    </div>`;
+  document.body.appendChild(sheet);
+  sheet.querySelector('#del-confirm').onclick=()=>{sheet.remove();deleteCategory(cat);};
+  sheet.querySelector('#del-cancel').onclick=()=>sheet.remove();
+  sheet.onclick=e=>{if(e.target===sheet)sheet.remove();};
 }
 
-// Close any open swipe on tap elsewhere
-document.addEventListener('touchstart',e=>{
-  if(_swRevealed&&_swRow&&!_swRow.contains(e.target)){
-    _swRow.style.transform='';
-    _swRevealed=false;
-    const btn=_swRow.querySelector('.cr-del-btn');
-    if(btn)btn.remove();
-  }
-},{passive:true});
+// Dummy swipe functions (kept for touch event handlers on tr)
+function swipeStart(){}
+function swipeMove(){}
+function swipeEnd(){}
 
 function showCatMenu(cat){
   const menu=document.createElement('div');
