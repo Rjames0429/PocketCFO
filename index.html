@@ -1190,7 +1190,18 @@ function render(){
   const remainingSpend=Math.max(0,tF-tA);
   const projectedBalance=revActual-remainingSpend;
   const availableToSave=Math.max(0,projectedBalance);
-  const daysLeft=new Date(YEAR,CM+1,0).getDate()-new Date().getDate();
+  const today=new Date();
+  const currentMonth=today.getMonth();
+  const currentYear=today.getFullYear();
+  const daysInMonth=new Date(YEAR,CM+1,0).getDate();
+  let daysLeft;
+  if(YEAR<currentYear||(YEAR===currentYear&&CM<currentMonth)){
+    daysLeft=0; // past month
+  } else if(YEAR===currentYear&&CM===currentMonth){
+    daysLeft=daysInMonth-today.getDate(); // current month
+  } else {
+    daysLeft=daysInMonth; // future month
+  }
   const unplannedSpend=Object.keys(D).reduce((sum,cat)=>{
     const catA=D[cat].items.reduce((s,i)=>s+getAV(i),0);
     const catB=D[cat].items.reduce((s,i)=>s+getBV(i),0);
@@ -1218,25 +1229,25 @@ function render(){
   const plDiff=pl-tF; // vs expense forecast (rough)
 
   const summaryCardsUpdated=mobile?`<div class="m-summary-cards">
-    <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C);cursor:pointer;min-height:80px;display:flex;flex-direction:column;justify-content:space-between" onclick="editCashBalance()">
+    <div class="m-sc" style="background:linear-gradient(140deg,#2E7D32,#19501C);cursor:pointer;height:90px;display:flex;flex-direction:column;box-sizing:border-box" onclick="editCashBalance()">
       <div style="font-size:8.5px;color:rgba(255,255,255,.9);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;line-height:1.3">Current Cash Balance</div>
-      <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(revActual)}</div>
-      <div style="font-size:8px;color:rgba(255,255,255,.7);margin-top:5px">✏️ Tap to edit</div>
+      <div style="flex:1;display:flex;align-items:flex-end;padding-bottom:2px"><span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(revActual)}</span></div>
+      <div style="font-size:8px;color:rgba(255,255,255,.85);margin-top:0;font-weight:500">✏️ Tap to edit</div>
     </div>
-    <div class="m-sc" style="background:linear-gradient(140deg,#185FA5,#0C3F72);min-height:80px;display:flex;flex-direction:column;justify-content:space-between">
+    <div class="m-sc" style="background:linear-gradient(140deg,#185FA5,#0C3F72);height:90px;display:flex;flex-direction:column;box-sizing:border-box">
       <div style="font-size:8.5px;color:rgba(255,255,255,.9);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;line-height:1.3">Projected Month-End Balance</div>
-      <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${projectedBalance>=0?'+':''}${$f(Math.abs(projectedBalance))}</div>
-      <div style="font-size:8px;color:rgba(255,255,255,.7);margin-top:5px">${$f(availableToSave)} available to save</div>
+      <div style="flex:1;display:flex;align-items:flex-end;padding-bottom:2px"><span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${projectedBalance>=0?'+':''}${$f(Math.abs(projectedBalance))}</span></div>
+      <div style="font-size:8px;color:rgba(255,255,255,.85);margin-top:0;font-weight:500">${$f(availableToSave)} available to save</div>
     </div>
-    <div class="m-sc" style="background:linear-gradient(140deg,#1D9E75,#0D6B50);min-height:80px;display:flex;flex-direction:column;justify-content:space-between">
+    <div class="m-sc" style="background:linear-gradient(140deg,#1D9E75,#0D6B50);height:90px;display:flex;flex-direction:column;box-sizing:border-box">
       <div style="font-size:8.5px;color:rgba(255,255,255,.9);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;line-height:1.3">Remaining Expenses</div>
-      <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(remainingSpend)}</div>
-      <div style="font-size:8px;color:rgba(255,255,255,.7);margin-top:5px">${daysLeft} days left this month</div>
+      <div style="flex:1;display:flex;align-items:flex-end;padding-bottom:2px"><span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(remainingSpend)}</span></div>
+      <div style="font-size:8px;color:rgba(255,255,255,.85);margin-top:0;font-weight:500">${daysLeft} days left this month</div>
     </div>
-    <div class="m-sc" style="background:linear-gradient(140deg,#4B3FA0,#2D2460);min-height:80px;display:flex;flex-direction:column;justify-content:space-between">
+    <div class="m-sc" style="background:linear-gradient(140deg,#4B3FA0,#2D2460);height:90px;display:flex;flex-direction:column;box-sizing:border-box">
       <div style="font-size:8.5px;color:rgba(255,255,255,.9);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;line-height:1.3">Unplanned Spending</div>
-      <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(unplannedSpend)}</div>
-      <div style="font-size:8px;color:rgba(255,255,255,.7);margin-top:5px">Outside your budget</div>
+      <div style="flex:1;display:flex;align-items:flex-end;padding-bottom:2px"><span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1">${$f(unplannedSpend)}</span></div>
+      <div style="font-size:8px;color:rgba(255,255,255,.85);margin-top:0;font-weight:500">Outside your budget</div>
     </div>
   </div>`:'';
 
@@ -1247,7 +1258,7 @@ function render(){
   document.getElementById('app-main').innerHTML=
     // Mobile: sticky overview inside scroll container
     (mobile?
-      `<div class="m-sticky-overview" style="padding-top:14px">`+
+      `<div class="m-sticky-overview">`+
         `<div class="page-label">Budget Overview</div>`+
         `<div class="month-h">${mn} <span class="yr">${YEAR}</span></div>`+
         `<div class="prog-wrap">${progHTML}</div>`+
