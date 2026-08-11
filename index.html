@@ -13,6 +13,9 @@
 <meta name="description" content="Your personal finance command center"/>
 <meta name="theme-color" content="#4B3FA0"/>
 <link rel="manifest" href="manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Alex+Brush&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <style>
@@ -501,20 +504,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     👋 <strong>Welcome!</strong> &nbsp;This is sample data — double-click any number to update with your real figures.
     <button class="demo-dismiss" onclick="dismissDemo()">Got it ✕</button>
   </div>
-  <div class="app-header">
-    <!-- Single logo — shown on both desktop and mobile -->
-    <div class="hlogo" id="hdr-logo-desk"><div class="dot"></div><div class="name">PocketCFO</div></div>
-    <!-- Stats (hidden on mobile via CSS) -->
-    <div class="hcenter" id="hdr-stats">
-      <div class="hstat"><div class="hstat-val" id="hdr-left" style="color:#2E7D32">$0 left</div><div class="hstat-lbl" id="hdr-month-lbl">June 2026 budget</div></div>
-      <div class="hsep"></div>
-      <div class="hstat"><div class="hstat-val" id="hdr-spent" style="color:#185FA5">$0</div><div class="hstat-lbl">Spent so far</div></div>
+  <div class="app-header" style="background:#fff;border-bottom:1px solid #E8ECF2;padding:12px 20px;height:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;top:0;z-index:50">
+    <!-- CFO Bobby cursive logo -->
+    <div class="hlogo" id="hdr-logo-desk" style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <div class="name" style="font-family:'Alex Brush',cursive;font-size:32px;font-weight:400;color:#0B1538;letter-spacing:-.3px;line-height:1">CFO Bobby</div>
     </div>
-    <!-- Single account badge + sign out -->
-    <div class="hright">
-      <span class="abadge" id="hdr-acct">PCF-0000-0000</span>
-      <span class="saved-ind" id="sav-ind">✓ Saved</span>
-      <button class="btn-so" onclick="doSignOut()">Sign out</button>
+    <!-- Account pill + bell + profile circle -->
+    <div class="hright" style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <span class="abadge" id="hdr-acct" style="font-size:12px;font-weight:600;color:#0B1538;background:#fff;padding:8px 14px;border-radius:999px;border:1px solid #E8ECF2;display:inline-flex;align-items:center;gap:6px">PCF-0000-0000<span style="font-size:9px;color:#98A2B3">▾</span></span>
+      <span class="saved-ind" id="sav-ind" style="font-size:11px;color:#18A957;display:none">✓ Saved</span>
+      <button onclick="navTo('discover')" aria-label="Notifications" style="position:relative;width:38px;height:38px;border-radius:50%;border:1px solid #E8ECF2;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#0B1538" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 4.5 2 6 2 6H4s2-1.5 2-6"/><path d="M9.5 18a2.5 2.5 0 0 0 5 0"/></svg>
+        <span style="position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;background:#2F80ED;border:1.5px solid #fff"></span>
+      </button>
+      <button class="btn-so" onclick="doSignOut()" style="font-size:11px;color:#98A2B3;background:none;border:1px solid #E8ECF2;cursor:pointer;padding:8px 12px;border-radius:999px;font-family:inherit;font-weight:600">Sign out</button>
+      <div id="hdr-profile" style="width:38px;height:38px;border-radius:50%;border:1.5px solid #0B1538;display:flex;align-items:center;justify-content:center;font-family:'Alex Brush',cursive;font-size:20px;color:#0B1538;background:#fff;flex-shrink:0;padding-top:2px">CB</div>
     </div>
   </div>
 
@@ -1149,12 +1153,7 @@ function render(){
     <td class="cdiv" style="${plF>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plF>=0?'+':''}${$f(Math.abs(plF))}</td>
   </tr>`;
 
-  // Update header stats
-  const rem=tB-tA;const over=rem<0;
-  document.getElementById('hdr-left').textContent=over?`-${$f(Math.abs(rem))} over`:`${$f(rem)} left`;
-  document.getElementById('hdr-left').style.color=over?'#C62828':'#2E7D32';
-  document.getElementById('hdr-spent').textContent=$f(tA);
-  document.getElementById('hdr-month-lbl').textContent=`${mn} ${YEAR} budget`;
+  // Header budget-stats removed — this info now lives in the CFO Bobby overview card (rendered below)
 
   // KPI colors
   const vB=tB-tA,vF=tF-tA;
