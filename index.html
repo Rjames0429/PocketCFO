@@ -1266,7 +1266,7 @@ function render(){
   document.getElementById('app-main').innerHTML=
     // Mobile: sticky overview inside scroll container
     (mobile?
-      `<div style="background:#fff;border:1px solid #E8ECF2;border-radius:18px;box-shadow:0 8px 30px rgba(15,23,42,.06);padding:15px 16px;margin:18px 0 12px">`+
+      `<div style="background:#fff;border:1px solid #E8ECF2;border-radius:18px;box-shadow:0 8px 30px rgba(15,23,42,.06);padding:15px 16px;margin:12px 0 12px">`+
         `<div style="display:flex;justify-content:space-between;align-items:center">`+
           `<div style="font-size:20px;font-weight:700;color:#0B1538">${mn}<span style="font-size:14px;color:#98A2B3;font-weight:500;margin-left:5px">${YEAR}</span></div>`+
           `<div style="display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:${isOverMtd?'#FFF3F2':'#EFFAF2'};color:${isOverMtd?'#E53935':'#129447'};font-size:11px;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:${isOverMtd?'#E53935':'#129447'}"></span>${isOverMtd?'Over Budget':'Healthy'}</div>`+
