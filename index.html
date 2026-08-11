@@ -1103,7 +1103,7 @@ function render(){
       if(catB>0&&catA/catB>=0.85)return`<span style="font-size:9px;font-weight:700;color:#B7791F;display:block;margin-top:1px">Near limit</span>`;
       return'';
     };
-    rows+=`<tr class="cr" draggable="true" data-cat="${cat}" ondragstart="dragStart(event,${ci})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropCat(event,${ci})" ontouchstart="swipeStart(event,this)" ontouchmove="swipeMove(event,this)" ontouchend="swipeEnd(event,this,'${cat}')"><td style="padding-left:16px"><div style="display:inline-flex;align-items:center;gap:7px;width:100%"><span style="color:#C6CCD9;font-size:14px;flex-shrink:0;cursor:pointer" onclick="tc(${ci})" ontouchstart="lpStart(event,'${cat}')" ontouchend="lpEnd()" onmousedown="lpStart(event,'${cat}')" onmouseup="lpEnd()" onmouseleave="lpEnd()">${exp?'⌄':'›'}</span><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden;cursor:pointer" onclick="tc(${ci})"><span style="font-size:12px;font-weight:700;color:#0B1538;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div></td>`;
+    rows+=`<tr class="cr" draggable="true" data-cat="${cat}" ondragstart="dragStart(event,${ci})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropCat(event,${ci})" ontouchstart="swipeStart(event,this)" ontouchmove="swipeMove(event,this)" ontouchend="swipeEnd(event,this,'${cat}')"><td style="padding-left:4px"><div style="display:inline-flex;align-items:center;gap:7px;width:100%"><span style="color:#C6CCD9;font-size:14px;flex-shrink:0;cursor:pointer" onclick="tc(${ci})" ontouchstart="lpStart(event,'${cat}')" ontouchend="lpEnd()" onmousedown="lpStart(event,'${cat}')" onmouseup="lpEnd()" onmouseleave="lpEnd()">${exp?'⌄':'›'}</span><div style="display:flex;flex-direction:column;gap:1px;overflow:hidden;cursor:pointer" onclick="tc(${ci})"><span style="font-size:12px;font-weight:700;color:#0B1538;white-space:normal;line-height:1.3">${eCatCell(cat)}</span>${statusLbl()}</div></div></td>`;
     rows+=`<td>${eCell(b,v=>saveBudget(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${eCell(a,v=>saveActualDB(cat,cd.items[0]?.name,v))}</td>`;
     rows+=`<td>${varPill}</td>`;
@@ -1340,7 +1340,7 @@ function render(){
     `<tbody>`+
     // Revenue row — sits at top of tbody, above expenses
     `<tr class="rev-row">`+
-    `<td style="padding-left:16px;background:#EFFAF2;vertical-align:middle"><div style="display:inline-flex;align-items:center;gap:7px;width:100%"><span style="color:#18A957;font-size:14px;flex-shrink:0">›</span><span style="font-size:12px;font-weight:700;color:#0B1538">Income</span></div></td>`+
+    `<td style="padding-left:4px;background:#EFFAF2;vertical-align:middle"><div style="display:inline-flex;align-items:center;gap:7px;width:100%"><span style="color:#18A957;font-size:14px;flex-shrink:0">›</span><span style="font-size:12px;font-weight:700;color:#0B1538">Income</span></div></td>`+
     `<td>${revR_b}</td>`+
     `<td>${revR_a}</td>`+
     `<td>${mobile?pillMob(rA+rVar,rA):pill(rA+rVar,rA)}</td>`+
