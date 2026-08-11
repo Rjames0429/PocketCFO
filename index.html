@@ -1124,7 +1124,7 @@ function render(){
   });
 
   const addR=mobile?`<tr><td colspan="5" style="padding:10px 16px"><div style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#EEECFD;color:#5B4FE0;border-radius:12px;padding:10px 12px" onclick="openOv('modal-addcat')"><span style="width:18px;height:18px;border-radius:50%;background:#5B4FE0;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">+</span><span style="font-size:12px;font-weight:700">Add category</span></div></td></tr>`:`<tr class="addr"><td colspan="5"><button class="addb" onclick="openOv('modal-addcat')">＋ Add category</button></td></tr>`;
-  const totR=`<tr class="tr"><td>Total Expenses</td><td>${$f(tB)}</td><td>${$f(tA)}</td><td>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv">${$f(tF)}</td></tr>`;
+  const totR=`<tr class="tr"><td style="padding-left:16px">Total Expenses</td><td>${$f(tB)}</td><td>${$f(tA)}</td><td>${mobile?pillMob(tB,tA):pill(tB,tA)}</td><td class="cdiv">${$f(tF)}</td></tr>`;
 
   // Revenue row — editable, sits above the category table
   const rB=VIEW==='ytd'?Array.from({length:CM+1},(_,i)=>getRevB(i)).reduce((s,v)=>s+v,0):VIEW==='annual'?getRevB(CM)*12:VIEW==='bvf'?getRevB(CM)*12:getRevB(CM);
@@ -1141,7 +1141,7 @@ function render(){
   const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
   const plLabel='Profit / Loss';
   const plR=`<tr class="pl-row">
-    <td style="font-weight:700">${plLabel}</td>
+    <td style="font-weight:700;padding-left:16px">${plLabel}</td>
     <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
     <td style="${plStyle};font-weight:700">${plA>=0?'+':''}${$f(Math.abs(plA))}</td>
     <td>${mobile?`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`:`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`}</td>
