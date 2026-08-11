@@ -736,6 +736,8 @@ const DEMO={
 };
 
 let CU=null,D={},FO={},EXP={},VIEW='mtd',CM=new Date().getMonth(),YEAR=new Date().getFullYear();
+let CASH_BALANCE=0; // independent, manually-edited running cash balance — NOT derived from revenue/income
+let UNCAT_TXNS=[]; // Plaid transactions with no category assigned yet — counted toward Outside Budget
 const MNS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const isMobile=()=>window.innerWidth<=768;
 
@@ -866,10 +868,11 @@ async function loadApp(){
   // syncNavHeight after a frame so nav is fully painted and offsetHeight is accurate
   requestAnimationFrame(syncNavHeight);
   if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{cleanupUI();document.getElementById('auth-screen').style.display='flex';authTab('in');return;}}
-  const{data:u}=await sb.from('users').select('account_number,display_name').eq('id',CU.id).single();
+  const{data:u}=await sb.from('users').select('account_number,display_name,current_cash_balance').eq('id',CU.id).single();
   if(u){
     const acct=u.account_number||'PCF-0000-0000';
     document.getElementById('hdr-acct').textContent=acct;
+    CASH_BALANCE=u.current_cash_balance??0;
     
     if(u.display_name==='demo'&&!sessionStorage.getItem('demo-dismissed')){
       document.getElementById('demo-banner').style.display='flex';
@@ -890,6 +893,10 @@ async function fetchData(){
   const{data:txns}=await sb.from('transactions').select('*').eq('user_id',CU.id).gte('date',`${YEAR}-01-01`).lte('date',`${YEAR}-12-31`);
   // Also load Plaid transactions (they have category_name, not line_item_id)
   const{data:plaidTxns}=await sb.from('transactions').select('*').eq('user_id',CU.id).not('plaid_transaction_id','is',null).not('category_name','is',null).gte('date',`${YEAR}-01-01`).lte('date',`${YEAR}-12-31`);
+  // Uncategorized Plaid transactions — real spend that isn't tracked against any budget line yet.
+  // Counted toward "Outside Budget" so unassigned spending doesn't silently disappear from the KPI.
+  const{data:uncatTxns}=await sb.from('transactions').select('*').eq('user_id',CU.id).not('plaid_transaction_id','is',null).is('category_name',null).gte('date',`${YEAR}-01-01`).lte('date',`${YEAR}-12-31`);
+  UNCAT_TXNS=uncatTxns||[];
   cats.forEach(cat=>{D[cat.name]={id:cat.id,catObj:cat,items:[]};});
   (items||[]).forEach(item=>{
     const cat=cats.find(c=>c.id===item.category_id);if(!cat)return;
@@ -1183,12 +1190,12 @@ function render(){
   }[VIEW]||{b:mn,a:'Spent',v:'Var',f:'Forecast'};
 
   // ── NEW KPI CARDS: Revenue / Expenses / Profit-Loss / Profit Margin ──
-  const revActual=rA;   // view-aware: MTD/YTD/Annual/BVF
+  const revActual=rA;   // view-aware: MTD/YTD/Annual/BVF — used for Income/Revenue & P&L only, NOT the cash balance card
 
   // Spending-based progress: actual ÷ forecast (per spec)
   const spendPct=tF>0?Math.min(100,(tA/tF)*100):0;
   const remainingSpend=Math.max(0,tF-tA);
-  const projectedBalance=revActual-remainingSpend;
+  const projectedBalance=CASH_BALANCE-remainingSpend; // Projected Month-End Balance = Cash Available Today − Expected Bills Left
   const availableToSave=Math.max(0,projectedBalance);
   const today=new Date();
   const currentMonth=today.getMonth();
@@ -1202,11 +1209,16 @@ function render(){
   } else {
     daysLeft=daysInMonth; // future month
   }
+  const uncatSpend=UNCAT_TXNS.reduce((sum,t)=>{
+    const tm=new Date(t.date).getMonth();
+    const inView=VIEW==='mtd'?tm===CM:VIEW==='ytd'?tm<=CM:true; // annual/bvf: count the whole year
+    return inView?sum+Math.abs(parseFloat(t.amount)):sum;
+  },0);
   const unplannedSpend=Object.keys(D).reduce((sum,cat)=>{
     const catA=D[cat].items.reduce((s,i)=>s+getAV(i),0);
     const catB=D[cat].items.reduce((s,i)=>s+getBV(i),0);
     return sum+Math.max(0,catA-catB);
-  },0);
+  },uncatSpend);
   const progHTML=spendPct>=100
     ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${spendPct.toFixed(1)}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(remainingSpend))} over budget</span></div>`
     :`<div class="prog-track"><div class="prog-fill-good" style="width:${spendPct}%"></div></div><div class="prog-right"><span class="prog-pct-good">${spendPct.toFixed(1)}%</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(remainingSpend)}</strong> left · ${daysLeft}d</span></div>`;
@@ -1231,7 +1243,7 @@ function render(){
   const summaryCardsUpdated=mobile?`<div class="m-summary-cards">
     <div class="m-sc" style="background:linear-gradient(135deg,#2E7D32,#19501C);cursor:pointer" onclick="editCashBalance()">
       <div style="font-size:10px;color:rgba(255,255,255,.9);font-weight:700;margin-bottom:8px;line-height:1.2">Current Cash Balance</div>
-      <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1;margin-bottom:6px">${$f(revActual)}</div>
+      <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1;margin-bottom:6px">${$f(CASH_BALANCE)}</div>
       <div style="font-size:10px;color:rgba(255,255,255,.75);font-weight:500">✏️ Tap to edit</div>
     </div>
     <div class="m-sc" style="background:linear-gradient(135deg,#185FA5,#0C3F72)">
@@ -1509,12 +1521,13 @@ async function deleteCategory(catName){
   render();
 }
 
-function editCashBalance(){
-  const curr=prompt('Enter current cash balance:','');
+async function editCashBalance(){
+  const curr=prompt('Enter current cash balance:',CASH_BALANCE?String(CASH_BALANCE):'');
   if(curr===null)return;
   const val=parseFloat(curr.replace(/[^0-9.]/g,''));
   if(isNaN(val))return;
-  saveRevA(CM,val);
+  CASH_BALANCE=val;
+  await sb.from('users').update({current_cash_balance:val}).eq('id',CU.id);
   render();
 }
 
