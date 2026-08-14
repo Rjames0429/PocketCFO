@@ -912,7 +912,7 @@ async function loadApp(){
       document.getElementById('demo-banner').style.display='flex';
     }
   }
-  await fetchData();render();
+  await fetchData();render();attachScrollVisibilityListener();
   checkPlaidRedirect();
 }
 function dismissDemo(){document.getElementById('demo-banner').style.display='none';sessionStorage.setItem('demo-dismissed','1');}
@@ -956,13 +956,37 @@ async function fetchData(){
 }
 function showLastUpdated(){
   const el=document.getElementById('last-updated-fixed');
-  if(!el)return;
-  if(currentPage==='budget'&&isMobile()){
+  if(el&&currentPage==='budget'&&isMobile()){
     el.textContent=`Updated ${fmtUpdated(LAST_UPDATED)}`;
-    el.style.display='block';
-  } else {
-    el.style.display='none';
   }
+  updateFloatingVisibility();
+}
+function updateFloatingVisibility(){
+  const tsEl=document.getElementById('last-updated-fixed');
+  const chatEl=document.getElementById('chat-btn');
+  const eligible=currentPage==='budget'&&isMobile();
+  if(!eligible){
+    if(tsEl)tsEl.style.display='none';
+    if(chatEl)chatEl.style.display='none';
+    return;
+  }
+  const main=document.getElementById('app-main');
+  const nearBottom=main?(main.scrollTop+main.clientHeight>=main.scrollHeight-40):true;
+  if(tsEl)tsEl.style.display=nearBottom?'block':'none';
+  if(chatEl)chatEl.style.display=nearBottom?'flex':'none';
+}
+let _scrollListenerAttached=false;
+function attachScrollVisibilityListener(){
+  if(_scrollListenerAttached)return;
+  const main=document.getElementById('app-main');
+  if(!main)return;
+  let ticking=false;
+  main.addEventListener('scroll',()=>{
+    if(ticking)return;
+    ticking=true;
+    requestAnimationFrame(()=>{updateFloatingVisibility();ticking=false;});
+  });
+  _scrollListenerAttached=true;
 }
 
 // ── HELPERS ───────────────────────────────────────────────
@@ -1666,9 +1690,8 @@ function navTo(page){
     const el=document.getElementById('page-'+page);
     if(el){el.style.display='block';renderPage(page);}
   }
-  // Chat button only shows on Budget tab
-  const cb=document.getElementById('chat-btn');
-  if(cb){cb.style.display=(page==='budget'&&isMobile())?'flex':'none';if(window._initChatDrag)window._initChatDrag();}
+  // Chat button visibility now handled by updateFloatingVisibility() below (scroll-aware)
+  if(window._initChatDrag)window._initChatDrag();
   // Bottom nav always visible on mobile regardless of page
   const bn=document.getElementById('bottom-nav');
   if(bn)bn.style.display=isMobile()?'flex':'none';
