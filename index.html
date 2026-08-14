@@ -412,9 +412,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .bottom-nav{flex-shrink:0;background:#fff;border-top:0.5px solid var(--border2);padding:7px 0;align-items:center;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;z-index:60}
   .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:55px;cursor:pointer}
   .nav-icon{font-size:20px;color:#ccc}
-  .nav-icon.active{color:var(--brand)}
+  .nav-icon.active{color:#2F80ED}
   .nav-lbl{font-size:9px;color:#ccc;font-weight:500}
-  .nav-lbl.active{color:var(--brand);font-weight:600}
+  .nav-lbl.active{color:#2F80ED;font-weight:600}
+  .house-fill{display:none}
+  .nav-icon.active .house-fill{display:block}
+  .nav-icon.active .house-outline{display:none}
   .m-header-row{display:flex!important;align-items:center;justify-content:space-between}
 }
 
@@ -530,7 +533,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- Bottom nav — persistent, always visible regardless of active page -->
 <div class="bottom-nav" id="bottom-nav" style="display:none">
   <div class="nav-item active" onclick="navTo('budget')">
-    <div class="nav-icon active" id="ni-budget"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4.5a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1V10"/></svg></div>
+    <div class="nav-icon active" id="ni-budget">
+      <svg class="house-outline" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4.5a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1V10"/></svg>
+      <svg class="house-fill" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none"><path d="M12 3.2 2.4 11 3.6 12.5 5.5 11v8a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-8l1.9 1.5 1.2-1.5z"/></svg>
+    </div>
     <div class="nav-lbl active" id="nl-budget">Dashboard</div>
   </div>
   <div class="nav-item" onclick="navTo('charts')">
@@ -1956,7 +1962,7 @@ function renderSettings(){
       </div>
     </div>
 
-    <div style="text-align:center;font-size:11px;color:#ccc;padding:8px 0 20px">CFO Bobby v1.0 · Built with ❤️</div>`;
+    <div style="text-align:center;font-size:11px;color:#ccc;padding:8px 0 20px">CFO Bobby</div>`;
 }
 
 function settingsAction(type){
