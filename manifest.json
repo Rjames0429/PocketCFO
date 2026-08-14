@@ -1,6 +1,6 @@
 {
-  "name": "PocketCFO",
-  "short_name": "PocketCFO",
+  "name": "CFO Bobby",
+  "short_name": "CFO Bobby",
   "description": "Your personal finance command center",
   "start_url": "/",
   "display": "standalone",

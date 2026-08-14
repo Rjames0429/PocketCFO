@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="mobile-web-app-capable" content="yes"/>
-<title>PocketCFO</title>
+<title>CFO Bobby</title>
 <meta name="description" content="Your personal finance command center"/>
 <meta name="theme-color" content="#4B3FA0"/>
 <link rel="manifest" href="manifest.json"/>
@@ -450,7 +450,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- ══ AUTH ══ -->
 <div id="auth-screen">
 <div class="auth-wrap">
-  <div class="logo-row"><div class="logo-dot"></div><div class="logo-name">PocketCFO</div></div>
+  <div class="logo-row"><div class="logo-dot"></div><div class="logo-name">CFO Bobby</div></div>
   <div class="card">
     <div class="tabs" id="auth-tabs">
       <button class="tab active" onclick="authTab('in')" id="tab-in">Sign in</button>
@@ -478,7 +478,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div id="p-created" style="display:none">
       <div class="ptitle">You're in! 🎉</div>
-      <div class="psub">Your PocketCFO account is ready</div>
+      <div class="psub">Your CFO Bobby account is ready</div>
       <div class="acard"><div style="font-size:12px;color:var(--text3);margin-bottom:6px">Your account number</div><div class="anum" id="c-anum">PCF-0000-0000</div><div class="asub">Save this for support</div></div>
       <div class="pnote">🛡 We don't know your name and never will unless you tell us. <strong>This is intentional.</strong></div>
       <button class="btn-p" onclick="loadApp()">Go to my dashboard →</button>
@@ -561,14 +561,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div style="display:flex;align-items:center;gap:10px">
           <div style="width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px">💬</div>
           <div>
-            <div style="font-size:14px;font-weight:600;color:#fff">PocketCFO Assistant</div>
+            <div style="font-size:14px;font-weight:600;color:#fff">CFO Bobby Assistant</div>
             <div style="font-size:11px;color:rgba(255,255,255,.7)">Ask me anything about your budget</div>
           </div>
         </div>
         <button onclick="closeOv('modal-chat')" style="background:none;border:none;color:rgba(255,255,255,.8);font-size:20px;cursor:pointer;padding:0">✕</button>
       </div>
       <div id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;background:#f9f9f9;display:flex;flex-direction:column;gap:10px">
-        <div class="chat-msg-bot"><div class="chat-bubble-bot">Hi! I'm your PocketCFO assistant. Ask me about your spending, budget, or how to use the app.</div></div>
+        <div class="chat-msg-bot"><div class="chat-bubble-bot">Hi! I'm your CFO Bobby assistant. Ask me about your spending, budget, or how to use the app.</div></div>
       </div>
       <div style="padding:12px;background:#fff;border-top:0.5px solid #f0f0f0;display:flex;gap:8px;flex-shrink:0">
         <input id="chat-input" placeholder="Ask about your budget…" style="flex:1;padding:10px 14px;border:1px solid #e0e0e0;border-radius:99px;font-size:13px;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')sendChat()"/>
@@ -748,6 +748,7 @@ const DEMO={
 let CU=null,D={},FO={},EXP={},VIEW='mtd',CM=new Date().getMonth(),YEAR=new Date().getFullYear();
 let CASH_BALANCE=0; // independent, manually-edited running cash balance — NOT derived from revenue/income
 let UNCAT_TXNS=[]; // Plaid transactions with no category assigned yet — counted toward Outside Budget
+let NOTIF_ENABLED=localStorage.getItem('pcf-notif-enabled')!=='false'; // simple UI preference, defaults on
 const MNS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const isMobile=()=>window.innerWidth<=768;
 
@@ -1668,7 +1669,7 @@ function renderDiscover(){
   return`<div style="padding:20px 16px 40px">
     <div style="font-size:20px;font-weight:800;color:#0B1538;margin-bottom:2px">Discover</div>
     <div style="font-size:12px;color:#667085;margin-bottom:4px">Financial products that could help you save, earn, or grow.</div>
-    <div style="font-size:10.5px;color:#98A2B3;background:#FAFBFC;border:1px solid #E8ECF2;border-radius:10px;padding:8px 10px;margin:10px 0 16px">ℹ️ Every offer on this page is a mockup for design purposes. None are real, live, or affiliated with PocketCFO.</div>
+    <div style="font-size:10.5px;color:#98A2B3;background:#FAFBFC;border:1px solid #E8ECF2;border-radius:10px;padding:8px 10px;margin:10px 0 16px">ℹ️ Every offer on this page is a mockup for design purposes. None are real, live, or affiliated with CFO Bobby.</div>
     ${cards}
   </div>`;
 }
@@ -1911,8 +1912,8 @@ function renderSettings(){
       <div style="padding:14px 18px;border-bottom:0.5px solid #f5f5f5">
         <div style="font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Preferences</div>
         ${settingsRow('🔔','Notifications','Spending alerts and reminders','toggle')}
-        ${settingsRow('📅','Budget period','Monthly','')}
-        ${settingsRow('💵','Currency','USD — US Dollar','')}
+        ${settingsRow('📅','Budget period','Monthly','budgetperiod')}
+        ${settingsRow('💵','Currency','USD — US Dollar','currency')}
       </div>
     </div>
 
@@ -1931,7 +1932,7 @@ function renderSettings(){
       <div style="padding:14px 18px">
         <div style="font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Account</div>
         ${settingsRow('🔒','Change password','Update your login password','password')}
-        ${settingsRow('📧','Contact support','Get help with PocketCFO','support')}
+        ${settingsRow('📧','Contact support','Get help with CFO Bobby','support')}
         <div onclick="doSignOut()" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer">
           <div style="display:flex;align-items:center;gap:12px">
             <div style="font-size:20px">🚪</div>
@@ -1942,12 +1943,12 @@ function renderSettings(){
       </div>
     </div>
 
-    <div style="text-align:center;font-size:11px;color:#ccc;padding:8px 0 20px">PocketCFO v1.0 · Built with ❤️</div>`;
+    <div style="text-align:center;font-size:11px;color:#ccc;padding:8px 0 20px">CFO Bobby v1.0 · Built with ❤️</div>`;
 }
 
 function settingsAction(type){
   if(type==='password'){sb.auth.resetPasswordForEmail(CU.email,{redirectTo:window.location.origin}).then(()=>alert('Password reset email sent to '+CU.email));}
-  else if(type==='support'){window.open('mailto:support@pocketcfo.app?subject=PocketCFO Support','_blank');}
+  else if(type==='support'){window.open('mailto:support@pocketcfo.app?subject=CFO Bobby Support','_blank');}
   else if(type==='export'){exportData();}
   else if(type==='sync'){
     const btn=event?.target?.closest('[onclick]');
@@ -1961,13 +1962,15 @@ function settingsAction(type){
     });
   }
   else if(type==='red'){if(confirm('Clear all demo data and start fresh?'))clearData();}
+  else if(type==='budgetperiod'){alert('CFO Bobby currently tracks budgets on a monthly cycle. Other periods (weekly, quarterly) aren\'t available yet.');}
+  else if(type==='currency'){alert('CFO Bobby currently supports USD only. Multi-currency support isn\'t available yet.');}
 }
 async function exportData(){
   if(!CU||!Object.keys(D).length)return;
   const rows=[['Category','Item','Month','Budget','Actual']];
   Object.keys(D).forEach(cat=>{D[cat].items.forEach(item=>{for(let m=0;m<12;m++){rows.push([cat,item.name,MNS[m],getB(item,m).toFixed(2),getA(item,m).toFixed(2)]);}});});
   const csv=rows.map(r=>r.join(',')).join('\n');
-  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='pocketcfo-export.csv';a.click();
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='cfo-bobby-export.csv';a.click();
 }
 async function clearData(){
   if(!CU)return;
@@ -1979,11 +1982,11 @@ async function clearData(){
 }
 function settingsRow(icon,title,sub,type){
   const right=type==='toggle'
-    ?`<div style="width:44px;height:26px;background:#4B3FA0;border-radius:99px;position:relative;cursor:pointer"><div style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div></div>`
-    :type==='red'||type===''?''
+    ?`<div onclick="toggleNotifications(event)" style="width:44px;height:26px;background:${NOTIF_ENABLED?'#4B3FA0':'#ddd'};border-radius:99px;position:relative;cursor:pointer;transition:background .15s"><div style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;${NOTIF_ENABLED?'right:2px':'left:2px'};box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s,right .15s"></div></div>`
+    :type==='red'?''
     :`<div style="color:#ccc;font-size:14px">›</div>`;
   const titleColor=type==='red'?'#C62828':'#111';
-  const action=type&&type!=='toggle'&&type!==''?`onclick="settingsAction('${type}')"`:''
+  const action=type&&type!=='toggle'?`onclick="settingsAction('${type}')"`:''
   return`<div ${action} style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid #f5f5f5;cursor:pointer">
     <div style="display:flex;align-items:center;gap:12px">
       <div style="font-size:20px">${icon}</div>
@@ -1994,6 +1997,12 @@ function settingsRow(icon,title,sub,type){
     </div>
     ${right}
   </div>`;
+}
+function toggleNotifications(e){
+  if(e)e.stopPropagation();
+  NOTIF_ENABLED=!NOTIF_ENABLED;
+  localStorage.setItem('pcf-notif-enabled',NOTIF_ENABLED?'true':'false');
+  renderSettings();
 }
 
 // ── CHAT ────────────────────────────────────────────────────
@@ -2063,7 +2072,7 @@ async function sendChat(){
       body:JSON.stringify({
         model:'claude-sonnet-4-6',
         max_tokens:1000,
-        system:`You are PocketCFO, a friendly personal finance assistant. The user's current month budget data for ${MNS[CM]} ${YEAR}: ${budgetCtx}. Keep answers concise, practical and encouraging. Use dollar amounts from their actual data when relevant.`,
+        system:`You are CFO Bobby, a friendly personal finance assistant. The user's current month budget data for ${MNS[CM]} ${YEAR}: ${budgetCtx}. Keep answers concise, practical and encouraging. Use dollar amounts from their actual data when relevant.`,
         messages:[{role:'user',content:txt}]
       })
     });
