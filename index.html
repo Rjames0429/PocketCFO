@@ -434,7 +434,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .chat-btn{
     position:fixed;
     bottom:56px;right:16px;z-index:55;
-    width:46px;height:46px;border-radius:50%;
+    width:42px;height:42px;border-radius:50%;
     background:#4B3FA0;border:none;cursor:grab;
     font-size:19px;align-items:center;justify-content:center;
     box-shadow:0 4px 16px rgba(75,63,160,.35);
@@ -972,8 +972,32 @@ function updateFloatingVisibility(){
   }
   const main=document.getElementById('app-main');
   const nearBottom=main?(main.scrollTop+main.clientHeight>=main.scrollHeight-40):true;
-  if(tsEl)tsEl.style.display=nearBottom?'block':'none';
+  if(tsEl){
+    tsEl.style.display=nearBottom?'block':'none';
+    if(nearBottom)positionTimestampCentered();
+  }
   if(chatEl)chatEl.style.display=nearBottom?'flex':'none';
+}
+function positionTimestampCentered(){
+  const tsEl=document.getElementById('last-updated-fixed');
+  const tw=document.querySelector('.tw');
+  const nav=document.getElementById('bottom-nav');
+  if(!tsEl||!tw||!nav)return;
+  const tableBottom=tw.getBoundingClientRect().bottom;
+  const navTop=nav.getBoundingClientRect().top;
+  const gap=navTop-tableBottom;
+  if(gap>24){
+    // Real visible gap - center the timestamp within it
+    const mid=tableBottom+gap/2;
+    tsEl.style.top=mid+'px';
+    tsEl.style.bottom='auto';
+    tsEl.style.transform='translateY(-50%)';
+  } else {
+    // Little/no gap (long content, scrolled to bottom) - fall back to a fixed offset above the nav
+    tsEl.style.top='auto';
+    tsEl.style.bottom='calc(var(--nav-h) + 14px)';
+    tsEl.style.transform='none';
+  }
 }
 let _scrollListenerAttached=false;
 function attachScrollVisibilityListener(){
@@ -986,6 +1010,7 @@ function attachScrollVisibilityListener(){
     ticking=true;
     requestAnimationFrame(()=>{updateFloatingVisibility();ticking=false;});
   });
+  window.addEventListener('resize',()=>updateFloatingVisibility());
   _scrollListenerAttached=true;
 }
 
