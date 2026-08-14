@@ -1623,7 +1623,45 @@ function renderPage(page){
   if(page==='transactions') renderTransactions();
   if(page==='charts') renderCharts();
   if(page==='settings') renderSettings();
-  if(page==='discover') document.getElementById('app-main').innerHTML=`<div style="padding:60px 24px;text-align:center"><div style="font-size:52px;margin-bottom:16px">🧭</div><div style="font-size:22px;font-weight:800;color:#111;margin-bottom:12px">Discover</div><div style="font-size:14px;color:#888;line-height:1.8">Financial products to help you grow your savings.<br><br><span style="color:#4B3FA0;font-weight:700">Coming soon.</span></div></div>`;
+  if(page==='discover') document.getElementById('app-main').innerHTML=renderDiscover();
+}
+
+function renderDiscover(){
+  const offers=[
+    {cat:'Credit Card',catColor:'#2F80ED',catBg:'#EEF5FF',icon:'💳',name:'Summit Rewards Card',blurb:'Earn 2% cash back on every purchase, no annual fee.',stat:'2% back',statLbl:'on all purchases'},
+    {cat:'Savings',catColor:'#18A957',catBg:'#EFFAF2',icon:'🏦',name:'Nova High-Yield Savings',blurb:'Grow your emergency fund faster with a top-tier rate.',stat:'4.50%',statLbl:'APY'},
+    {cat:'Investing',catColor:'#5B4FE0',catBg:'#EEECFD',icon:'📈',name:'Meridian Invest',blurb:'Automated investing with zero-commission trades.',stat:'$0',statLbl:'commission'},
+    {cat:'Credit Card',catColor:'#2F80ED',catBg:'#EEF5FF',icon:'✈️',name:'Voyage Travel Card',blurb:'3x points on travel and dining, transferable to airlines.',stat:'3x',statLbl:'travel points'},
+    {cat:'Credit Monitoring',catColor:'#E53935',catBg:'#FFF3F2',icon:'🛡️',name:'Ledger Credit Watch',blurb:'Free credit score tracking with real-time fraud alerts.',stat:'Free',statLbl:'forever'},
+    {cat:'Loans',catColor:'#B7791F',catBg:'#FFF8EB',icon:'🏠',name:'Anchor Home Loans',blurb:'Refinance and see if you qualify for a lower rate.',stat:'3 min',statLbl:'to check rate'},
+  ];
+  const cards=offers.map(o=>`
+    <div style="background:#fff;border:1px solid #E8ECF2;border-radius:16px;box-shadow:0 8px 30px rgba(15,23,42,.06);padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="width:44px;height:44px;border-radius:12px;background:${o.catBg};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${o.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:9px;font-weight:700;color:${o.catColor};background:${o.catBg};padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px">${o.cat}</span>
+            <span style="font-size:9px;font-weight:600;color:#98A2B3;border:1px solid #E8ECF2;padding:2px 8px;border-radius:999px">Example</span>
+          </div>
+          <div style="font-size:14px;font-weight:800;color:#0B1538;margin-top:6px">${o.name}</div>
+          <div style="font-size:12px;color:#667085;margin-top:3px;line-height:1.4">${o.blurb}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+            <div>
+              <span style="font-size:16px;font-weight:800;color:${o.catColor}">${o.stat}</span>
+              <span style="font-size:11px;color:#98A2B3;margin-left:4px">${o.statLbl}</span>
+            </div>
+            <button onclick="alert('This is an example offer for design purposes only — not a real, live financial product.')" style="font-size:11px;font-weight:700;color:#fff;background:${o.catColor};border:none;padding:8px 16px;border-radius:999px;cursor:pointer">Learn More</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+  return`<div style="padding:20px 16px 40px">
+    <div style="font-size:20px;font-weight:800;color:#0B1538;margin-bottom:2px">Discover</div>
+    <div style="font-size:12px;color:#667085;margin-bottom:4px">Financial products that could help you save, earn, or grow.</div>
+    <div style="font-size:10.5px;color:#98A2B3;background:#FAFBFC;border:1px solid #E8ECF2;border-radius:10px;padding:8px 10px;margin:10px 0 16px">ℹ️ Every offer on this page is a mockup for design purposes. None are real, live, or affiliated with PocketCFO.</div>
+    ${cards}
+  </div>`;
 }
 
 // ── TRANSACTIONS ────────────────────────────────────────────
