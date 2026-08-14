@@ -418,6 +418,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .house-fill{display:none}
   .nav-icon.active .house-fill{display:block}
   .nav-icon.active .house-outline{display:none}
+  .charts-fill,.activity-fill,.discover-fill,.settings-fill{display:none}
+  .nav-icon.active .charts-fill,.nav-icon.active .activity-fill,.nav-icon.active .discover-fill,.nav-icon.active .settings-fill{display:block}
+  .nav-icon.active .charts-outline,.nav-icon.active .activity-outline,.nav-icon.active .discover-outline,.nav-icon.active .settings-outline{display:none}
   .m-header-row{display:flex!important;align-items:center;justify-content:space-between}
 }
 
@@ -540,19 +543,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="nav-lbl active" id="nl-budget">Dashboard</div>
   </div>
   <div class="nav-item" onclick="navTo('charts')">
-    <div class="nav-icon" id="ni-charts"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V13"/><path d="M12 20V6"/><path d="M19 20v-9"/></svg></div>
+    <div class="nav-icon" id="ni-charts">
+      <svg class="charts-outline" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V13"/><path d="M12 20V6"/><path d="M19 20v-9"/></svg>
+      <svg class="charts-fill" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none"><rect x="3.3" y="12" width="3.4" height="8" rx="1.2"/><rect x="10.3" y="5" width="3.4" height="15" rx="1.2"/><rect x="17.3" y="9" width="3.4" height="11" rx="1.2"/></svg>
+    </div>
     <div class="nav-lbl" id="nl-charts">Charts</div>
   </div>
   <div class="nav-item" onclick="navTo('transactions')">
-    <div class="nav-icon" id="ni-transactions"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="13" rx="2"/><path d="M3.5 10.5h17"/><path d="M7 14.5h5"/></svg></div>
+    <div class="nav-icon" id="ni-transactions">
+      <svg class="activity-outline" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="13" rx="2"/><path d="M3.5 10.5h17"/><path d="M7 14.5h5"/></svg>
+      <svg class="activity-fill" viewBox="0 0 24 24" width="20" height="20"><rect x="3.5" y="6" width="17" height="13" rx="2" fill="currentColor"/><rect x="3.5" y="9.7" width="17" height="1.6" fill="#fff"/><rect x="7" y="13.7" width="5" height="1.8" rx="0.9" fill="#fff"/></svg>
+    </div>
     <div class="nav-lbl" id="nl-transactions">Activity</div>
   </div>
   <div class="nav-item" onclick="navTo('discover')">
-    <div class="nav-icon" id="ni-discover"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3.5 12.6 8 17 9.6l-4.4 1.6L11 15.6 9.4 11.2 5 9.6l4.4-1.6z"/><path d="M18 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg></div>
+    <div class="nav-icon" id="ni-discover">
+      <svg class="discover-outline" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3.5 12.6 8 17 9.6l-4.4 1.6L11 15.6 9.4 11.2 5 9.6l4.4-1.6z"/><path d="M18 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg>
+      <svg class="discover-fill" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none"><path d="M11 3.5 12.6 8 17 9.6l-4.4 1.6L11 15.6 9.4 11.2 5 9.6l4.4-1.6z"/><path d="M18 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg>
+    </div>
     <div class="nav-lbl" id="nl-discover">Discover</div>
   </div>
   <div class="nav-item" onclick="navTo('settings')">
-    <div class="nav-icon" id="ni-settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82A1.65 1.65 0 0 0 3 14.09H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.4.68.74.86.31.17.65.26 1 .26H21a2 2 0 0 1 0 4h-.09c-.36 0-.7.09-1 .26-.34.18-.6.5-.74.86z"/></svg></div>
+    <div class="nav-icon" id="ni-settings">
+      <svg class="settings-outline" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82A1.65 1.65 0 0 0 3 14.09H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.4.68.74.86.31.17.65.26 1 .26H21a2 2 0 0 1 0 4h-.09c-.36 0-.7.09-1 .26-.34.18-.6.5-.74.86z"/></svg>
+      <svg class="settings-fill" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82A1.65 1.65 0 0 0 3 14.09H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.4.68.74.86.31.17.65.26 1 .26H21a2 2 0 0 1 0 4h-.09c-.36 0-.7.09-1 .26-.34.18-.6.5-.74.86z"/><circle cx="12" cy="12" r="3" fill="#fff"/></svg>
+    </div>
     <div class="nav-lbl" id="nl-settings">Settings</div>
   </div>
 </div>
