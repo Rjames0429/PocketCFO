@@ -530,23 +530,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- Bottom nav — persistent, always visible regardless of active page -->
 <div class="bottom-nav" id="bottom-nav" style="display:none">
   <div class="nav-item active" onclick="navTo('budget')">
-    <div class="nav-icon active" id="ni-budget">📊</div>
-    <div class="nav-lbl active" id="nl-budget">Budget</div>
+    <div class="nav-icon active" id="ni-budget"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4.5a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1V10"/></svg></div>
+    <div class="nav-lbl active" id="nl-budget">Dashboard</div>
   </div>
   <div class="nav-item" onclick="navTo('charts')">
-    <div class="nav-icon" id="ni-charts">📈</div>
+    <div class="nav-icon" id="ni-charts"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V13"/><path d="M12 20V6"/><path d="M19 20v-9"/></svg></div>
     <div class="nav-lbl" id="nl-charts">Charts</div>
   </div>
   <div class="nav-item" onclick="navTo('transactions')">
-    <div class="nav-icon" id="ni-transactions">💳</div>
-    <div class="nav-lbl" id="nl-transactions">Transactions</div>
+    <div class="nav-icon" id="ni-transactions"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="13" rx="2"/><path d="M3.5 10.5h17"/><path d="M7 14.5h5"/></svg></div>
+    <div class="nav-lbl" id="nl-transactions">Activity</div>
   </div>
   <div class="nav-item" onclick="navTo('discover')">
-    <div class="nav-icon" id="ni-discover">🧭</div>
+    <div class="nav-icon" id="ni-discover"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3.5 12.6 8 17 9.6l-4.4 1.6L11 15.6 9.4 11.2 5 9.6l4.4-1.6z"/><path d="M18 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg></div>
     <div class="nav-lbl" id="nl-discover">Discover</div>
   </div>
   <div class="nav-item" onclick="navTo('settings')">
-    <div class="nav-icon" id="ni-settings">⚙️</div>
+    <div class="nav-icon" id="ni-settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82A1.65 1.65 0 0 0 3 14.09H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.4.68.74.86.31.17.65.26 1 .26H21a2 2 0 0 1 0 4h-.09c-.36 0-.7.09-1 .26-.34.18-.6.5-.74.86z"/></svg></div>
     <div class="nav-lbl" id="nl-settings">Settings</div>
   </div>
 </div>
@@ -749,6 +749,7 @@ let CU=null,D={},FO={},EXP={},VIEW='mtd',CM=new Date().getMonth(),YEAR=new Date(
 let CASH_BALANCE=0; // independent, manually-edited running cash balance — NOT derived from revenue/income
 let UNCAT_TXNS=[]; // Plaid transactions with no category assigned yet — counted toward Outside Budget
 let NOTIF_ENABLED=localStorage.getItem('pcf-notif-enabled')!=='false'; // simple UI preference, defaults on
+let LAST_UPDATED=null; // real timestamp of the last successful data fetch from Supabase
 const MNS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const isMobile=()=>window.innerWidth<=768;
 
@@ -928,6 +929,7 @@ async function fetchData(){
     }
     D[cat.name].items.push({id:item.id,name:item.name,budgets:bMap,actuals:aMap});
   });
+  LAST_UPDATED=new Date();
 }
 
 // ── HELPERS ───────────────────────────────────────────────
@@ -1359,8 +1361,19 @@ function render(){
     // Expenses label separator row — a little space before first category
     `${rows}${addR}${totR}${plR}`+
     `</tbody></table></div>`+
+    `<div style="text-align:center;font-size:11px;color:#98A2B3;padding:14px 0 4px">Updated ${fmtUpdated(LAST_UPDATED)}</div>`+
     (VIEW==='annual'?`<div style="font-size:11px;color:#aaa;text-align:center;padding:6px 20px 0">Actuals to date + average monthly spend × remaining months</div>`:'')+
     (!mobile?`<div class="hint-wrap" id="hint-bar"><span class="hint-txt">✏️ <strong>Double-click</strong> any number or category name to edit &nbsp;·&nbsp; Forecast carries forward automatically</span><button class="hint-x" onclick="document.getElementById('hint-bar').style.display='none'">Got it ✕</button></div>`:'');
+}
+function fmtUpdated(d){
+  if(!d)return'—';
+  const now=new Date();
+  const sameDay=d.toDateString()===now.toDateString();
+  const time=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  if(sameDay)return`today at ${time}`;
+  const yest=new Date(now);yest.setDate(now.getDate()-1);
+  if(d.toDateString()===yest.toDateString())return`yesterday at ${time}`;
+  return`${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})} at ${time}`;
 }
 
 function togViewDD(e){
