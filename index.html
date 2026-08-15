@@ -1886,7 +1886,7 @@ function renderTransactions(){
                 <div style="font-size:14px;font-weight:600;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${itemName}</div>
                 ${t.pending?'<span style="font-size:9px;font-weight:700;color:#B7791F;background:#FFF8EB;padding:1px 6px;border-radius:999px;flex-shrink:0">PENDING</span>':''}
               </div>
-              <div style="font-size:15px;font-weight:700;color:${isIncome?'#2F80ED':'#E53935'};flex-shrink:0;white-space:nowrap">${isIncome?'+':'−'}$${Math.abs(amt).toFixed(2)}</div>
+              <div style="font-size:15px;font-weight:700;color:${isIncome?'#2F80ED':'#E53935'};flex-shrink:0;white-space:nowrap">${isIncome?'+':'−'}$${Math.abs(amt).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
             </div>
             <div style="margin-top:4px">${catSelector}</div>
           </div>`;
