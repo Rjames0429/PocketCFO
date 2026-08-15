@@ -894,11 +894,12 @@ async function loadDemoData(userId){
 async function loadApp(){
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('app-screen').style.display=isMobile()?'flex':'block';
-  // Initialize persistent nav + chat button visibility
+  // Initialize persistent nav visibility (chat button visibility is handled
+  // later by updateFloatingVisibility(), once the table actually exists in
+  // the DOM - showing it here first would just flash it before it's hidden)
   const bn=document.getElementById('bottom-nav');
   if(bn)bn.style.display=isMobile()?'flex':'none';
-  const cb=document.getElementById('chat-btn');
-  if(cb){cb.style.display=isMobile()?'flex':'none';if(window._initChatDrag)window._initChatDrag();}
+  if(window._initChatDrag)window._initChatDrag();
   // syncNavHeight after a frame so nav is fully painted and offsetHeight is accurate
   requestAnimationFrame(syncNavHeight);
   if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{cleanupUI();document.getElementById('auth-screen').style.display='flex';authTab('in');return;}}
