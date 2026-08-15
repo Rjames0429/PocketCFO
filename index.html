@@ -823,8 +823,19 @@ const EYE_CLOSED='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" st
 function togPw(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.innerHTML=i.type==='password'?EYE_OPEN:EYE_CLOSED;}
 
 async function doSignIn(){
-  const e=document.getElementById('si-e').value.trim(),p=document.getElementById('si-p').value.trim();
-  if(!e||!p){amsg('Please enter your email and password.','err');return;}
+  let e=document.getElementById('si-e').value.trim(),p=document.getElementById('si-p').value.trim();
+  if(!e||!p){
+    // Mobile autofill can sometimes visually fill a field a moment after the
+    // value is actually readable - give it one brief re-check before
+    // declaring an error, rather than failing instantly on a fast tap.
+    await new Promise(r=>setTimeout(r,150));
+    e=document.getElementById('si-e').value.trim();p=document.getElementById('si-p').value.trim();
+  }
+  if(!e||!p){
+    amsg('Please enter your email and password.','err');
+    document.getElementById('amsg').scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
   const btn=document.getElementById('si-btn');btn.disabled=true;btn.innerHTML='<div class="spin"></div> Signing in…';
   try{
     const{data,error}=await sb.auth.signInWithPassword({email:e,password:p});
