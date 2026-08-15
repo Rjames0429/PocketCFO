@@ -13,9 +13,6 @@
 <meta name="description" content="Your personal finance command center"/>
 <meta name="theme-color" content="#4B3FA0"/>
 <link rel="manifest" href="manifest.json"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <style>
@@ -30,42 +27,39 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:var(--text);font-size:13px;min-height:100vh}
 
 /* ── AUTH ── */
-#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;max-height:100vh;overflow:hidden;padding:24px;background:radial-gradient(circle at 50% 0%,#16224F 0%,#0B1538 45%,#060A1E 100%);position:fixed;inset:0;z-index:100}
+#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;max-height:100vh;overflow:hidden;padding:24px;background:linear-gradient(160deg,#FAFBFC 0%,#F3F7FF 100%);position:fixed;inset:0;z-index:100}
 .auth-wrap{width:100%;max-width:400px}
-.logo-row{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;margin-bottom:36px}
-.logo-row img{height:38px;width:auto}
-.logo-hairline{width:36px;height:1px;background:linear-gradient(90deg,transparent,#C9A868,transparent)}
-.card{background:#FDFBF7;border:1px solid rgba(201,168,104,.25);border-radius:6px;padding:44px 36px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.02)}
-.tabs{display:flex;gap:0;border-bottom:1px solid #EDE7DA;margin-bottom:28px}
-.tab{flex:1;padding:0 0 12px;font-size:11px;border:none;border-bottom:1.5px solid transparent;cursor:pointer;background:transparent;color:#A8A196;font-family:inherit;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;transition:color .2s,border-color .2s}
-.tab.active{background:transparent;color:#0B1538;border-bottom-color:#C9A868}
-.ptitle{font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-size:30px;font-weight:500;letter-spacing:.3px;color:#0B1538;margin-bottom:6px}
-.psub{font-size:13px;color:#8A8478;margin-bottom:28px;letter-spacing:.2px}
-.field{margin-bottom:20px}
-.field label{display:block;font-size:10px;font-weight:600;color:#A8A196;margin-bottom:7px;text-transform:uppercase;letter-spacing:1.1px}
-.field input{width:100%;padding:12px 4px;font-size:14px;font-family:inherit;color:#0B1538;background:transparent;border:none;border-bottom:1px solid #E3DDCF;border-radius:0;outline:none;transition:border-color .2s}
-.field input:focus{border-bottom-color:#C9A868}
-.field input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(75,63,160,.1)}
+.logo-row{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-bottom:32px}
+.logo-row img{height:36px;width:auto}
+.logo-tagline{font-size:11px;font-weight:600;color:#98A2B3;letter-spacing:1px;text-transform:uppercase}
+.card{background:#fff;border:1px solid #E8ECF2;border-radius:18px;padding:36px 32px;box-shadow:0 8px 30px rgba(15,23,42,.06)}
+.tabs{display:flex;gap:4px;background:#F6F8FB;padding:4px;border-radius:999px;margin-bottom:26px}
+.tab{flex:1;padding:9px 0;font-size:12px;border:none;border-radius:999px;cursor:pointer;background:transparent;color:#98A2B3;font-family:inherit;font-weight:700;transition:background .2s,color .2s}
+.tab.active{background:#2F80ED;color:#fff}
+.ptitle{font-size:22px;font-weight:800;letter-spacing:-.2px;color:#0B1538;margin-bottom:6px}
+.psub{font-size:13px;color:#667085;margin-bottom:26px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:600;color:#98A2B3;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.field input{width:100%;padding:11px 14px;font-size:14px;font-family:inherit;color:#0B1538;background:#fff;border:1px solid #E8ECF2;border-radius:10px;outline:none;transition:border-color .2s}
+.field input:focus{border-color:#2F80ED;box-shadow:0 0 0 3px rgba(47,128,237,.1)}
 .pw-wrap{position:relative}
 .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px}
-.btn-p{width:100%;padding:14px;font-size:12px;font-family:inherit;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:#FDFBF7;background:#0B1538;border:none;border-radius:4px;cursor:pointer;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
-.btn-p:hover{background:#16224F}
-.btn-p:hover{background:var(--brand-dk)}
+.btn-p{width:100%;padding:13px;font-size:14px;font-family:inherit;font-weight:700;color:#fff;background:#2F80ED;border:none;border-radius:999px;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
+.btn-p:hover{background:#1D6FDB}
 .btn-p:disabled{background:#9B93D0;cursor:not-allowed}
-.forgot{font-size:11px;color:#8A8478;text-align:right;margin:-10px 0 20px;display:block;cursor:pointer;background:none;border:none;width:100%;font-family:inherit;letter-spacing:.3px;transition:color .2s}
-.forgot:hover{color:#C9A868}
-.amsg{padding:10px 12px;border-radius:4px;font-size:13px;margin-bottom:14px;display:none}
+.forgot{font-size:12px;color:#2F80ED;text-align:right;margin:-8px 0 16px;display:block;cursor:pointer;background:none;border:none;width:100%;font-family:inherit;font-weight:600;transition:color .2s}
+.forgot:hover{color:#1D6FDB}
+.amsg{padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none}
 .amsg.show{display:block}
 .merr{background:#FFEBEE;border:0.5px solid #F09595;color:#A32D2D}
 .mok{background:#E8F5E9;border:0.5px solid #97C459;color:#2E7D32}
 .minf{background:var(--brand-pale);border:0.5px solid #AFA9EC;color:#3C3489}
-.pnote{display:flex;align-items:flex-start;gap:8px;padding:14px;background:#F7F3EA;border-radius:4px;margin-bottom:20px;font-size:12px;color:#7A7466;line-height:1.55}
-.acard{background:#F7F3EA;border:1px solid rgba(201,168,104,.25);border-radius:4px;padding:26px;text-align:center;margin-bottom:20px}
-.anum{font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:600;letter-spacing:1.5px;margin-bottom:4px;color:#0B1538}
-.asub{font-size:11px;color:#A8A196;letter-spacing:.3px}
-.afooter{text-align:center;font-size:12px;color:#A8A196;margin-top:22px;letter-spacing:.2px}
-.afooter a{color:#0B1538;font-weight:600;cursor:pointer}
-.afooter a{color:var(--brand);cursor:pointer;font-weight:500}
+.pnote{display:flex;align-items:flex-start;gap:8px;padding:12px;background:#EEECFD;border-radius:10px;margin-bottom:18px;font-size:12px;color:#5B4FE0;line-height:1.5}
+.acard{background:#F6F8FB;border:1px solid #E8ECF2;border-radius:14px;padding:24px;text-align:center;margin-bottom:18px}
+.anum{font-size:22px;font-weight:800;letter-spacing:.5px;margin-bottom:4px;color:#0B1538}
+.asub{font-size:12px;color:#98A2B3}
+.afooter{text-align:center;font-size:13px;color:#98A2B3;margin-top:18px}
+.afooter a{color:#2F80ED;cursor:pointer;font-weight:700}
 
 /* ── APP SHELL ── */
 #app-screen{display:none;background:#fff}
@@ -459,7 +453,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- ══ AUTH ══ -->
 <div id="auth-screen">
 <div class="auth-wrap">
-  <div class="logo-row"><img src="logo-wordmark-light.png" alt="CFO Bobby"/><div class="logo-hairline"></div></div>
+  <div class="logo-row"><img src="logo-wordmark.png" alt="CFO Bobby"/><div class="logo-tagline">Your Pocket CFO</div></div>
   <div class="card">
     <div class="tabs" id="auth-tabs">
       <button class="tab active" onclick="authTab('in')" id="tab-in">Sign in</button>
