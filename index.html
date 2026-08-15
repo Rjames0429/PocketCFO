@@ -1842,7 +1842,8 @@ function renderTransactions(){
     if(picker&&!picker.dataset.initialized){picker.value=String(CM);picker.dataset.initialized='1';}
     const txnMonth=picker?parseInt(picker.value):CM;
     const txnMonthStart=`${YEAR}-${String(txnMonth+1).padStart(2,'0')}-01`;
-    const txnMonthEnd=`${YEAR}-${String(txnMonth+1).padStart(2,'0')}-31`;
+    const daysInTxnMonth=new Date(YEAR,txnMonth+1,0).getDate(); // correct last day for any month (28/29/30/31)
+    const txnMonthEnd=`${YEAR}-${String(txnMonth+1).padStart(2,'0')}-${String(daysInTxnMonth).padStart(2,'0')}`;
     sb.from('transactions')
       .select('*,budget_line_items(name),budget_categories(name)')
       .eq('user_id',CU.id)
@@ -1850,7 +1851,8 @@ function renderTransactions(){
       .lte('date',txnMonthEnd)
       .order('date',{ascending:false})
       .limit(200)
-    .then(({data:txns})=>{
+    .then(({data:txns,error})=>{
+      if(error){el.innerHTML=`<div style="padding:40px;text-align:center;color:#C62828;font-size:13px">Couldn't load transactions.<br><span style="color:#aaa;font-size:11px">${error.message}</span></div>`;console.error('Transaction fetch error:',error);return;}
       if(!txns||!txns.length){el.innerHTML='<div style="padding:40px;text-align:center;color:#aaa;font-size:14px">No transactions yet<br><br><button onclick="syncAndRefreshTxns(this)" style="margin-top:8px;padding:10px 20px;background:#4B3FA0;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">🔄 Sync from Bank</button></div>';return;}
       // Group by date
       const groups={};
