@@ -492,6 +492,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <button class="btn-p" onclick="doReset()">Send reset link</button>
       <div class="afooter"><a onclick="authTab('in')">← Back to sign in</a></div>
     </div>
+    <div id="p-recovery" style="display:none">
+      <div class="ptitle">Set a new password</div>
+      <div class="psub">Choose a new password for your account</div>
+      <div class="field"><label>New password</label><div class="pw-wrap"><input type="password" id="rc-p" placeholder="At least 8 characters" onkeydown="if(event.key==='Enter')doUpdatePassword()"/><button class="pw-toggle" onclick="togPw('rc-p',this)">👁</button></div></div>
+      <div class="field"><label>Confirm password</label><div class="pw-wrap"><input type="password" id="rc-p2" placeholder="Re-enter your new password" onkeydown="if(event.key==='Enter')doUpdatePassword()"/><button class="pw-toggle" onclick="togPw('rc-p2',this)">👁</button></div></div>
+      <button class="btn-p" id="rc-btn" onclick="doUpdatePassword()">Update password</button>
+    </div>
   </div>
 </div>
 </div>
@@ -689,6 +696,26 @@ const APP_VERSION='2026-07-02-table-redesign';
 const SUPA_URL='https://omliytfwfkmzyvchlojf.supabase.co';
 const SUPA_KEY='sb_publishable_ZxsC3Vu69fuo05Y4O6mIRw_T8Krp00X';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+let RECOVERY_MODE=false;
+sb.auth.onAuthStateChange(async(ev,sess)=>{
+  if(ev==='PASSWORD_RECOVERY'){
+    // User arrived via a password-reset email link. Supabase has already
+    // given them a valid session at this point, but that does NOT mean
+    // their password was actually changed - without this check, they'd
+    // just land in their account with the old password still active and
+    // no way to set a new one. Block normal app entry and force the
+    // "set a new password" screen instead.
+    RECOVERY_MODE=true;
+    if(document.getElementById('auth-screen')){
+      document.getElementById('app-screen').style.display='none';
+      document.getElementById('auth-screen').style.display='flex';
+      authTab('recovery');
+    }
+    return;
+  }
+  if(ev==='SIGNED_IN'&&sess&&!RECOVERY_MODE)CU=sess.user;
+  if(ev==='SIGNED_OUT')CU=null;
+});
 
 /* ── SUPABASE SCHEMA REQUIRED ────────────────────────────────
    Run this SQL in Supabase SQL Editor before using Plaid:
@@ -773,8 +800,8 @@ const isMobile=()=>window.innerWidth<=768;
 
 // ── AUTH ──────────────────────────────────────────────────
 function authTab(t){
-  ['in','up','created','forgot'].forEach(p=>{document.getElementById('p-'+p).style.display=p===t?'block':'none';});
-  document.getElementById('auth-tabs').style.display=(t==='created'||t==='forgot')?'none':'flex';
+  ['in','up','created','forgot','recovery'].forEach(p=>{document.getElementById('p-'+p).style.display=p===t?'block':'none';});
+  document.getElementById('auth-tabs').style.display=(t==='created'||t==='forgot'||t==='recovery')?'none':'flex';
   if(t==='in'){document.getElementById('tab-in').classList.add('active');document.getElementById('tab-up').classList.remove('active');}
   if(t==='up'){document.getElementById('tab-up').classList.add('active');document.getElementById('tab-in').classList.remove('active');}
   clrMsg();
@@ -812,6 +839,20 @@ async function doReset(){
   const{error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:window.location.origin});
   if(error){amsg(error.message,'err');return;}
   amsg('Reset link sent! Check your inbox.','ok');
+}
+async function doUpdatePassword(){
+  const p1=document.getElementById('rc-p').value;
+  const p2=document.getElementById('rc-p2').value;
+  if(!p1||p1.length<8){amsg('Password must be at least 8 characters.','err');return;}
+  if(p1!==p2){amsg('Passwords don\'t match.','err');return;}
+  const btn=document.getElementById('rc-btn');btn.disabled=true;btn.innerHTML='<div class="spin"></div> Updating…';
+  const{error}=await sb.auth.updateUser({password:p1});
+  btn.disabled=false;btn.textContent='Update password';
+  if(error){amsg(error.message,'err');return;}
+  RECOVERY_MODE=false;
+  amsg('Password updated! Taking you to your dashboard…','ok');
+  await new Promise(r=>setTimeout(r,1200));
+  await loadApp();
 }
 // Single source of truth for resetting ALL UI state
 // Call this any time you need to hide the app and show auth
@@ -888,6 +929,7 @@ async function loadDemoData(userId){
 
 // ── APP ───────────────────────────────────────────────────
 async function loadApp(){
+  if(RECOVERY_MODE){authTab('recovery');return;} // never let normal app entry happen mid-password-reset
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('app-screen').style.display=isMobile()?'flex':'block';
   // Initialize persistent nav visibility (chat button visibility is handled
@@ -2420,8 +2462,7 @@ async function disconnectBank(itemId){
 // ── INIT ────────────────────────────────────────────────────
 (async()=>{
   const{data:{session}}=await sb.auth.getSession();
-  if(session){CU=session.user;await loadApp();}
-  sb.auth.onAuthStateChange(async(ev,sess)=>{if(ev==='SIGNED_IN'&&sess)CU=sess.user;if(ev==='SIGNED_OUT')CU=null;});
+  if(session&&!RECOVERY_MODE){CU=session.user;await loadApp();}
   window.addEventListener('resize',()=>render());
 })();
 </script>
