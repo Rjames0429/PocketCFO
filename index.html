@@ -826,27 +826,39 @@ const EYE_CLOSED='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" st
 function togPw(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.innerHTML=i.type==='password'?EYE_OPEN:EYE_CLOSED;}
 
 async function doSignIn(){
-  const e=document.getElementById('si-e').value.trim(),p=document.getElementById('si-p').value;
+  const e=document.getElementById('si-e').value.trim(),p=document.getElementById('si-p').value.trim();
   if(!e||!p){amsg('Please enter your email and password.','err');return;}
   const btn=document.getElementById('si-btn');btn.disabled=true;btn.innerHTML='<div class="spin"></div> Signing in…';
-  const{data,error}=await sb.auth.signInWithPassword({email:e,password:p});
-  btn.disabled=false;btn.textContent='Sign in';
-  if(error){amsg(error.message,'err');return;}
-  CU=data.user;await loadApp();
+  try{
+    const{data,error}=await sb.auth.signInWithPassword({email:e,password:p});
+    if(error){amsg(error.message,'err');return;}
+    CU=data.user;await loadApp();
+  }catch(err){
+    amsg('Something went wrong. Check your connection and try again.','err');
+    console.error('Sign in error:',err);
+  }finally{
+    btn.disabled=false;btn.textContent='Sign in';
+  }
 }
 async function doSignUp(){
-  const e=document.getElementById('su-e').value.trim(),p=document.getElementById('su-p').value;
+  const e=document.getElementById('su-e').value.trim(),p=document.getElementById('su-p').value.trim();
   if(!e||!p||p.length<8){amsg('Please enter a valid email and password (8+ characters).','err');return;}
   const btn=document.getElementById('su-btn');btn.disabled=true;btn.innerHTML='<div class="spin"></div> Creating…';
-  const{data,error}=await sb.auth.signUp({email:e,password:p});
-  btn.disabled=false;btn.textContent='Create account';
-  if(error){amsg(error.message,'err');return;}
-  CU=data.user;
-  await new Promise(r=>setTimeout(r,1500));
-  const{data:u}=await sb.from('users').select('account_number').eq('id',CU.id).single();
-  document.getElementById('c-anum').textContent=u?u.account_number:'PCF-'+Math.floor(1000+Math.random()*9000)+'-'+Math.floor(1000+Math.random()*9000);
-  await loadDemoData(CU.id);
-  authTab('created');
+  try{
+    const{data,error}=await sb.auth.signUp({email:e,password:p});
+    if(error){amsg(error.message,'err');return;}
+    CU=data.user;
+    await new Promise(r=>setTimeout(r,1500));
+    const{data:u}=await sb.from('users').select('account_number').eq('id',CU.id).single();
+    document.getElementById('c-anum').textContent=u?u.account_number:'PCF-'+Math.floor(1000+Math.random()*9000)+'-'+Math.floor(1000+Math.random()*9000);
+    await loadDemoData(CU.id);
+    authTab('created');
+  }catch(err){
+    amsg('Something went wrong creating your account. Please try again.','err');
+    console.error('Sign up error:',err);
+  }finally{
+    btn.disabled=false;btn.textContent='Create account';
+  }
 }
 async function doReset(){
   const e=document.getElementById('fp-e').value.trim();
