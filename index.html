@@ -2276,31 +2276,67 @@ function renderOnbStep(){
   `;
 }
 function renderOnbVisualStep(){
-  const badge=(n,color)=>`<div style="position:absolute;top:-7px;right:-7px;width:17px;height:17px;border-radius:50%;background:${color};color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2)">${n}</div>`;
+  const badge=(n,color)=>`<div style="position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:${color};color:#fff;font-size:8.5px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2">${n}</div>`;
   return`
     <div style="font-size:19px;font-weight:800;color:#0B1538;margin-bottom:14px">Here's what you'll see</div>
-    <div style="background:#F8F9FA;border:1px solid #E8ECF2;border-radius:14px;padding:12px;margin-bottom:16px">
-      <div style="height:7px;width:45%;background:#0B1538;opacity:.15;border-radius:3px;margin-bottom:10px"></div>
-      <div style="position:relative;display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px">
-        <div style="height:26px;background:#fff;border:1px solid #E8ECF2;border-radius:6px"></div>
-        <div style="height:26px;background:#fff;border:1px solid #E8ECF2;border-radius:6px"></div>
-        <div style="height:26px;background:#fff;border:1px solid #E8ECF2;border-radius:6px"></div>
-        <div style="height:26px;background:#fff;border:1px solid #E8ECF2;border-radius:6px"></div>
+    <div style="background:#F8F9FA;border:1px solid #E8ECF2;border-radius:14px;padding:9px;margin-bottom:16px;text-align:left">
+      <!-- mini header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+        <div style="font-size:8.5px;font-weight:800;font-style:italic;color:#0B1538">CFO Bobby</div>
+        <div style="width:9px;height:9px;border-radius:50%;border:1px solid #0B1538"></div>
+      </div>
+      <!-- mini overview card -->
+      <div style="background:#fff;border:1px solid #E8ECF2;border-radius:7px;padding:5px 6px;margin-bottom:5px;display:flex;align-items:center;gap:5px">
+        <div style="width:20px;height:20px;border-radius:50%;background:conic-gradient(#18A957 71%, #E9EDF3 0)"><div style="width:12px;height:12px;border-radius:50%;background:#fff;margin:4px;font-size:4px;font-weight:800;color:#18A957;display:flex;align-items:center;justify-content:center">71%</div></div>
+        <div>
+          <div style="font-size:6.5px;font-weight:800;color:#18A957;line-height:1.1">$1,814</div>
+          <div style="font-size:4px;color:#98A2B3">remaining</div>
+        </div>
+        <div style="margin-left:auto;background:#EFFAF2;color:#18A957;font-size:4px;font-weight:700;padding:1.5px 4px;border-radius:99px">● Healthy</div>
+      </div>
+      <!-- mini KPI grid -->
+      <div style="position:relative;display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:5px">
+        <div style="background:#fff;border:1px solid #E8ECF2;border-radius:6px;padding:4px 5px">
+          <div style="font-size:3.6px;font-weight:700;color:#667085">CASH AVAILABLE</div>
+          <div style="font-size:6.5px;font-weight:800;color:#0B1538">$6,200</div>
+        </div>
+        <div style="background:#fff;border:1px solid #E8ECF2;border-radius:6px;padding:4px 5px">
+          <div style="font-size:3.6px;font-weight:700;color:#667085">PROJECTED BAL.</div>
+          <div style="font-size:6.5px;font-weight:800;color:#2F80ED">$4,386</div>
+        </div>
+        <div style="background:#fff;border:1px solid #E8ECF2;border-radius:6px;padding:4px 5px">
+          <div style="font-size:3.6px;font-weight:700;color:#667085">BILLS LEFT</div>
+          <div style="font-size:6.5px;font-weight:800;color:#18A957">$1,814</div>
+        </div>
+        <div style="background:#fff;border:1px solid #E8ECF2;border-radius:6px;padding:4px 5px">
+          <div style="font-size:3.6px;font-weight:700;color:#667085">OUTSIDE BUDGET</div>
+          <div style="font-size:6.5px;font-weight:800;color:#E53935">$15</div>
+        </div>
         ${badge(1,'#2F80ED')}
       </div>
-      <div style="position:relative;background:#fff;border:1px solid #E8ECF2;border-radius:6px;padding:6px;margin-bottom:10px">
-        <div style="height:5px;width:100%;background:#EEECFD;border-radius:3px;margin-bottom:4px"></div>
-        <div style="height:5px;width:100%;background:#F0F0F0;border-radius:3px;margin-bottom:4px"></div>
-        <div style="height:5px;width:100%;background:#F0F0F0;border-radius:3px;margin-bottom:4px"></div>
-        <div style="height:5px;width:80%;background:#F0F0F0;border-radius:3px"></div>
+      <!-- mini table -->
+      <div style="position:relative;border:1px solid #E8ECF2;border-radius:6px;overflow:hidden;margin-bottom:5px">
+        <div style="background:#EEECFD;color:#5B4FE0;font-size:3.6px;font-weight:800;padding:3px 5px;display:flex;justify-content:space-between">
+          <span>CATEGORY</span><span>BUDGET</span><span>ACTUAL</span>
+        </div>
+        <div style="background:#EFFAF2;padding:3px 5px;font-size:5px;font-weight:700;color:#0B1538;display:flex;justify-content:space-between;border-top:1px solid #F5F5F5">
+          <span>› Income</span><span>$6,500</span><span>$6,200</span>
+        </div>
+        <div style="padding:3px 5px;font-size:5px;font-weight:700;color:#0B1538;display:flex;justify-content:space-between;border-top:1px solid #F5F5F5">
+          <span>› Housing</span><span>$3,096</span><span>$3,096</span>
+        </div>
+        <div style="padding:3px 5px;font-size:5px;font-weight:700;color:#0B1538;display:flex;justify-content:space-between;border-top:1px solid #F5F5F5">
+          <span>› Utilities</span><span>$515</span><span>$530</span>
+        </div>
         ${badge(2,'#18A957')}
       </div>
-      <div style="position:relative;display:flex;justify-content:space-between;padding:0 4px">
-        <div style="width:11px;height:11px;border-radius:3px;background:#D6DBE3"></div>
-        <div style="width:11px;height:11px;border-radius:3px;background:#D6DBE3"></div>
-        <div style="width:11px;height:11px;border-radius:3px;background:#D6DBE3"></div>
-        <div style="width:11px;height:11px;border-radius:3px;background:#D6DBE3"></div>
-        <div style="width:11px;height:11px;border-radius:3px;background:#D6DBE3"></div>
+      <!-- mini bottom nav -->
+      <div style="position:relative;display:flex;justify-content:space-around;padding-top:4px;border-top:1px solid #EDEDED">
+        <div style="width:8px;height:8px;border-radius:2px;background:#2F80ED"></div>
+        <div style="width:8px;height:8px;border-radius:2px;background:#D6DBE3"></div>
+        <div style="width:8px;height:8px;border-radius:2px;background:#D6DBE3"></div>
+        <div style="width:8px;height:8px;border-radius:2px;background:#D6DBE3"></div>
+        <div style="width:8px;height:8px;border-radius:2px;background:#D6DBE3"></div>
         ${badge(3,'#E53935')}
       </div>
     </div>
