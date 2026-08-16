@@ -1475,7 +1475,7 @@ function render(){
       <div style="min-width:0;flex:1;display:flex;flex-direction:column;cursor:pointer" onclick="editCashBalance()">
         <div style="font-size:10.5px;font-weight:600;color:#0B1538;line-height:1.2;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cash Position <span style="color:#98A2B3;font-weight:500">✏️</span></div>
         <div style="margin-top:6px;font-size:18px;line-height:1.05;font-weight:800;letter-spacing:-.3px;white-space:nowrap;color:#0B1538">${$f(CASH_BALANCE)}</div>
-        <div style="margin-top:5px;color:${newProjectedBalance>=0?'#129447':'#E53935'};font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onclick="event.stopPropagation();showCashBreakdown(${CASH_BALANCE},${rF},${revActual},${tF},${tA},${newProjectedBalance})">${newProjectedBalance>=0?$f(newProjectedBalance)+' projected':$f(Math.abs(newProjectedBalance))+' shortfall'} ⓘ</div>
+        <div style="margin-top:5px;color:${newProjectedBalance>=0?'#129447':'#E53935'};font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onclick="event.stopPropagation();showCashBreakdown(${CASH_BALANCE},${rF},${revActual},${tF},${tA},${newProjectedBalance})">${newProjectedBalance>=0?$f(newProjectedBalance)+' projected':'-'+$f(Math.abs(newProjectedBalance))+' shortfall'} ⓘ</div>
       </div>
     </div>
   </div>`:'';
