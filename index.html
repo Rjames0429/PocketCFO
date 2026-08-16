@@ -1414,12 +1414,19 @@ function render(){
   if(overBudgetCats.length>0){highVarCat=overBudgetCats[0].cat;highVarAmt=overBudgetCats[0].overage;highVarIsOver=true;}
   else if(underspendCats.length>0){highVarCat=underspendCats[0].cat;highVarAmt=underspendCats[0].variance;highVarIsOver=false;}
   const netVariance=tB-tA; // positive = under budget overall, negative = over
-  // Projected Month-End Balance: cash + remaining expected income - remaining expected expenses
-  const newProjectedBalance=CASH_BALANCE+(rF-revActual)-(tF-tA);
+  const revBudget=rB;   // view-aware (moved earlier - now needed by the Cash Position formula below)
+  // Cash Position: starting balance (manual entry) + this month's real net activity so far
+  const trueCashPosition=CASH_BALANCE+revActual-tA;
+  // Projected Month-End Balance: Cash Position + budget still expected to come in - budget still expected to go out
+  // Floored at 0 so already-exceeded budget (income above budget, or expenses over budget) can't
+  // flip sign and artificially help/hurt the projection - that real over/under is already reflected
+  // in Cash Position itself via Actual figures.
+  const remainingIncomeBudget=Math.max(0,revBudget-revActual);
+  const remainingExpenseBudget=Math.max(0,tB-tA);
+  const newProjectedBalance=trueCashPosition+remainingIncomeBudget-remainingExpenseBudget;
   const progHTML=spendPct>=100
     ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${spendPct.toFixed(1)}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(remainingSpend))} over budget</span></div>`
     :`<div class="prog-track"><div class="prog-fill-good" style="width:${spendPct}%"></div></div><div class="prog-right"><span class="prog-pct-good">${spendPct.toFixed(1)}%</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(remainingSpend)}</strong> left · ${daysLeft}d</span></div>`;
-  const revBudget=rB;   // view-aware
   const expActual=tA;   // already view-aware from getBV/getAV
   const expBudget=tB;   // already view-aware
   const pl=revActual-expActual;
@@ -1474,8 +1481,8 @@ function render(){
       </div>
       <div style="min-width:0;flex:1;display:flex;flex-direction:column;cursor:pointer" onclick="editCashBalance()">
         <div style="font-size:10.5px;font-weight:600;color:#0B1538;line-height:1.2;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cash Position <span style="color:#98A2B3;font-weight:500">✏️</span></div>
-        <div style="margin-top:6px;font-size:18px;line-height:1.05;font-weight:800;letter-spacing:-.3px;white-space:nowrap;color:#0B1538">${$f(CASH_BALANCE)}</div>
-        <div style="margin-top:5px;color:${newProjectedBalance>=0?'#129447':'#E53935'};font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onclick="event.stopPropagation();showCashBreakdown(${CASH_BALANCE},${rF},${revActual},${tF},${tA},${newProjectedBalance})">${newProjectedBalance>=0?$f(newProjectedBalance)+' projected':'-'+$f(Math.abs(newProjectedBalance))+' shortfall'} ⓘ</div>
+        <div style="margin-top:6px;font-size:18px;line-height:1.05;font-weight:800;letter-spacing:-.3px;white-space:nowrap;color:${trueCashPosition>=0?'#0B1538':'#E53935'}">${trueCashPosition>=0?$f(trueCashPosition):'-'+$f(Math.abs(trueCashPosition))}</div>
+        <div style="margin-top:5px;color:${newProjectedBalance>=0?'#129447':'#E53935'};font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onclick="event.stopPropagation();showCashBreakdown(${CASH_BALANCE},${revActual},${tA},${revBudget},${tB},${trueCashPosition},${newProjectedBalance})">${newProjectedBalance>=0?$f(newProjectedBalance)+' projected':'-'+$f(Math.abs(newProjectedBalance))+' shortfall'} ⓘ</div>
       </div>
     </div>
   </div>`:'';
@@ -1761,19 +1768,23 @@ async function deleteCategory(catName){
   render();
 }
 
-function showCashBreakdown(cash,incF,incA,expF,expA,total){
-  const incRemain=incF-incA;
-  const expRemain=expF-expA;
+function showCashBreakdown(startBal,incA,expA,incB,expB,cashPos,total){
+  const incRemain=Math.max(0,incB-incA);
+  const expRemain=Math.max(0,expB-expA);
   const lines=[
-    `Cash Position: ${$f(cash)}`,
-    `${incRemain>=0?'+':'−'} Income still expected: ${$f(Math.abs(incRemain))}  (Forecast ${$f(incF)} − Actual ${$f(incA)})`,
-    `${expRemain>=0?'−':'+'} Expenses still expected: ${$f(Math.abs(expRemain))}  (Forecast ${$f(expF)} − Actual ${$f(expA)})`,
+    `Starting balance: ${$f(startBal)}`,
+    `+ Income actual: ${$f(incA)}`,
+    `− Expense actual: ${$f(expA)}`,
+    `= Cash Position: ${cashPos>=0?$f(cashPos):'-'+$f(Math.abs(cashPos))}`,
+    ``,
+    `+ Income budget still expected: ${$f(incRemain)}  (Budget ${$f(incB)} − Actual ${$f(incA)}, floored at $0)`,
+    `− Expense budget still expected: ${$f(expRemain)}  (Budget ${$f(expB)} − Actual ${$f(expA)}, floored at $0)`,
     `= Projected Month-End Balance: ${total>=0?$f(total):'-'+$f(Math.abs(total))}`
   ];
   alert(lines.join('\n'));
 }
 async function editCashBalance(){
-  const curr=prompt('Enter current cash balance:',CASH_BALANCE?String(CASH_BALANCE):'');
+  const curr=prompt('Enter your starting balance (before this month\'s income/expenses):',CASH_BALANCE?String(CASH_BALANCE):'');
   if(curr===null)return;
   const val=parseFloat(curr.replace(/[^0-9.]/g,''));
   if(isNaN(val))return;
