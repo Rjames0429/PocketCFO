@@ -679,8 +679,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div style="font-size:12.5px;color:#344054;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px">Projected Cash Position at Month End <span style="color:#98A2B3;cursor:help" title="Bank balance + extra income - extra spending + remaining expected income - remaining expected expenses">ⓘ</span></div>
         <div id="qe-result" style="font-size:26px;font-weight:800;color:#18A957;margin-top:4px">$0</div>
       </div>
-      <button class="btn-p" style="border-radius:999px;background:#2F80ED;margin-bottom:12px" onclick="viewProjectionFromQE()">Save & Close</button>
-      <button onclick="closeOv('modal-quick-estimate')" style="background:none;border:none;color:#98A2B3;font-size:13px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;padding:6px">Close</button>
+      <button onclick="closeOv('modal-quick-estimate')" style="background:none;border:1px solid #E8ECF2;color:#0B1538;font-size:14px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;padding:13px;border-radius:999px">Close</button>
     </div>
   </div>
 
@@ -1917,18 +1916,7 @@ function updateQuickEstimatePreview(){
   el.textContent=projected>=0?$f(projected):'-'+$f(Math.abs(projected));
   el.style.color=projected>=0?'#18A957':'#E53935';
 }
-async function viewProjectionFromQE(){
-  // Only the bank balance itself is saved (it's the source-of-truth field, same as the main
-  // flow). Extra Income/Extra Spending are deliberately NOT persisted anywhere - they're a
-  // one-time what-if adjustment layered on top of the live preview only, per spec.
-  const bank=parseFloat(document.getElementById('qe-bank').value.replace(/[^0-9.-]/g,''));
-  if(isNaN(bank)){alert('Please enter a valid bank balance.');return;}
-  CASH_BALANCE=bank;
-  await sb.from('users').update({current_cash_balance:bank}).eq('id',CU.id);
-  closeOv('modal-quick-estimate');
-  closeOv('modal-cashpos');
-  render();
-}
+
 
 function getCatEmoji(catName){
   const n=catName.toLowerCase();
