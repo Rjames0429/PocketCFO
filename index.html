@@ -757,6 +757,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <p class="msub">Create a new expense category</p>
     <div class="ff"><label>Category name</label><input id="nc-n" placeholder="e.g. Dining out"/></div>
     <div class="ff"><label>Monthly budget</label><input id="nc-b" type="number" placeholder="0"/></div>
+    <div class="ff">
+      <label>Expense type</label>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button type="button" id="nc-type-ongoing" class="nc-type-btn nc-type-active" onclick="setNCType('ongoing')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #2F80ED;background:#EEF5FF;color:#2F80ED;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">Ongoing</button>
+        <button type="button" id="nc-type-onetime" class="nc-type-btn" onclick="setNCType('onetime')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #E8ECF2;background:#fff;color:#98A2B3;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">One-Time</button>
+      </div>
+      <div style="font-size:11px;color:#98A2B3;margin-top:6px" id="nc-type-hint">Recurring expense - forecast tracks spending against budget each month.</div>
+    </div>
     <div class="ff"><label>Line items (optional)</label><div id="nc-items"></div><button class="aib" onclick="addNCItem()">＋ Add line item</button></div>
     <div class="mbtns">
       <button class="bsm bgh" onclick="closeOv('modal-addcat')">Cancel</button>
@@ -1227,9 +1235,9 @@ function getAV(item){
   return getYA(item)+(avgMonthly*remainingMonths);
 }
 
-// Forecast with carry-forward logic
+// Forecast with carry-forward logic, plus auto-follow-actual behavior per category type
 function getForecastForMonth(catName,itemName,month){
-  // Check explicit override first
+  // Check explicit override first - manual overrides always win, per spec
   const k=`${catName}::${itemName}::${month}`;
   if(FO[k]!==undefined)return FO[k];
   // Look back for most recent forecast set in previous months
@@ -1237,9 +1245,20 @@ function getForecastForMonth(catName,itemName,month){
     const pk=`${catName}::${itemName}::${m}`;
     if(FO[pk]!==undefined)return FO[pk];
   }
-  // Default to budget
   const item=D[catName]?.items.find(i=>i.name===itemName);
-  return item?getB(item,month):0;
+  if(!item)return 0;
+  const budget=getB(item,month);
+  const actual=getA(item,month);
+  const expenseType=D[catName]?.catObj?.expense_type||'ongoing';
+  if(expenseType==='onetime'){
+    // One-Time: once this month's actual is entered (even if below budget), forecast becomes
+    // that actual - handles bills that come in under budget without needing a manual override.
+    if(actual>0)return actual;
+    return budget;
+  }
+  // Ongoing: forecast follows actual once actual exceeds budget, otherwise stays at budget.
+  // If actual later drops back below budget (e.g. a correction), forecast returns to budget too.
+  return actual>budget?actual:budget;
 }
 function mFI(cat,iname){return getForecastForMonth(cat,iname,CM);}
 function mFC(cat){return D[cat]?.items.reduce((s,i)=>s+mFI(cat,i.name),0)||0;}
@@ -1719,14 +1738,29 @@ async function saveActuals(){
 
 // Add category
 function addNCItem(){const r=document.createElement('div');r.className='ir';r.innerHTML='<input placeholder="Item name" class="in"/><input type="number" placeholder="Budget $" class="ib" style="width:90px"/><button class="idel" onclick="this.parentElement.remove()">✕</button>';document.getElementById('nc-items').appendChild(r);}
+let ncSelectedType='ongoing';
+function setNCType(type){
+  ncSelectedType=type;
+  const ongoingBtn=document.getElementById('nc-type-ongoing'),onetimeBtn=document.getElementById('nc-type-onetime'),hint=document.getElementById('nc-type-hint');
+  if(type==='ongoing'){
+    ongoingBtn.style.cssText='flex:1;padding:9px;border-radius:10px;border:1.5px solid #2F80ED;background:#EEF5FF;color:#2F80ED;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit';
+    onetimeBtn.style.cssText='flex:1;padding:9px;border-radius:10px;border:1.5px solid #E8ECF2;background:#fff;color:#98A2B3;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit';
+    hint.textContent='Recurring expense - forecast tracks spending against budget each month.';
+  }else{
+    onetimeBtn.style.cssText='flex:1;padding:9px;border-radius:10px;border:1.5px solid #2F80ED;background:#EEF5FF;color:#2F80ED;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit';
+    ongoingBtn.style.cssText='flex:1;padding:9px;border-radius:10px;border:1.5px solid #E8ECF2;background:#fff;color:#98A2B3;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit';
+    hint.textContent='One-time expense - once you log this month\'s actual, forecast matches it exactly.';
+  }
+}
 async function saveNewCat(){
   const name=document.getElementById('nc-n').value.trim();
   if(!name){alert('Please enter a category name.');return;}
   if(D[name]){alert('Category already exists.');return;}
   const bgt=parseFloat(document.getElementById('nc-b').value)||0;
-  const{data:cat}=await sb.from('budget_categories').insert({user_id:CU.id,name,sort_order:Object.keys(D).length+1}).select().single();
+  const{data:cat}=await sb.from('budget_categories').insert({user_id:CU.id,name,sort_order:Object.keys(D).length+1,expense_type:ncSelectedType}).select().single();
   if(!cat)return;
-  D[name]={id:cat.id,items:[]};
+  D[name]={id:cat.id,catObj:cat,items:[]};
+  ncSelectedType='ongoing'; // reset for next time the modal opens
   const rows=[...document.querySelectorAll('#nc-items .ir')];
   for(let j=0;j<rows.length;j++){
     const n=rows[j].querySelector('.in').value.trim(),b=parseFloat(rows[j].querySelector('.ib').value)||bgt;
