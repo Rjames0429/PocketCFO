@@ -1503,7 +1503,10 @@ function render(){
   const remainingExpenseForecast=tF-tA;
   QE_REMAINING_INCOME=remainingIncomeForecast;
   QE_REMAINING_EXPENSE=remainingExpenseForecast;
-  const newProjectedBalance=CASH_BALANCE+remainingIncomeForecast-remainingExpenseForecast;
+  // Special case: no bank balance entered yet - showing a partial calculation against $0 would
+  // be misleading (exactly the confusing negative-number problem worked through earlier), so
+  // instead show the full-month forecast net with no assumed starting cash.
+  const newProjectedBalance=CASH_BALANCE===0?(rF-tF):(CASH_BALANCE+remainingIncomeForecast-remainingExpenseForecast);
   const progHTML=spendPct>=100
     ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${spendPct.toFixed(1)}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(remainingSpend))} over budget</span></div>`
     :`<div class="prog-track"><div class="prog-fill-good" style="width:${spendPct}%"></div></div><div class="prog-right"><span class="prog-pct-good">${spendPct.toFixed(1)}%</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(remainingSpend)}</strong> left · ${daysLeft}d</span></div>`;
@@ -1864,6 +1867,19 @@ async function deleteCategory(catName){
 }
 
 function showCashBreakdown(cashPos,incA,expA,incF,expF,total){
+  if(cashPos===0){
+    const lines=[
+      `No bank balance entered yet, so this shows your full-month forecast net instead of a partial calculation against \$0:`,
+      ``,
+      `Income Forecast: ${$f(incF)}`,
+      `− Expense Forecast: ${$f(expF)}`,
+      `= Projected Cash Position: ${total>=0?$f(total):'-'+$f(Math.abs(total))}`,
+      ``,
+      `Tap the pencil to enter your real bank balance for an accurate projection.`
+    ];
+    alert(lines.join('\n'));
+    return;
+  }
   const incRemain=incF-incA;
   const expRemain=expF-expA;
   const lines=[
@@ -1896,10 +1912,17 @@ function openQuickEstimate(){
 }
 function updateQuickEstimatePreview(){
   const bank=parseFloat(document.getElementById('qe-bank').value.replace(/[^0-9.-]/g,''))||0;
+  const el=document.getElementById('qe-result');
+  if(bank<=0){
+    el.textContent='Enter your bank balance';
+    el.style.color='#98A2B3';
+    el.style.fontSize='15px';
+    return;
+  }
+  el.style.fontSize='26px';
   const extraInc=parseFloat(document.getElementById('qe-extra-income').value.replace(/[^0-9.-]/g,''))||0;
   const extraSpend=parseFloat(document.getElementById('qe-extra-spending').value.replace(/[^0-9.-]/g,''))||0;
   const projected=bank+extraInc-extraSpend+QE_REMAINING_INCOME-QE_REMAINING_EXPENSE;
-  const el=document.getElementById('qe-result');
   el.textContent=projected>=0?$f(projected):'-'+$f(Math.abs(projected));
   el.style.color=projected>=0?'#18A957':'#E53935';
 }
