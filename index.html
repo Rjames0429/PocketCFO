@@ -760,7 +760,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button type="button" id="nc-type-onetime" class="nc-type-btn nc-type-active" onclick="setNCType('onetime')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #2F80ED;background:#EEF5FF;color:#2F80ED;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">One-Time</button>
         <button type="button" id="nc-type-ongoing" class="nc-type-btn" onclick="setNCType('ongoing')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #E8ECF2;background:#fff;color:#98A2B3;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">Ongoing</button>
       </div>
-      <div style="font-size:11px;color:#98A2B3;margin-top:6px" id="nc-type-hint">One-time expense - once you log this month's actual, forecast matches it exactly.</div>
+      <div style="font-size:11px;color:#98A2B3;margin-top:6px" id="nc-type-hint">Bills once per month, like rent or utilities - forecast matches the actual as soon as it's billed, even if this repeats every month.</div>
     </div>
     <div class="ff"><label>Line items (optional)</label><div id="nc-items"></div><button class="aib" onclick="addNCItem()">＋ Add line item</button></div>
     <div class="mbtns">
@@ -1747,11 +1747,11 @@ function setNCType(type){
   if(type==='ongoing'){
     ongoingBtn.style.cssText='flex:1;padding:9px;border-radius:10px;border:1.5px solid #2F80ED;background:#EEF5FF;color:#2F80ED;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit';
     onetimeBtn.style.cssText='flex:1;padding:9px;border-radius:10px;border:1.5px solid #E8ECF2;background:#fff;color:#98A2B3;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit';
-    hint.textContent='Recurring expense - forecast tracks spending against budget each month.';
+    hint.textContent='May have multiple charges in a month, like groceries or dining - forecast tracks total spending against budget.';
   }else{
     onetimeBtn.style.cssText='flex:1;padding:9px;border-radius:10px;border:1.5px solid #2F80ED;background:#EEF5FF;color:#2F80ED;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit';
     ongoingBtn.style.cssText='flex:1;padding:9px;border-radius:10px;border:1.5px solid #E8ECF2;background:#fff;color:#98A2B3;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit';
-    hint.textContent='One-time expense - once you log this month\'s actual, forecast matches it exactly.';
+    hint.textContent='Bills once per month, like rent or utilities - forecast matches the actual as soon as it\'s billed, even if this repeats every month.';
   }
 }
 async function saveNewCat(){
