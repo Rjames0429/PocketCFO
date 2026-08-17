@@ -2014,40 +2014,29 @@ function renderPage(page){
 }
 
 function renderDiscover(){
-  const DI={
-    card:'<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2.2"/><path d="M2.5 9.5h19"/></svg>',
-    bank:'<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 4l9 6"/><path d="M4.5 10v9M9.5 10v9M14.5 10v9M19.5 10v9"/><path d="M3 19h18"/></svg>',
-    chart:'<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9.5 10.5 14 15l7-8"/><path d="M17 7h4v4"/></svg>',
-    plane:'<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 8.5 3 12l2 1.3 2.3-1"/><path d="M15.5 13.5 21 8l-2-2-6.5 4.5"/><path d="M9 15l-1 4 2-1 1.3-2.3"/><path d="M9 9l6 6"/></svg>',
-    shield:'<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19.5 6.5v5.3c0 4.6-3.2 7.6-7.5 8.7-4.3-1.1-7.5-4.1-7.5-8.7V6.5z"/><path d="M9 12l2 2 4-4.5"/></svg>',
-    house:'<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4.5a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1V10"/></svg>'
-  };
   const offers=[
-    {cat:'Credit Card',catColor:'#2F80ED',catBg:'#EEF5FF',icon:DI.card,name:'Summit Rewards Card',blurb:'Earn 2% cash back on every purchase, no annual fee.',stat:'2% back',statLbl:'on all purchases'},
-    {cat:'Savings',catColor:'#18A957',catBg:'#EFFAF2',icon:DI.bank,name:'Nova High-Yield Savings',blurb:'Grow your emergency fund faster with a top-tier rate.',stat:'4.50%',statLbl:'APY'},
-    {cat:'Investing',catColor:'#5B4FE0',catBg:'#EEECFD',icon:DI.chart,name:'Meridian Invest',blurb:'Automated investing with zero-commission trades.',stat:'$0',statLbl:'commission'},
-    {cat:'Credit Card',catColor:'#2F80ED',catBg:'#EEF5FF',icon:DI.plane,name:'Voyage Travel Card',blurb:'3x points on travel and dining, transferable to airlines.',stat:'3x',statLbl:'travel points'},
-    {cat:'Credit Monitoring',catColor:'#E53935',catBg:'#FFF3F2',icon:DI.shield,name:'Ledger Credit Watch',blurb:'Free credit score tracking with real-time fraud alerts.',stat:'Free',statLbl:'forever'},
-    {cat:'Loans',catColor:'#B7791F',catBg:'#FFF8EB',icon:DI.house,name:'Anchor Home Loans',blurb:'Refinance and see if you qualify for a lower rate.',stat:'3 min',statLbl:'to check rate'},
+    {cat:'Credit Card',catColor:'#2F80ED',catBg:'#EEF5FF',name:'Summit Rewards Card',blurb:'Earn 2% cash back on every purchase, no annual fee.',stat:'2% back',statLbl:'on all purchases'},
+    {cat:'Savings',catColor:'#18A957',catBg:'#EFFAF2',name:'Nova High-Yield Savings',blurb:'Grow your emergency fund faster with a top-tier rate.',stat:'4.50%',statLbl:'APY'},
+    {cat:'Investing',catColor:'#5B4FE0',catBg:'#EEECFD',name:'Meridian Invest',blurb:'Automated investing with zero-commission trades.',stat:'$0',statLbl:'commission'},
+    {cat:'Credit Card',catColor:'#2F80ED',catBg:'#EEF5FF',name:'Voyage Travel Card',blurb:'3x points on travel and dining, transferable to airlines.',stat:'3x',statLbl:'travel points'},
+    {cat:'Credit Monitoring',catColor:'#E53935',catBg:'#FFF3F2',name:'Ledger Credit Watch',blurb:'Free credit score tracking with real-time fraud alerts.',stat:'Free',statLbl:'forever'},
+    {cat:'Loans',catColor:'#B7791F',catBg:'#FFF8EB',name:'Anchor Home Loans',blurb:'Refinance and see if you qualify for a lower rate.',stat:'3 min',statLbl:'to check rate'},
   ];
   const cards=offers.map(o=>`
     <div style="background:#fff;border:1px solid #E8ECF2;border-radius:16px;box-shadow:0 8px 30px rgba(15,23,42,.06);padding:14px;margin-bottom:12px">
-      <div style="display:flex;align-items:flex-start;gap:12px">
-        <div style="width:44px;height:44px;border-radius:12px;background:${o.catBg};color:${o.catColor};display:flex;align-items:center;justify-content:center;flex-shrink:0">${o.icon}</div>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <span style="font-size:9px;font-weight:700;color:${o.catColor};background:${o.catBg};padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px">${o.cat}</span>
-            <span style="font-size:9px;font-weight:600;color:#98A2B3;border:1px solid #E8ECF2;padding:2px 8px;border-radius:999px">Example</span>
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-size:9px;font-weight:700;color:${o.catColor};background:${o.catBg};padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px">${o.cat}</span>
+          <span style="font-size:9px;font-weight:600;color:#98A2B3;border:1px solid #E8ECF2;padding:2px 8px;border-radius:999px">Example</span>
+        </div>
+        <div style="font-size:14px;font-weight:800;color:#0B1538;margin-top:6px">${o.name}</div>
+        <div style="font-size:12px;color:#667085;margin-top:3px;line-height:1.4">${o.blurb}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+          <div>
+            <span style="font-size:16px;font-weight:800;color:${o.catColor}">${o.stat}</span>
+            <span style="font-size:11px;color:#98A2B3;margin-left:4px">${o.statLbl}</span>
           </div>
-          <div style="font-size:14px;font-weight:800;color:#0B1538;margin-top:6px">${o.name}</div>
-          <div style="font-size:12px;color:#667085;margin-top:3px;line-height:1.4">${o.blurb}</div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
-            <div>
-              <span style="font-size:16px;font-weight:800;color:${o.catColor}">${o.stat}</span>
-              <span style="font-size:11px;color:#98A2B3;margin-left:4px">${o.statLbl}</span>
-            </div>
-            <button onclick="alert('This is an example offer for design purposes only — not a real, live financial product.')" style="font-size:11px;font-weight:700;color:#fff;background:${o.catColor};border:none;padding:8px 16px;border-radius:999px;cursor:pointer">Learn More</button>
-          </div>
+          <button onclick="alert('This is an example offer for design purposes only — not a real, live financial product.')" style="font-size:11px;font-weight:700;color:#fff;background:${o.catColor};border:none;padding:8px 16px;border-radius:999px;cursor:pointer">Learn More</button>
         </div>
       </div>
     </div>`).join('');
