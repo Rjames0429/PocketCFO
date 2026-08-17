@@ -1705,12 +1705,27 @@ function swActM(m){actMo=m;buildActTabs();buildActFields();}
 function buildActFields(){
   let h='';
   Object.keys(D).forEach(cat=>{
-    h+=`<div class="mch">${cat}</div>`;
+    const curType=D[cat].catObj?.expense_type||'ongoing';
+    h+=`<div class="mch" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span>${cat}</span>
+      <span style="display:flex;gap:4px;flex-shrink:0">
+        <button type="button" onclick="setCatExpenseType('${cat}','ongoing')" style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;cursor:pointer;font-family:inherit;border:1px solid ${curType==='ongoing'?'#2F80ED':'#E8ECF2'};background:${curType==='ongoing'?'#EEF5FF':'#fff'};color:${curType==='ongoing'?'#2F80ED':'#98A2B3'}">Ongoing</button>
+        <button type="button" onclick="setCatExpenseType('${cat}','onetime')" style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;cursor:pointer;font-family:inherit;border:1px solid ${curType==='onetime'?'#2F80ED':'#E8ECF2'};background:${curType==='onetime'?'#EEF5FF':'#fff'};color:${curType==='onetime'?'#2F80ED':'#98A2B3'}">One-Time</button>
+      </span>
+    </div>`;
     D[cat].items.forEach(it=>{
       h+=`<div class="mr"><div class="ml"><div>${it.name}</div><div class="ml-bud">Budget: ${$f(getB(it,actMo))}</div></div><input class="mi" data-cat="${cat}" data-item="${it.name}" type="number" step="0.01" value="${(it.actuals[actMo]||0).toFixed(2)}"/></div>`;
     });
   });
   document.getElementById('act-fields').innerHTML=h;
+}
+async function setCatExpenseType(cat,type){
+  if(!D[cat])return;
+  if(!D[cat].catObj)D[cat].catObj={};
+  D[cat].catObj.expense_type=type;
+  await sb.from('budget_categories').update({expense_type:type}).eq('id',D[cat].id).eq('user_id',CU.id);
+  buildActFields(); // re-render to reflect the new toggle state
+  showSaved();
 }
 async function saveActuals(){
   const inputs=document.querySelectorAll('#act-fields .mi');
