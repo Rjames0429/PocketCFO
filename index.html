@@ -1493,18 +1493,7 @@ function render(){
     daysLeft=daysInMonth; // future month
   }
 
-  // ── New KPI spec (approved): Income / Expense / Cash Position / Variance ──
-  const catVariances=Object.keys(D).map(cat=>{
-    const catA=D[cat].items.reduce((s,i)=>s+getAV(i),0);
-    const catB=D[cat].items.reduce((s,i)=>s+getBV(i),0);
-    return{cat,catA,catB,variance:catB-catA,overage:catA-catB};
-  });
-  const overBudgetCats=catVariances.filter(c=>c.overage>0).sort((a,b)=>b.overage-a.overage);
-  const underspendCats=catVariances.filter(c=>c.variance>0).sort((a,b)=>b.variance-a.variance);
-  let highVarCat=null,highVarAmt=0,highVarIsOver=false;
-  if(overBudgetCats.length>0){highVarCat=overBudgetCats[0].cat;highVarAmt=overBudgetCats[0].overage;highVarIsOver=true;}
-  else if(underspendCats.length>0){highVarCat=underspendCats[0].cat;highVarAmt=underspendCats[0].variance;highVarIsOver=false;}
-  const netVariance=tB-tA; // positive = under budget overall, negative = over
+  // ── KPI spec (approved): Income / Expense / Profit-Loss / Cash Position ──
   const revBudget=rB;   // view-aware (moved earlier - now needed by the Cash Position formula below)
   // Cash Position: the user's real, manually-entered current balance - defaults to $0, user
   // updates it to reflect their actual bank balance whenever they want, and that number directly
@@ -1559,13 +1548,13 @@ function render(){
       </div>
     </div>
     <div style="min-height:96px;padding:10px 8px;border-radius:16px;background:#FFF;border:1px solid #E8ECF2;box-shadow:0 8px 30px rgba(15,23,42,.06);position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:6px">
-      <div style="width:34px;height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:${netVariance>=0?'#EFFAF2':'#FFF3F2'};color:${netVariance>=0?'#129447':'#E53935'}">
-        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 22 20H2z"/><path d="M12 9.5v4.5"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/></svg>
+      <div style="width:34px;height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:${plA>=0?'#EFFAF2':'#FFF3F2'};color:${plA>=0?'#129447':'#E53935'}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9.5 10.5 14 15l7-8"/><path d="M17 7h4v4"/></svg>
       </div>
       <div style="min-width:0;flex:1;display:flex;flex-direction:column">
-        <div style="font-size:10.5px;font-weight:600;color:#0B1538;line-height:1.2;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Variance</div>
-        <div style="margin-top:6px;font-size:18px;line-height:1.05;font-weight:800;letter-spacing:-.3px;white-space:nowrap;color:${netVariance>=0?'#129447':'#E53935'}">${$f(netVariance)}</div>
-        <div style="margin-top:5px;color:${highVarCat?(highVarIsOver?'#E53935':'#129447'):'#667085'};font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${highVarCat?`${$f(highVarAmt)} ${highVarCat}`:'On track'}</div>
+        <div style="font-size:10.5px;font-weight:600;color:#0B1538;line-height:1.2;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Profit / Loss</div>
+        <div style="margin-top:6px;font-size:18px;line-height:1.05;font-weight:800;letter-spacing:-.3px;white-space:nowrap;color:${plA>=0?'#129447':'#E53935'}">${plA>=0?$f(plA):'-'+$f(Math.abs(plA))}</div>
+        <div style="margin-top:5px;color:#667085;font-size:10px;font-weight:500;white-space:nowrap">${plB>=0?$f(plB):'-'+$f(Math.abs(plB))} budgeted</div>
       </div>
     </div>
     <div style="min-height:96px;padding:10px 8px;border-radius:16px;background:#FFF;border:1px solid #E8ECF2;box-shadow:0 8px 30px rgba(15,23,42,.06);position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:6px">
