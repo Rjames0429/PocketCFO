@@ -613,6 +613,79 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 
+  <!-- Update Cash Position modal -->
+  <div class="ov" id="modal-cashpos" style="z-index:300;align-items:flex-end">
+    <div class="modal" style="width:100%;max-width:480px;padding:24px 22px 26px;border-radius:20px 20px 0 0;text-align:left;margin:0">
+      <div style="width:36px;height:4px;background:#E8ECF2;border-radius:99px;margin:0 auto 16px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-size:20px;font-weight:800;color:#0B1538">Update Cash Position</div>
+        <button onclick="closeOv('modal-cashpos')" style="background:none;border:none;font-size:20px;color:#98A2B3;cursor:pointer;line-height:1;padding:0">✕</button>
+      </div>
+      <div style="font-size:13px;color:#667085;margin-bottom:18px">Enter your current bank balance to update your cash position.</div>
+      <label style="font-size:12px;font-weight:700;color:#0B1538;display:block;margin-bottom:6px">Current Bank Balance</label>
+      <div style="display:flex;align-items:center;border:1px solid #2F80ED;border-radius:10px;padding:12px 14px;margin-bottom:18px">
+        <span style="font-size:16px;color:#0B1538;font-weight:600;margin-right:6px">$</span>
+        <input id="cashpos-input" type="text" inputmode="decimal" style="border:none;outline:none;font-size:16px;font-weight:600;color:#0B1538;flex:1;font-family:inherit" onkeydown="if(event.key==='Enter')saveCashPosition()"/>
+      </div>
+      <button class="btn-p" style="border-radius:999px;background:#2F80ED;margin-bottom:16px" onclick="saveCashPosition()">Update Cash Position</button>
+      <div style="border-top:1px solid #EDEDED;padding-top:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openQuickEstimate()">
+        <div style="width:34px;height:34px;border-radius:50%;background:#EEF5FF;color:#2F80ED;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#0B1538">Need a quick estimate?</div>
+          <div style="font-size:11.5px;color:#98A2B3">Estimate without updating all your actuals.</div>
+        </div>
+        <div style="color:#2F80ED;font-weight:700;font-size:13px;display:flex;align-items:center;gap:2px;flex-shrink:0">Quick Estimate <span>›</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Estimate modal -->
+  <div class="ov" id="modal-quick-estimate" style="z-index:310;align-items:flex-end">
+    <div class="modal" style="width:100%;max-width:480px;padding:24px 22px 26px;border-radius:20px 20px 0 0;text-align:left;margin:0">
+      <div style="width:36px;height:4px;background:#E8ECF2;border-radius:99px;margin:0 auto 16px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-size:20px;font-weight:800;color:#0B1538">Quick Estimate</div>
+        <button onclick="closeOv('modal-quick-estimate')" style="background:none;border:none;font-size:20px;color:#98A2B3;cursor:pointer;line-height:1;padding:0">✕</button>
+      </div>
+      <div style="font-size:13px;color:#667085;margin-bottom:4px">Get an instant estimate of your cash position.</div>
+      <div style="font-size:13px;color:#667085;margin-bottom:18px">This won't change your actuals or forecast.</div>
+
+      <label style="font-size:12px;font-weight:700;color:#0B1538;display:block;margin-bottom:6px">Current Bank Balance</label>
+      <div style="display:flex;align-items:center;border:1px solid #E8ECF2;border-radius:10px;padding:12px 14px;margin-bottom:16px">
+        <span style="font-size:16px;color:#0B1538;font-weight:600;margin-right:6px">$</span>
+        <input id="qe-bank" type="text" inputmode="decimal" style="border:none;outline:none;font-size:16px;font-weight:600;color:#0B1538;flex:1;font-family:inherit" oninput="updateQuickEstimatePreview()"/>
+      </div>
+
+      <label style="font-size:12px;font-weight:700;color:#0B1538;display:block;margin-bottom:6px">Extra Income <span style="color:#98A2B3;font-weight:500">(Optional)</span></label>
+      <div style="display:flex;align-items:center;border:1px solid #E8ECF2;border-radius:10px;padding:12px 14px;margin-bottom:4px">
+        <span style="font-size:16px;color:#0B1538;font-weight:600;margin-right:6px">$</span>
+        <input id="qe-extra-income" type="text" inputmode="decimal" placeholder="0" style="border:none;outline:none;font-size:16px;font-weight:600;color:#0B1538;flex:1;font-family:inherit" oninput="updateQuickEstimatePreview()"/>
+      </div>
+      <div style="font-size:11px;color:#98A2B3;margin-bottom:16px">Add any income not reflected in your actuals.</div>
+
+      <label style="font-size:12px;font-weight:700;color:#0B1538;display:block;margin-bottom:6px">Extra Spending <span style="color:#98A2B3;font-weight:500">(Optional)</span></label>
+      <div style="display:flex;align-items:center;border:1px solid #E8ECF2;border-radius:10px;padding:12px 14px;margin-bottom:4px">
+        <span style="font-size:16px;color:#0B1538;font-weight:600;margin-right:6px">$</span>
+        <input id="qe-extra-spending" type="text" inputmode="decimal" placeholder="0" style="border:none;outline:none;font-size:16px;font-weight:600;color:#0B1538;flex:1;font-family:inherit" oninput="updateQuickEstimatePreview()"/>
+      </div>
+      <div style="font-size:11px;color:#98A2B3;margin-bottom:18px">Add any spending not reflected in your actuals.</div>
+
+      <div style="background:#EFFAF2;border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:18px">
+        <div style="width:38px;height:38px;border-radius:50%;background:#DFF5E4;color:#18A957;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9.5 10.5 14 15l7-8"/><path d="M17 7h4v4"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:12.5px;color:#344054;font-weight:600;display:flex;align-items:center;gap:5px">Projected Cash Position at Month End <span style="color:#98A2B3;cursor:help" title="Bank balance + extra income - extra spending + remaining expected income - remaining expected expenses">ⓘ</span></div>
+          <div id="qe-result" style="font-size:26px;font-weight:800;color:#18A957;margin-top:2px">$0</div>
+        </div>
+      </div>
+      <button class="btn-p" style="border-radius:999px;background:#2F80ED;margin-bottom:12px" onclick="viewProjectionFromQE()">View Projection</button>
+      <button onclick="closeOv('modal-quick-estimate')" style="background:none;border:none;color:#98A2B3;font-size:13px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;padding:6px">Close</button>
+    </div>
+  </div>
+
   <!-- Transactions page -->
   <div id="page-transactions" style="display:none;position:fixed;top:0;left:0;right:0;bottom:var(--nav-h);background:#fff;z-index:40;overflow-y:auto">
     <div style="background:#fff;padding:12px 18px;border-bottom:0.5px solid #f0f0f0;position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:8px">
@@ -806,6 +879,7 @@ let CASH_BALANCE=0; // independent, manually-edited running cash balance — NOT
 let UNCAT_TXNS=[]; // Plaid transactions with no category assigned yet — counted toward Outside Budget
 let NOTIF_ENABLED=localStorage.getItem('pcf-notif-enabled')!=='false'; // simple UI preference, defaults on
 let LAST_UPDATED=null; // real timestamp of the last successful data fetch from Supabase
+let QE_REMAINING_INCOME=0,QE_REMAINING_EXPENSE=0; // captured from render() for use by the Cash Position / Quick Estimate modals
 const MNS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const isMobile=()=>window.innerWidth<=768;
 
@@ -1338,13 +1412,14 @@ function render(){
 
   // P&L row — Revenue minus Total Expenses
   const plB=rB-tB;const plA=rA-tA;const plF=rF-tF;
+  const plVar=plB-plA; // Variance = Budget P/L - Actual P/L, was incorrectly duplicating plA before
   const plStyle=plA>=0?'color:#2E7D32':'color:#C62828';
   const plLabel='Profit / Loss';
   const plR=`<tr class="pl-row">
     <td style="font-weight:700;padding-left:4px">${plLabel}</td>
     <td style="${plB>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plB>=0?'+':''}${$f(Math.abs(plB))}</td>
     <td style="${plStyle};font-weight:700">${plA>=0?'+':''}${$f(Math.abs(plA))}</td>
-    <td>${mobile?`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`:`<span class="pill ${plA>=0?'pg':'pb'}">${plA>=0?'+':'-'}${$f(Math.abs(plA))}</span>`}</td>
+    <td>${mobile?`<span class="pill ${plVar>=0?'pg':'pb'}">${plVar>=0?'+':'-'}${$f(Math.abs(plVar))}</span>`:`<span class="pill ${plVar>=0?'pg':'pb'}">${plVar>=0?'+':'-'}${$f(Math.abs(plVar))}</span>`}</td>
     <td class="cdiv" style="${plF>=0?'color:#2E7D32':'color:#C62828'};font-weight:700">${plF>=0?'+':''}${$f(Math.abs(plF))}</td>
   </tr>`;
 
@@ -1423,6 +1498,8 @@ function render(){
   // flip sign and artificially help/hurt the projection.
   const remainingIncomeBudget=Math.max(0,revBudget-revActual);
   const remainingExpenseBudget=Math.max(0,tB-tA);
+  QE_REMAINING_INCOME=remainingIncomeBudget;
+  QE_REMAINING_EXPENSE=remainingExpenseBudget;
   const newProjectedBalance=CASH_BALANCE+remainingIncomeBudget-remainingExpenseBudget;
   const progHTML=spendPct>=100
     ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${spendPct.toFixed(1)}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(remainingSpend))} over budget</span></div>`
@@ -1779,13 +1856,45 @@ function showCashBreakdown(cashPos,incA,expA,incB,expB,total){
   ];
   alert(lines.join('\n'));
 }
-async function editCashBalance(){
-  const curr=prompt('Enter your starting balance (before this month\'s income/expenses):',CASH_BALANCE?String(CASH_BALANCE):'');
-  if(curr===null)return;
-  const val=parseFloat(curr.replace(/[^0-9.]/g,''));
-  if(isNaN(val))return;
+function editCashBalance(){
+  document.getElementById('cashpos-input').value=CASH_BALANCE?String(CASH_BALANCE):'';
+  openOv('modal-cashpos');
+}
+async function saveCashPosition(){
+  const raw=document.getElementById('cashpos-input').value;
+  const val=parseFloat(raw.replace(/[^0-9.-]/g,''));
+  if(isNaN(val)){alert('Please enter a valid amount.');return;}
   CASH_BALANCE=val;
   await sb.from('users').update({current_cash_balance:val}).eq('id',CU.id);
+  closeOv('modal-cashpos');
+  render();
+}
+function openQuickEstimate(){
+  document.getElementById('qe-bank').value=CASH_BALANCE?String(CASH_BALANCE):'';
+  document.getElementById('qe-extra-income').value='';
+  document.getElementById('qe-extra-spending').value='';
+  updateQuickEstimatePreview();
+  openOv('modal-quick-estimate');
+}
+function updateQuickEstimatePreview(){
+  const bank=parseFloat(document.getElementById('qe-bank').value.replace(/[^0-9.-]/g,''))||0;
+  const extraInc=parseFloat(document.getElementById('qe-extra-income').value.replace(/[^0-9.-]/g,''))||0;
+  const extraSpend=parseFloat(document.getElementById('qe-extra-spending').value.replace(/[^0-9.-]/g,''))||0;
+  const projected=bank+extraInc-extraSpend+QE_REMAINING_INCOME-QE_REMAINING_EXPENSE;
+  const el=document.getElementById('qe-result');
+  el.textContent=projected>=0?$f(projected):'-'+$f(Math.abs(projected));
+  el.style.color=projected>=0?'#18A957':'#E53935';
+}
+async function viewProjectionFromQE(){
+  // Only the bank balance itself is saved (it's the source-of-truth field, same as the main
+  // flow). Extra Income/Extra Spending are deliberately NOT persisted anywhere - they're a
+  // one-time what-if adjustment layered on top of the live preview only, per spec.
+  const bank=parseFloat(document.getElementById('qe-bank').value.replace(/[^0-9.-]/g,''));
+  if(isNaN(bank)){alert('Please enter a valid bank balance.');return;}
+  CASH_BALANCE=bank;
+  await sb.from('users').update({current_cash_balance:bank}).eq('id',CU.id);
+  closeOv('modal-quick-estimate');
+  closeOv('modal-cashpos');
   render();
 }
 
