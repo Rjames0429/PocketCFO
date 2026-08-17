@@ -757,8 +757,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="ff">
       <label>Expense type</label>
       <div style="display:flex;gap:8px;margin-top:4px">
-        <button type="button" id="nc-type-onetime" class="nc-type-btn nc-type-active" onclick="setNCType('onetime')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #2F80ED;background:#EEF5FF;color:#2F80ED;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">One-Time</button>
-        <button type="button" id="nc-type-ongoing" class="nc-type-btn" onclick="setNCType('ongoing')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #E8ECF2;background:#fff;color:#98A2B3;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">Ongoing</button>
+        <button type="button" id="nc-type-onetime" class="nc-type-btn nc-type-active" onclick="setNCType('onetime')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #2F80ED;background:#EEF5FF;color:#2F80ED;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">Single Charge</button>
+        <button type="button" id="nc-type-ongoing" class="nc-type-btn" onclick="setNCType('ongoing')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #E8ECF2;background:#fff;color:#98A2B3;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">Ongoing Charges</button>
       </div>
       <div style="font-size:11px;color:#98A2B3;margin-top:6px" id="nc-type-hint">Bills once per month, like rent or utilities - forecast matches the actual as soon as it's billed, even if this repeats every month.</div>
     </div>
@@ -1709,8 +1709,8 @@ function buildActFields(){
     h+=`<div class="mch" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
       <span>${cat}</span>
       <span style="display:flex;gap:4px;flex-shrink:0">
-        <button type="button" onclick="setCatExpenseType('${cat}','onetime')" style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;cursor:pointer;font-family:inherit;border:1px solid ${curType==='onetime'?'#2F80ED':'#E8ECF2'};background:${curType==='onetime'?'#EEF5FF':'#fff'};color:${curType==='onetime'?'#2F80ED':'#98A2B3'}">One-Time</button>
-        <button type="button" onclick="setCatExpenseType('${cat}','ongoing')" style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;cursor:pointer;font-family:inherit;border:1px solid ${curType==='ongoing'?'#2F80ED':'#E8ECF2'};background:${curType==='ongoing'?'#EEF5FF':'#fff'};color:${curType==='ongoing'?'#2F80ED':'#98A2B3'}">Ongoing</button>
+        <button type="button" onclick="setCatExpenseType('${cat}','onetime')" style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;cursor:pointer;font-family:inherit;border:1px solid ${curType==='onetime'?'#2F80ED':'#E8ECF2'};background:${curType==='onetime'?'#EEF5FF':'#fff'};color:${curType==='onetime'?'#2F80ED':'#98A2B3'}">Single Charge</button>
+        <button type="button" onclick="setCatExpenseType('${cat}','ongoing')" style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;cursor:pointer;font-family:inherit;border:1px solid ${curType==='ongoing'?'#2F80ED':'#E8ECF2'};background:${curType==='ongoing'?'#EEF5FF':'#fff'};color:${curType==='ongoing'?'#2F80ED':'#98A2B3'}">Ongoing Charges</button>
       </span>
     </div>`;
     D[cat].items.forEach(it=>{
