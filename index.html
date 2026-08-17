@@ -1498,14 +1498,12 @@ function render(){
   // Cash Position: the user's real, manually-entered current balance - defaults to $0, user
   // updates it to reflect their actual bank balance whenever they want, and that number directly
   // drives the projection below. Not auto-calculated - kept simple and in the user's control.
-  // Projected Month-End Balance: Cash Position + budget still expected to come in - budget still expected to go out
-  // Floored at 0 so already-exceeded budget (income above budget, or expenses over budget) can't
-  // flip sign and artificially help/hurt the projection.
-  const remainingIncomeBudget=Math.max(0,revBudget-revActual);
-  const remainingExpenseBudget=Math.max(0,tB-tA);
-  QE_REMAINING_INCOME=remainingIncomeBudget;
-  QE_REMAINING_EXPENSE=remainingExpenseBudget;
-  const newProjectedBalance=CASH_BALANCE+remainingIncomeBudget-remainingExpenseBudget;
+  // Projected Cash Position = Bank Balance + (Income Forecast - Income Actual) - (Expense Forecast - Expense Actual)
+  const remainingIncomeForecast=rF-revActual;
+  const remainingExpenseForecast=tF-tA;
+  QE_REMAINING_INCOME=remainingIncomeForecast;
+  QE_REMAINING_EXPENSE=remainingExpenseForecast;
+  const newProjectedBalance=CASH_BALANCE+remainingIncomeForecast-remainingExpenseForecast;
   const progHTML=spendPct>=100
     ?`<div class="prog-track"><div class="prog-fill-over" style="width:100%"></div></div><div class="prog-right"><span class="prog-pct-over">${spendPct.toFixed(1)}% used</span><span class="prog-dot">·</span><span class="prog-rem-over">${$f(Math.abs(remainingSpend))} over budget</span></div>`
     :`<div class="prog-track"><div class="prog-fill-good" style="width:${spendPct}%"></div></div><div class="prog-right"><span class="prog-pct-good">${spendPct.toFixed(1)}%</span><span class="prog-dot">·</span><span class="prog-rem-good"><strong>${$f(remainingSpend)}</strong> left · ${daysLeft}d</span></div>`;
@@ -1564,7 +1562,7 @@ function render(){
       <div style="min-width:0;flex:1;display:flex;flex-direction:column;cursor:pointer" onclick="editCashBalance()">
         <div style="font-size:10.5px;font-weight:600;color:#0B1538;line-height:1.2;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cash Position <span style="color:#98A2B3;font-weight:500">✏️</span></div>
         <div style="margin-top:6px;font-size:18px;line-height:1.05;font-weight:800;letter-spacing:-.3px;white-space:nowrap;color:${CASH_BALANCE>=0?'#0B1538':'#E53935'}">${CASH_BALANCE>=0?$f(CASH_BALANCE):'-'+$f(Math.abs(CASH_BALANCE))}</div>
-        <div style="margin-top:5px;color:${newProjectedBalance>=0?'#129447':'#E53935'};font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onclick="event.stopPropagation();showCashBreakdown(${CASH_BALANCE},${revActual},${tA},${revBudget},${tB},${newProjectedBalance})">${newProjectedBalance>=0?$f(newProjectedBalance)+' projected':'-'+$f(Math.abs(newProjectedBalance))+' shortfall'} ⓘ</div>
+        <div style="margin-top:5px;color:${newProjectedBalance>=0?'#129447':'#E53935'};font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onclick="event.stopPropagation();showCashBreakdown(${CASH_BALANCE},${revActual},${tA},${rF},${tF},${newProjectedBalance})">${newProjectedBalance>=0?$f(newProjectedBalance)+' projected':'-'+$f(Math.abs(newProjectedBalance))+' shortfall'} ⓘ</div>
       </div>
     </div>
   </div>`:'';
@@ -1865,14 +1863,14 @@ async function deleteCategory(catName){
   render();
 }
 
-function showCashBreakdown(cashPos,incA,expA,incB,expB,total){
-  const incRemain=Math.max(0,incB-incA);
-  const expRemain=Math.max(0,expB-expA);
+function showCashBreakdown(cashPos,incA,expA,incF,expF,total){
+  const incRemain=incF-incA;
+  const expRemain=expF-expA;
   const lines=[
-    `Cash Position: ${cashPos>=0?$f(cashPos):'-'+$f(Math.abs(cashPos))}  (your entered balance)`,
-    `+ Income budget still expected: ${$f(incRemain)}  (Budget ${$f(incB)} − Actual ${$f(incA)}, floored at $0)`,
-    `− Expense budget still expected: ${$f(expRemain)}  (Budget ${$f(expB)} − Actual ${$f(expA)}, floored at $0)`,
-    `= Projected Month-End Balance: ${total>=0?$f(total):'-'+$f(Math.abs(total))}`
+    `Current Bank Balance: ${cashPos>=0?$f(cashPos):'-'+$f(Math.abs(cashPos))}`,
+    `${incRemain>=0?'+':'−'} Remaining Forecast Income: ${$f(Math.abs(incRemain))}  (Forecast ${$f(incF)} − Actual ${$f(incA)})`,
+    `${expRemain>=0?'−':'+'} Remaining Forecast Expenses: ${$f(Math.abs(expRemain))}  (Forecast ${$f(expF)} − Actual ${$f(expA)})`,
+    `= Projected Cash Position: ${total>=0?$f(total):'-'+$f(Math.abs(total))}`
   ];
   alert(lines.join('\n'));
 }
