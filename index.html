@@ -649,7 +649,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div style="font-size:20px;font-weight:800;color:#0B1538">Quick Estimate</div>
         <button onclick="closeOv('modal-quick-estimate')" style="background:none;border:none;font-size:20px;color:#98A2B3;cursor:pointer;line-height:1;padding:0">✕</button>
       </div>
-      <div style="font-size:13px;color:#667085;margin-bottom:4px">Get an instant estimate of your cash position.</div>
+      <div style="font-size:13px;color:#667085;margin-bottom:4px">Estimate of your projected cash position at month end.</div>
       <div style="font-size:13px;color:#667085;margin-bottom:18px">This won't change your actuals or forecast.</div>
 
       <label style="font-size:12px;font-weight:700;color:#0B1538;display:block;margin-bottom:6px">Current Bank Balance</label>
@@ -672,16 +672,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div style="font-size:11px;color:#98A2B3;margin-bottom:18px">Add any spending not reflected in your actuals.</div>
 
-      <div style="background:#EFFAF2;border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:18px">
-        <div style="width:38px;height:38px;border-radius:50%;background:#DFF5E4;color:#18A957;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <div style="background:#EFFAF2;border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:18px">
+        <div style="width:38px;height:38px;border-radius:50%;background:#DFF5E4;color:#18A957;display:flex;align-items:center;justify-content:center;margin-bottom:8px">
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9.5 10.5 14 15l7-8"/><path d="M17 7h4v4"/></svg>
         </div>
-        <div style="flex:1">
-          <div style="font-size:12.5px;color:#344054;font-weight:600;display:flex;align-items:center;gap:5px">Projected Cash Position at Month End <span style="color:#98A2B3;cursor:help" title="Bank balance + extra income - extra spending + remaining expected income - remaining expected expenses">ⓘ</span></div>
-          <div id="qe-result" style="font-size:26px;font-weight:800;color:#18A957;margin-top:2px">$0</div>
-        </div>
+        <div style="font-size:12.5px;color:#344054;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px">Projected Cash Position at Month End <span style="color:#98A2B3;cursor:help" title="Bank balance + extra income - extra spending + remaining expected income - remaining expected expenses">ⓘ</span></div>
+        <div id="qe-result" style="font-size:26px;font-weight:800;color:#18A957;margin-top:4px">$0</div>
       </div>
-      <button class="btn-p" style="border-radius:999px;background:#2F80ED;margin-bottom:12px" onclick="viewProjectionFromQE()">View Projection</button>
+      <button class="btn-p" style="border-radius:999px;background:#2F80ED;margin-bottom:12px" onclick="viewProjectionFromQE()">Save & Close</button>
       <button onclick="closeOv('modal-quick-estimate')" style="background:none;border:none;color:#98A2B3;font-size:13px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;padding:6px">Close</button>
     </div>
   </div>
