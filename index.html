@@ -786,14 +786,25 @@ const SUPA_URL='https://omliytfwfkmzyvchlojf.supabase.co';
 const SUPA_KEY='sb_publishable_ZxsC3Vu69fuo05Y4O6mIRw_T8Krp00X';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 let RECOVERY_MODE=false;
+// Robust recovery detection: Supabase's own type=recovery signal gets silently dropped by
+// PKCE flow redirects before it ever reaches the app - a known, documented Supabase
+// limitation (the PASSWORD_RECOVERY auth event often never fires, you just get a normal
+// sign-in instead). So we mark our own redirect URL with ?password_reset=1 when sending the
+// reset email, and check for that marker directly here instead of trusting the SDK's event.
+// The actual session itself still gets established correctly via Supabase's normal code
+// exchange (detectSessionInUrl) - we just can't rely on it telling us WHY that session exists.
+if(new URLSearchParams(window.location.search).get('password_reset')==='1'){
+  RECOVERY_MODE=true;
+  if(document.getElementById('auth-screen')){
+    document.getElementById('app-screen').style.display='none';
+    document.getElementById('auth-screen').style.display='flex';
+    authTab('recovery');
+  }
+}
 sb.auth.onAuthStateChange(async(ev,sess)=>{
   if(ev==='PASSWORD_RECOVERY'){
-    // User arrived via a password-reset email link. Supabase has already
-    // given them a valid session at this point, but that does NOT mean
-    // their password was actually changed - without this check, they'd
-    // just land in their account with the old password still active and
-    // no way to set a new one. Block normal app entry and force the
-    // "set a new password" screen instead.
+    // Kept as a fallback for any non-PKCE / implicit-flow scenario where this event does
+    // fire correctly - harmless redundancy alongside the direct URL check above.
     RECOVERY_MODE=true;
     if(document.getElementById('auth-screen')){
       document.getElementById('app-screen').style.display='none';
@@ -958,7 +969,7 @@ async function doSignUp(){
 async function doReset(){
   const e=document.getElementById('fp-e').value.trim();
   if(!e){amsg('Please enter your email.','err');return;}
-  const{error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:window.location.origin});
+  const{error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:window.location.origin+'/?password_reset=1'});
   if(error){amsg(error.message,'err');return;}
   amsg('Reset link sent! Check your inbox.','ok');
 }
@@ -972,6 +983,8 @@ async function doUpdatePassword(){
   btn.disabled=false;btn.textContent='Update password';
   if(error){amsg(error.message,'err');return;}
   RECOVERY_MODE=false;
+  // Remove the ?password_reset=1 marker so a refresh afterward doesn't re-trigger recovery mode
+  window.history.replaceState({},'',window.location.pathname);
   amsg('Password updated! Taking you to your dashboard…','ok');
   await new Promise(r=>setTimeout(r,1200));
   await loadApp();
@@ -2352,7 +2365,7 @@ function renderSettings(){
 }
 
 function settingsAction(type){
-  if(type==='password'){sb.auth.resetPasswordForEmail(CU.email,{redirectTo:window.location.origin}).then(()=>alert('Password reset email sent to '+CU.email));}
+  if(type==='password'){sb.auth.resetPasswordForEmail(CU.email,{redirectTo:window.location.origin+'/?password_reset=1'}).then(()=>alert('Password reset email sent to '+CU.email));}
   else if(type==='support'){window.open('mailto:support@pocketcfo.app?subject=CFO Bobby Support','_blank');}
   else if(type==='export'){exportData();}
   else if(type==='sync'){
