@@ -1904,13 +1904,16 @@ function showKpiInfo(kpi){
 }
 function showCashInfo(cashPos,incA,expA,incF,expF,total){
   const lines=[
-    'Cash Position is your current bank balance. You enter and update it yourself, it\'s not calculated automatically.',
+    'Cash Position: You update this yourself.',
     '',
-    'The number below it is your Projected Month-End Balance: where your cash is headed by the end of the month, based on your budget.',
+    'The number below is your Projected Month-End Balance: where your cash is expected to land at month end, based on your budget and the cash you have.',
+    '',
+    'Formula:',
+    'Cash Position + Income still expected − Expenses still expected = Projected',
     ''
   ];
   if(cashPos===0){
-    lines.push('You haven\'t entered a bank balance yet, so the projection below shows your full-month forecast net instead:');
+    lines.push('Your cash balance is $0, so right now that\'s just:');
     lines.push('');
     lines.push(`Income Forecast: ${$f(incF)}`);
     lines.push(`− Expense Forecast: ${$f(expF)}`);
@@ -1920,7 +1923,7 @@ function showCashInfo(cashPos,incA,expA,incF,expF,total){
   }else{
     const incRemain=incF-incA;
     const expRemain=expF-expA;
-    lines.push('How your projection is calculated:');
+    lines.push('With your numbers:');
     lines.push('');
     lines.push(`Cash Position: ${$f(cashPos)}`);
     lines.push(`${incRemain>=0?'+':'−'} Income still expected: ${$f(Math.abs(incRemain))}`);
