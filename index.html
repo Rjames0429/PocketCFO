@@ -1576,9 +1576,9 @@ function render(){
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.2"/><path d="M3 10.5h18"/><circle cx="16.3" cy="14.2" r="1.3" fill="currentColor" stroke="none"/></svg>
       </div>
       <div style="min-width:0;flex:1;display:flex;flex-direction:column;cursor:pointer" onclick="editCashBalance()">
-        <div style="font-size:10.5px;font-weight:600;color:#0B1538;line-height:1.2;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cash Position <span style="color:#98A2B3;font-weight:500">✏️</span> <span onclick="event.stopPropagation();showKpiInfo('cash')" style="color:#98A2B3;cursor:pointer;font-weight:500">ⓘ</span></div>
+        <div style="font-size:10.5px;font-weight:600;color:#0B1538;line-height:1.2;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cash Position <span style="color:#98A2B3;font-weight:500">✏️</span> <span onclick="event.stopPropagation();showCashInfo(${CASH_BALANCE},${revActual},${tA},${rF},${tF},${newProjectedBalance})" style="color:#98A2B3;cursor:pointer;font-weight:500">ⓘ</span></div>
         <div style="margin-top:6px;font-size:18px;line-height:1.05;font-weight:800;letter-spacing:-.3px;white-space:nowrap;color:${CASH_BALANCE>=0?'#0B1538':'#E53935'}">${CASH_BALANCE>=0?$f(CASH_BALANCE):'-'+$f(Math.abs(CASH_BALANCE))}</div>
-        <div style="margin-top:5px;color:${newProjectedBalance>=0?'#129447':'#E53935'};font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onclick="event.stopPropagation();showCashBreakdown(${CASH_BALANCE},${revActual},${tA},${rF},${tF},${newProjectedBalance})">${newProjectedBalance>=0?$f(newProjectedBalance)+' projected':'-'+$f(Math.abs(newProjectedBalance))+' shortfall'} ⓘ</div>
+        <div style="margin-top:5px;color:${newProjectedBalance>=0?'#129447':'#E53935'};font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${newProjectedBalance>=0?$f(newProjectedBalance)+' projected':'-'+$f(Math.abs(newProjectedBalance))+' shortfall'}</div>
       </div>
     </div>
   </div>`:'';
@@ -1896,35 +1896,37 @@ async function deleteCategory(catName){
 
 function showKpiInfo(kpi){
   const info={
-    income:'Income shows the money you\'ve actually received this period, compared to what you budgeted to earn.\n\nTop number: Actual income received\nBottom number: Budgeted income',
-    expense:'Expense shows the money you\'ve actually spent this period, compared to what you budgeted to spend.\n\nTop number: Actual amount spent\nBottom number: Budgeted amount',
-    pl:'Profit / Loss is your Income minus your Expenses.\n\nA positive number (green) means you\'re keeping more than you spend. A negative number (red) means you\'re spending more than you earn.\n\nTop number: Actual profit/loss so far\nBottom number: Budgeted profit/loss',
-    cash:'Cash Position is your current bank balance, which you enter and update yourself.\n\nThe number below it is your Projected Month-End Balance: your Cash Position plus whatever income and expenses are still expected to happen this month, based on your budget.\n\nTap the ⓘ next to the projected number for the exact math.'
+    income:'Income shows the money you\'ve actually received this period, along with what you budgeted to earn.\n\nTop number: Actual income received\nBottom number: Budgeted income',
+    expense:'Expense shows the money you\'ve actually spent this period, along with what you budgeted to spend.\n\nTop number: Actual amount spent\nBottom number: Budgeted amount',
+    pl:'Profit / Loss is your Income minus your Expenses.\n\nA positive number (green) means you\'re keeping more than you spend. A negative number (red) means you\'re spending more than you earn.\n\nTop number: Actual profit/loss so far\nBottom number: Budgeted profit/loss'
   };
   alert(info[kpi]||'');
 }
-function showCashBreakdown(cashPos,incA,expA,incF,expF,total){
-  if(cashPos===0){
-    const lines=[
-      `No bank balance entered yet, so this shows your full-month forecast net instead of a partial calculation against \$0:`,
-      ``,
-      `Income Forecast: ${$f(incF)}`,
-      `− Expense Forecast: ${$f(expF)}`,
-      `= Projected Cash Position: ${total>=0?$f(total):'-'+$f(Math.abs(total))}`,
-      ``,
-      `Tap the pencil to enter your real bank balance for an accurate projection.`
-    ];
-    alert(lines.join('\n'));
-    return;
-  }
-  const incRemain=incF-incA;
-  const expRemain=expF-expA;
+function showCashInfo(cashPos,incA,expA,incF,expF,total){
   const lines=[
-    `Current Bank Balance: ${cashPos>=0?$f(cashPos):'-'+$f(Math.abs(cashPos))}`,
-    `${incRemain>=0?'+':'−'} Remaining Forecast Income: ${$f(Math.abs(incRemain))}  (Forecast ${$f(incF)} − Actual ${$f(incA)})`,
-    `${expRemain>=0?'−':'+'} Remaining Forecast Expenses: ${$f(Math.abs(expRemain))}  (Forecast ${$f(expF)} − Actual ${$f(expA)})`,
-    `= Projected Cash Position: ${total>=0?$f(total):'-'+$f(Math.abs(total))}`
+    'Cash Position is your current bank balance. You enter and update it yourself, it\'s not calculated automatically.',
+    '',
+    'The number below it is your Projected Month-End Balance: where your cash is headed by the end of the month, based on your budget.',
+    ''
   ];
+  if(cashPos===0){
+    lines.push('You haven\'t entered a bank balance yet, so the projection below shows your full-month forecast net instead:');
+    lines.push('');
+    lines.push(`Income Forecast: ${$f(incF)}`);
+    lines.push(`− Expense Forecast: ${$f(expF)}`);
+    lines.push(`= Projected: ${total>=0?$f(total):'-'+$f(Math.abs(total))}`);
+    lines.push('');
+    lines.push('Tap the pencil to enter your real bank balance for an accurate projection.');
+  }else{
+    const incRemain=incF-incA;
+    const expRemain=expF-expA;
+    lines.push('How your projection is calculated:');
+    lines.push('');
+    lines.push(`Cash Position: ${$f(cashPos)}`);
+    lines.push(`${incRemain>=0?'+':'−'} Income still expected: ${$f(Math.abs(incRemain))}`);
+    lines.push(`${expRemain>=0?'−':'+'} Expenses still expected: ${$f(Math.abs(expRemain))}`);
+    lines.push(`= Projected: ${total>=0?$f(total):'-'+$f(Math.abs(total))}`);
+  }
   alert(lines.join('\n'));
 }
 function editCashBalance(){
