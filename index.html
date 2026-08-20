@@ -938,9 +938,9 @@ let RECOVERY_MODE=false;
 if(new URLSearchParams(window.location.search).get('password_reset')==='1'){
   RECOVERY_MODE=true;
   if(document.getElementById('auth-screen')){
-    showScreenEl('app-screen','none');
-    showScreenEl('landing-screen','none');
-    showScreenEl('auth-screen','flex');
+    document.getElementById('app-screen').style.display='none';
+    document.getElementById('landing-screen').style.display='none';
+    document.getElementById('auth-screen').style.display='flex';
     authTab('recovery');
   }
 }
@@ -950,9 +950,9 @@ sb.auth.onAuthStateChange(async(ev,sess)=>{
     // fire correctly - harmless redundancy alongside the direct URL check above.
     RECOVERY_MODE=true;
     if(document.getElementById('auth-screen')){
-      showScreenEl('app-screen','none');
-      showScreenEl('landing-screen','none');
-      showScreenEl('auth-screen','flex');
+      document.getElementById('app-screen').style.display='none';
+      document.getElementById('landing-screen').style.display='none';
+      document.getElementById('auth-screen').style.display='flex';
       authTab('recovery');
     }
     return;
@@ -1042,26 +1042,17 @@ let LAST_UPDATED=null; // real timestamp of the last successful data fetch from 
 let QE_REMAINING_INCOME=0,QE_REMAINING_EXPENSE=0; // captured from render() for use by the Cash Position / Quick Estimate modals
 const MNS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const isMobile=()=>window.innerWidth<=768;
-// Defensive screen-toggle helper: a missing element here just logs a warning instead of
-// throwing (which would silently halt every subsequent line in this script block). Used for
-// the landing/auth/app screen transitions specifically, since those run at page-load time
-// before we can be fully certain the DOM is in the exact state we expect.
-function showScreenEl(id,val){
-  const el=document.getElementById(id);
-  if(el)el.style.display=val;
-  else console.warn('showScreenEl: element not found -',id);
-}
 
 // ── AUTH ──────────────────────────────────────────────────
 function showAuthFromLanding(tab){
-  showScreenEl('landing-screen','none');
-  showScreenEl('auth-screen','flex');
+  document.getElementById('landing-screen').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
   authTab(tab);
 }
 function backToLanding(){
   if(RECOVERY_MODE)return; // don't let someone navigate away mid-password-reset
-  showScreenEl('auth-screen','none');
-  showScreenEl('landing-screen','block');
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('landing-screen').style.display='block';
 }
 function authTab(t){
   ['in','up','created','forgot','recovery'].forEach(p=>{document.getElementById('p-'+p).style.display=p===t?'block':'none';});
@@ -1186,7 +1177,7 @@ async function doSignOut(){
   await sb.auth.signOut();
   CU=null;D={};FO={};EXP={};
   cleanupUI();
-  showScreenEl('landing-screen','block');
+  document.getElementById('landing-screen').style.display='block';
 }
 
 // ── DEMO DATA LOADER ──────────────────────────────────────
@@ -1227,9 +1218,9 @@ async function loadDemoData(userId){
 // ── APP ───────────────────────────────────────────────────
 async function loadApp(){
   if(RECOVERY_MODE){authTab('recovery');return;} // never let normal app entry happen mid-password-reset
-  showScreenEl('auth-screen','none');
-  showScreenEl('landing-screen','none');
-  showScreenEl('app-screen',isMobile()?'flex':'block');
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('landing-screen').style.display='none';
+  document.getElementById('app-screen').style.display=isMobile()?'flex':'block';
   // Initialize persistent nav visibility (chat button visibility is handled
   // later by updateFloatingVisibility(), once the table actually exists in
   // the DOM - showing it here first would just flash it before it's hidden)
@@ -1238,7 +1229,7 @@ async function loadApp(){
   if(window._initChatDrag)window._initChatDrag();
   // syncNavHeight after a frame so nav is fully painted and offsetHeight is accurate
   requestAnimationFrame(syncNavHeight);
-  if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{cleanupUI();showScreenEl('app-screen','none');showScreenEl('landing-screen','block');return;}}
+  if(!CU){const{data:{session}}=await sb.auth.getSession();if(session)CU=session.user;else{cleanupUI();document.getElementById('app-screen').style.display='none';document.getElementById('landing-screen').style.display='block';return;}}
   const{data:u}=await sb.from('users').select('account_number,display_name,current_cash_balance').eq('id',CU.id).single();
   if(u){
     const acct=u.account_number||'PCF-0000-0000';
