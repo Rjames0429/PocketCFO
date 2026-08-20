@@ -1317,9 +1317,17 @@ async function saveActualDB(cat,iname,val,mo){
   const v=pn(val);const it=D[cat]?.items.find(i=>i.name===iname);if(!it||!D[cat])return;
   it.actuals[mo]=v;
   const dateStr=`${YEAR}-${String(mo+1).padStart(2,'0')}-15`;
-  const{data:ex}=await sb.from('transactions').select('id').eq('user_id',CU.id).eq('line_item_id',it.id).eq('date',dateStr).maybeSingle();
-  if(ex){await sb.from('transactions').update({amount:v}).eq('id',ex.id);}
-  else if(v>0){await sb.from('transactions').insert({user_id:CU.id,line_item_id:it.id,category_id:D[cat].id,amount:v,date:dateStr,merchant_name:iname,match_source:'manual',is_reviewed:true});}
+  const lastDay=new Date(YEAR,mo+1,0).getDate();
+  const monthStart=`${YEAR}-${String(mo+1).padStart(2,'0')}-01`;
+  const monthEnd=`${YEAR}-${String(mo+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+  // A manual actual edit is authoritative for this line item/month - it replaces
+  // whatever transactions (manual or Plaid-imported) previously summed to the old total,
+  // rather than adding a new transaction on top of them. Without this, categories with
+  // real Plaid transactions (which never happen to land on the 15th) would silently grow
+  // larger every single time they were manually edited, since the old total kept
+  // contributing alongside the new manual entry instead of being replaced by it.
+  await sb.from('transactions').delete().eq('user_id',CU.id).eq('line_item_id',it.id).gte('date',monthStart).lte('date',monthEnd);
+  if(v>0){await sb.from('transactions').insert({user_id:CU.id,line_item_id:it.id,category_id:D[cat].id,amount:v,date:dateStr,merchant_name:iname,match_source:'manual',is_reviewed:true});}
   showSaved();
 }
 async function saveFC(catName,itemName,val){
